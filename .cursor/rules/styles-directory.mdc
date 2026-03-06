@@ -1,0 +1,23 @@
+---
+description: Rules for the src/styles/ directory — prevents manual edits to managed files
+globs: src/styles/**
+---
+
+# src/styles/ Directory Rules
+
+## Do Not Manually Edit These Files
+
+- **intuit.css** — Synced from the DDMS CDN via `npm run sync-tokens`. Contains all IDS design token CSS custom properties. Run `npm run sync-tokens [version]` to update.
+- **index.css** — Global styles. Should not need modification during prototyping.
+- **fonts.css** — Font imports. Should not need modification during prototyping.
+
+## Editable Files
+
+- **App.module.css** — All prototype-specific styling goes here. Uses CSS Modules (Vite auto-scopes `.module.css` files) and design tokens.
+
+## References
+
+- **Design Tokens**: `.cursor/rules/tokens/intuit/*.mdc`
+- **Token Overview**: `.cursor/rules/tokens.mdc`
+- **Component Rules**: `.cursor/rules/components/*.mdc`
+- **Design System**: `.cursor/rules/design-system.mdc`

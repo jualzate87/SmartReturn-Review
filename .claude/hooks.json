@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "command": "if echo \"$TOOL_INPUT\" | grep -q 'src/styles/App.module.css'; then HEX=$(grep -En '#[0-9a-fA-F]{3,8}' src/styles/App.module.css | grep -v 'var(--' || true); PX=$(grep -En '(padding|margin|gap):\\s*[0-9]+px' src/styles/App.module.css | grep -v 'var(--' || true); if [ -n \"$HEX\" ]; then echo \"WARNING: Hardcoded hex colors found in App.module.css (use design tokens instead):\"; echo \"$HEX\"; fi; if [ -n \"$PX\" ]; then echo \"WARNING: Hardcoded pixel values for spacing found in App.module.css (use design tokens instead):\"; echo \"$PX\"; fi; fi"
+      }
+    ]
+  }
+}
