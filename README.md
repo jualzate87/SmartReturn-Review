@@ -7,7 +7,8 @@ A prototyping environment for the **Intuit Design System (IDS)**. Built for desi
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18 or later)
-- Access to the Intuit npm registry (configured via `.npmrc`)
+- [Yarn](https://yarnpkg.com/) (v4+ — included via `packageManager` in `package.json`)
+- Access to the Intuit npm registry (configured via `.yarnrc.yml`)
 - [Cursor](https://cursor.com/) IDE (recommended) or any editor with AI assistant support
 
 ### Setup
@@ -18,10 +19,10 @@ git clone <repo-url>
 cd ids-prototyping
 
 # 2. Install dependencies
-npm install
+yarn install
 
 # 3. Start the dev server
-npm run dev
+yarn dev
 ```
 
 Your prototype will be running at **http://localhost:5174**. Changes you make are reflected instantly in the browser.
@@ -62,7 +63,7 @@ Open the project in Cursor and start chatting with the AI assistant. You can des
 
 ### Example Workflow
 
-1. **Start the server** -- run `npm run dev` in your terminal
+1. **Start the server** -- run `yarn dev` in your terminal
 2. **Describe your idea** -- tell the AI what you want to build, e.g. *"Build a settings page with a sidebar nav, a form with name and email fields, and a save button"*
 3. **Iterate** -- ask for changes like *"Make the sidebar collapsible"* or *"Add a toast message when the form is saved"*
 4. **Check quality** -- run `/audit-a11y` to check accessibility or `/audit-style` to verify token usage
@@ -80,27 +81,32 @@ Everything stays on-system. The AI is configured to only use IDS components, des
 
 ## Project Structure
 
-You only need to care about two files:
+You only need to care about the pages and styles folders:
 
 ```
 src/
-├── App.tsx              ← Your prototype lives here
+├── App.tsx                  ← Router shell (managed by the AI)
+├── pages/
+│   ├── HomePage.tsx         ← Your prototype starts here
+│   └── [OtherPage].tsx      ← Additional pages created by skills
 ├── styles/
-│   ├── App.module.css   ← Your styles live here
-│   ├── index.css        ← Global styles (don't edit)
-│   ├── fonts.css        ← Font imports (don't edit)
-│   └── intuit.css       ← IDS design tokens (don't edit)
+│   ├── HomePage.module.css  ← Home page styles
+│   ├── [OtherPage].module.css ← Per-page styles
+│   ├── App.module.css       ← Shell-level styles (minimal)
+│   ├── index.css            ← Global styles (don't edit)
+│   ├── fonts.css            ← Font imports (don't edit)
+│   └── intuit.css           ← IDS design tokens (don't edit)
 ```
 
-The AI handles all the code. If you're curious, `App.tsx` contains the React components and `App.module.css` contains the styling using CSS Modules and design tokens.
+The AI handles all the code. Each page has its own file in `src/pages/` with a matching CSS module in `src/styles/`.
 
 ## Available Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start the dev server at http://localhost:5174 |
-| `npm run build` | Create a production build |
-| `npm run sync-tokens` | Update design tokens from the DDMS CDN |
+| `yarn dev` | Start the dev server at http://localhost:5174 |
+| `yarn build` | Create a production build |
+| `yarn sync-tokens` | Update design tokens from the DDMS CDN |
 
 ## Tips for Designers
 
@@ -115,7 +121,7 @@ The AI handles all the code. If you're curious, `App.tsx` contains the React com
 
 | Problem | Solution |
 |---------|----------|
-| `npm install` fails | Make sure you have access to the Intuit npm registry. Check that `.npmrc` is configured correctly. |
-| Dev server won't start | Try `npm install` again, then `npm run dev`. Make sure port 5174 isn't already in use. |
+| `yarn install` fails | Make sure you have access to the Intuit npm registry. Check that `.yarnrc.yml` is configured correctly. |
+| Dev server won't start | Try `yarn install` again, then `yarn dev`. Make sure port 5174 isn't already in use. |
 | Components look unstyled | The AI may have forgotten a CSS import. Ask it to check that all `@ids-ts/*` components have their CSS imported. |
 | Prototype looks wrong after changes | Use `/restore <name>` to go back to a saved snapshot, or ask the AI to undo the last change. |
