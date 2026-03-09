@@ -1588,7 +1588,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ids-ts/product-header@npm:5.151.0":
+"@ids-ts/product-header@npm:*":
   version: 5.151.0
   resolution: "@ids-ts/product-header@npm:5.151.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40ids-ts%2Fproduct-header%2F-%2F%40ids-ts%2Fproduct-header-5.151.0.tgz"
   dependencies:
@@ -1755,7 +1755,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ids-ts/switch@npm:5.151.0":
+"@ids-ts/switch@npm:*":
   version: 5.151.0
   resolution: "@ids-ts/switch@npm:5.151.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40ids-ts%2Fswitch%2F-%2F%40ids-ts%2Fswitch-5.151.0.tgz"
   dependencies:
@@ -3878,7 +3878,7 @@ __metadata:
     "@ids-ts/panel-contextual": "npm:*"
     "@ids-ts/point-of-need": "npm:*"
     "@ids-ts/popover": "npm:*"
-    "@ids-ts/product-header": "npm:5.151.0"
+    "@ids-ts/product-header": "npm:*"
     "@ids-ts/progress-bar": "npm:*"
     "@ids-ts/radio": "npm:*"
     "@ids-ts/segmented-button": "npm:*"
@@ -3888,7 +3888,7 @@ __metadata:
     "@ids-ts/status-dropdown": "npm:*"
     "@ids-ts/step-flow": "npm:*"
     "@ids-ts/survey-tool": "npm:*"
-    "@ids-ts/switch": "npm:5.151.0"
+    "@ids-ts/switch": "npm:*"
     "@ids-ts/table": "npm:*"
     "@ids-ts/tabs": "npm:*"
     "@ids-ts/text-field": "npm:*"
