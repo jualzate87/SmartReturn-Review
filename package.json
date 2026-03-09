@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "sync-tokens": "node scripts/sync-tokens.mjs",
+    "preinstall": "node scripts/check-yarn.mjs",
     "postinstall": "node scripts/sync-tokens.mjs",
     "validate-rules": "node scripts/validate-rules.mjs",
     "validate-rules:report": "node scripts/validate-rules.mjs --report"
