@@ -35,7 +35,7 @@ For each matching icon, show:
 If the exact match isn't clear, show 3-5 related icons and let the designer choose.
 
 ## 5. Offer to Add
-Ask if the designer wants this icon added to their current prototype in `src/App.tsx`.
+Ask if the designer wants this icon added to their current prototype. If yes, ask which page it should go on (check `src/pages/` for existing pages).
 
 ## Rules
 - Only use icons from `@design-systems/icons` — never inline SVGs or third-party icon packs

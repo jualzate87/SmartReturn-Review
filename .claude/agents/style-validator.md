@@ -55,7 +55,7 @@ Read these files to perform validation:
 ### Layout & Structure
 - [ ] No `position: absolute` for layout (use Flexbox/Grid)
 - [ ] No inline SVGs (use `@design-systems/icons`)
-- [ ] All code in `src/App.tsx` and `src/styles/App.module.css`
+- [ ] Page code lives in `src/pages/` with matching CSS modules in `src/styles/` (not directly in `src/App.tsx`)
 
 3. **Calculate compliance score** — (passed / total checks) × 100
 4. **Generate report** with violations and fixes.

@@ -12,11 +12,12 @@ dist
 dist-ssr
 *.local
 
-# Other package managers (not used)
-yarn.lock
-.yarn/
-.yarnrc.yml
+# Yarn (keep .yarnrc.yml, yarn.lock, and .yarn/releases checked in)
+.yarn/*
+!.yarn/releases
 .pnp.*
+
+# Other package managers (not used)
 bun.lockb
 pnpm-lock.yaml
 

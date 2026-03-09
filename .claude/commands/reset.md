@@ -19,6 +19,7 @@ Replace the entire contents of `src/App.tsx` with the router shell containing on
 ```tsx
 // App.tsx — Router shell. Skills manage the imports and PAGES array. Do not edit manually.
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import ErrorBoundary from './ErrorBoundary'
 import HomePage from './pages/HomePage'
 
 const PAGES = [
@@ -27,14 +28,16 @@ const PAGES = [
 
 export default function App() {
   return (
-    <HashRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/home" replace />} />
-        {PAGES.map(({ path, component: Page }) => (
-          <Route key={path} path={path} element={<Page />} />
-        ))}
-      </Routes>
-    </HashRouter>
+    <ErrorBoundary>
+      <HashRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          {PAGES.map(({ path, component: Page }) => (
+            <Route key={path} path={path} element={<Page />} />
+          ))}
+        </Routes>
+      </HashRouter>
+    </ErrorBoundary>
   )
 }
 ```
@@ -114,10 +117,7 @@ Replace the entire contents of `src/styles/HomePage.module.css` with the clean s
 
 Run these two bash commands to delete all page files except HomePage.tsx, and all module CSS files except HomePage.module.css:
 
-```bash
-find /Users/shawn/Developer/ids-starter/src/pages -name "*.tsx" ! -name "HomePage.tsx" -delete
-find /Users/shawn/Developer/ids-starter/src/styles -name "*.module.css" ! -name "HomePage.module.css" -delete
-```
+Delete all files in `src/pages/` except `HomePage.tsx`, and all `*.module.css` files in `src/styles/` except `HomePage.module.css` and `App.module.css`. Use the Glob tool to find the files, then delete them individually. Do **not** delete `ErrorBoundary.tsx`, `main.tsx`, `vite-env.d.ts`, `index.css`, `fonts.css`, or `intuit.css`.
 
 ## Step 6 — Confirm Reset Complete
 

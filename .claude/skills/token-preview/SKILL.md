@@ -27,7 +27,7 @@ If no token category is specified in `$ARGUMENTS`, ask: "Which token category do
    - Elevation: `.cursor/rules/tokens/intuit/elevation.mdc`
    - Radius: `.cursor/rules/tokens/intuit/radius.mdc`
 
-3. **Generate a visual preview page** in `src/App.tsx` and `src/styles/App.module.css` that renders token swatches:
+3. **Generate a visual preview page** in `src/pages/TokenPreviewPage.tsx` and `src/styles/TokenPreviewPage.module.css` that renders token swatches. Add it to the `PAGES` array in `src/App.tsx`.
 
    - **Color tokens:** Rows of colored squares with token name and value below each
    - **Spacing tokens:** Bars of increasing width showing each space token
@@ -37,11 +37,11 @@ If no token category is specified in `$ARGUMENTS`, ask: "Which token category do
 
    Use the actual CSS custom properties (e.g., `var(--color-text-primary)`) so the preview is live and theme-aware.
 
-4. **Auto-save the current prototype first** — before overwriting App.tsx, save the current state as a snapshot named `before-token-preview` (create `.claude/snapshots/before-token-preview/` and copy the files).
+4. **Since this creates a new page**, the designer's existing prototype is preserved. No snapshot is needed.
 
 5. **Start the dev server** with `npm run dev`.
 
-6. **Remind the user** they can run `/restore before-token-preview` to get back to their prototype.
+6. **Tell the user** the token preview is at `/#/token-preview` and their prototype is untouched.
 
 Rules:
 - Use only `var(--token-name)` syntax — the preview should be live, not hardcoded values

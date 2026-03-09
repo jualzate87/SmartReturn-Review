@@ -38,7 +38,7 @@ For each column the user listed, determine:
 Use the column type mapping from `table-patterns.md`.
 
 ## 4. Build the Table
-Write the table to `src/App.tsx` and `src/styles/App.module.css`.
+Write the table to the page the designer chose (new page in `src/pages/` with a matching CSS module in `src/styles/`, or an existing page). If a new page, add it to the `PAGES` array in `src/App.tsx`.
 
 Include:
 - Table header with column labels

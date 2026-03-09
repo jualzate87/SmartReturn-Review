@@ -54,7 +54,7 @@ Open the project in Cursor and start chatting with the AI assistant. You can des
 | `/audit-a11y` | Check accessibility (WCAG AA) |
 | `/audit-style` | Check design token and style compliance |
 | `/explain` | Explain the current prototype in plain language |
-| `/handoff` | Generate a developer handoff spec |
+| `/spec` | Generate a developer handoff spec |
 | `/snapshot <name>` | Save your current work |
 | `/restore <name>` | Go back to a saved version |
 | `/snapshots` | List all saved versions |
