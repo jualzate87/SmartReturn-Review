@@ -25,17 +25,12 @@ import { RcCheckbox } from '@ids-ts/rc-checkbox';
 | `a11yFocus` | `boolean` | No | - |
 | `assignInputRef` | `(c: HTMLInputElement | null) => void` | No | A function to get reference to input element. |
 | `checked` | `boolean` | No | Specifies whether the checkbox is checked. |
-| `state` | `whether or not the checkbox is checked.
-   *
-  ...` | Yes | - |
+| `defaultChecked` | `boolean` | No | Initial checked state (uncontrolled). |
 | `disabled` | `boolean` | No | - |
 | `indeterminate` | `boolean` | No | Specifies when type is checkbox and in a indeterminate state [-]. |
 | `name` | `string` | No | a name assign to the checkbox input |
 | `onBlur` | `React.FocusEventHandler<HTMLInputElement>` | No | Callback function that is fired when a Checkbox has been blurred. |
-| `onChange` | `(
-    /** a customized event */
-    e: {
-      ...` | No | Callback function that is fired when a Checkbox has been checked. |
+| `onChange` | `(e: { target: { checked: boolean; value: string } }) => void` | No | Called when the checkbox state changes. |
 | `onClick` | `React.MouseEventHandler<HTMLInputElement>` | No | Callback function that is fired when a Checkbox has been clicked. |
 | `onFocus` | `React.FocusEventHandler<HTMLInputElement>` | No | Callback function that is fired when a Checkbox has been focused. |
 | `readOnly` | `boolean` | No | - |

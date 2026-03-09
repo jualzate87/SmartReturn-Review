@@ -29,8 +29,7 @@ import { Button } from '@ids-ts/button';
 | `size` | `Size` | No | - |
 | `purpose` | `Purpose` | No | - |
 | `priority` | `Priority` | No | - |
-| `true` | `Always take the width of your container
-   * fa...` | Yes | - |
+| `fullWidth` | `boolean \| 'responsive'` | No | Controls button width. `true` = always full width. `false` = content width (default). `'responsive'` = full width on mobile, content width on desktop. |
 | `disabled` | `boolean` | No | * Specifies whether the button in a "disabled" state |
 | `isLoading` | `boolean` | No | * Specifies if the button is isLoading state. Loads a spinner |
 | `loadingComponent` | `JSX.Element` | No | - |

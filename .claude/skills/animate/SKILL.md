@@ -8,8 +8,13 @@ model: inherit
 
 Add animations to the prototype: $ARGUMENTS
 
+## Before Starting
+
+If there are multiple pages, ask: "Which page should I add animations to?" Wait for the answer before reading any page files.
+
 ## 1. Read the Current Prototype
-Read `src/App.tsx` and `src/styles/App.module.css` to understand what elements exist.
+Read `src/App.tsx` to see available pages.
+Read the target page file in `src/pages/` and its CSS module in `src/styles/` to understand what elements exist.
 
 ## 2. Read Animation Tokens
 Read the animation-related token files:
@@ -23,7 +28,7 @@ Based on the user's request, determine:
 - The appropriate timing and easing
 
 ## 4. Apply Animations
-Add CSS animations to `src/styles/App.module.css` using design tokens:
+Add CSS animations to the target page's CSS module in `src/styles/` using design tokens:
 
 ### Common Patterns
 
@@ -67,7 +72,7 @@ Add CSS animations to `src/styles/App.module.css` using design tokens:
 ```
 
 ## 5. Update the Code
-Edit `src/styles/App.module.css` to add the animations. If the animations require class changes, update `src/App.tsx` as well.
+Edit the target page's CSS module in `src/styles/` to add the animations. If the animations require class changes, update the page component in `src/pages/` as well.
 
 ## 6. Explain What Was Added
 Describe the animations in plain language and suggest adjustments.
@@ -79,3 +84,11 @@ Describe the animations in plain language and suggest adjustments.
 - Prefer `transform` and `opacity` for animations (GPU-accelerated)
 - Respect `prefers-reduced-motion` — add a media query to disable animations
 - Keep animations subtle — this is a business app, not a marketing site
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.
+
+Common scenarios:
+- **Animation causes layout issues** — offer to revert the specific animation, simplify it, or try a different animation type
+- **Reduced motion query needed but design requires animation** — explain the trade-off and ask how to handle it

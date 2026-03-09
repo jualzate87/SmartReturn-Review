@@ -5,6 +5,8 @@ user-invocable: true
 model: inherit
 ---
 
+No clarification needed — help is informational only. Output the guide below immediately without asking any questions.
+
 When this skill is invoked, print the following guide directly. Do not read any files — just output this text as-is:
 
 ```
@@ -37,7 +39,7 @@ You don't need to be a developer — just describe what you want and I'll build 
 - `/audit-a11y` — check accessibility (WCAG AA)
 - `/audit-style` — check design token compliance
 - `/explain` — get a plain-language explanation of what's built
-- `/handoff` — generate a developer handoff spec
+- `/spec` — generate a design specification for developers
 - `/compare dropdown vs dropdown-typeahead` — compare two components
 
 ## Save Your Work

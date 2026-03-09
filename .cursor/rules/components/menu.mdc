@@ -25,14 +25,10 @@ import { Menu, MenuItem } from '@ids-ts/menu';
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `accessStringMatch` | `string` | No | Key to match string |
-| `vertical` | `'top', 'bottom', 'middle'
-   * horizontal: 'lef...` | Yes | - |
+| `alignment` | `Alignments` | No | Alignment for the Menu: vertical (`'top'`, `'bottom'`, `'middle'`), horizontal (`'left'`, `'right'`, `'center'`). |
 | `anchorElement` | `React.ReactElement` | Yes | The element used to set the position of showing the Menu. |
-| `example` | `if anchor
-   * element is IDS TextField, then t...` | Yes | - |
-| `autoFocus` | `boolean` | No | - |
-| `children` | `| React.ReactElement<MenuItemProps>
-    | React...` | No | Menu contents, normally are `MenuItem`s. |
+| `autoFocus` | `boolean` | No | Whether the menu should auto-focus on open. |
+| `children` | `ReactElement<MenuItemProps> \| ReactElement<MenuItemProps>[]` | No | Menu contents, normally `MenuItem` components. |
 | `className` | `string` | No | Class to be assigned to Menu. Use to extend the style. |
 | `disabled` | `boolean` | No | - |
 | `disableSearch` | `boolean` | No | - |
@@ -47,16 +43,14 @@ import { Menu, MenuItem } from '@ids-ts/menu';
 | `onBlur` | `(e: React.KeyboardEvent | React.FocusEvent) => ...` | No | Callback fired when the Menu wants to blur |
 | `onClose` | `(e: React.KeyboardEvent | React.FocusEvent) => ...` | No | Callback fired when the Menu wants to close |
 | `onMouseEnter` | `React.MouseEventHandler` | No | Callback fired when the mouse hover the Menu |
-| `onSelect` | `(
-    e: React.MouseEvent<HTMLLIElement> | Reac...` | No | onSelect callback receive from parent to handle open/close, get selectedItem |
-| `onClickAway` | `(e: React.MouseEvent | React.KeyboardEvent) => ...` | No | Callback fired when the Menu gets clicked away |
+| `onSelect` | `(e: React.MouseEvent<HTMLLIElement> \| React.KeyboardEvent) => void` | No | Called when a menu item is selected. |
+| `onClickAway` | `(e: React.MouseEvent \| React.KeyboardEvent) => void` | No | Called when the Menu is clicked away. |
 | `open` | `boolean` | Yes | If `true`, the Menu shows. |
-| `menuOffsetSkidding` | `the cross-axis pixel distance that the popup sh...` | Yes | - |
-| `menuOffsetDistance` | `the main-axis pixel distance that the popup sho...` | Yes | - |
-| `menuOffsetX` | `the x axis pixel distance that the popup should...` | Yes | - |
-| `menuOffsetY` | `the y axis pixel distance that the popup should...` | Yes | - |
-| `vertical` | `'top', 'bottom'
-   * horizontal: 'left', 'right...` | Yes | - |
+| `menuOffsetSkidding` | `number` | No | Cross-axis pixel offset of the popup. |
+| `menuOffsetDistance` | `number` | No | Main-axis pixel offset of the popup. |
+| `menuOffsetX` | `number` | No | X-axis pixel offset of the popup. |
+| `menuOffsetY` | `number` | No | Y-axis pixel offset of the popup. |
+| `positions` | `string[]` | No | Vertical positions to try: `'top'`, `'bottom'`. |
 | `preventMenuOverflow` | `an object variable` | Yes | - |
 | `preventMenuOverflow` | `PreventOverflow` | No | - |
 | `reference` | `(c: HTMLUListElement | null) => void` | No | Callback that returns the ref for menu |
@@ -78,8 +72,7 @@ import { Menu, MenuItem } from '@ids-ts/menu';
 | `onClick` | `React.MouseEventHandler` | No | Callback function to be executed on click. |
 | `onKeyDown` | `React.KeyboardEventHandler` | No | Callback function to be executed on keydown. |
 | `onKeyUp` | `React.KeyboardEventHandler` | No | Callback function to be executed on keyUp. |
-| `onSelect` | `(
-    e: React.MouseEvent<HTMLLIElement> | Reac...` | No | Callback function to be executed on selection. Internal use only. |
+| `onSelect` | `(e: React.MouseEvent<HTMLLIElement> \| React.KeyboardEvent) => void` | No | Selection callback. Internal use only. |
 | `role` | `string` | No | - |
 | `size` | `'small' | 'medium'` | No | - |
 | `selected` | `boolean` | No | - |
@@ -355,8 +348,7 @@ export interface MenuItemProps extends ThemeableElement<'li'> {
 | `onClick` | `React.MouseEventHandler` | No | Callback function to be executed on click. |
 | `onKeyDown` | `React.KeyboardEventHandler` | No | Callback function to be executed on keydown. |
 | `onKeyUp` | `React.KeyboardEventHandler` | No | Callback function to be executed on keyUp. |
-| `onSelect` | `(
-    e: React.MouseEvent<HTMLLIElement> | Reac...` | No | Callback function to be executed on selection. Internal use only. |
+| `onSelect` | `(e: React.MouseEvent<HTMLLIElement> \| React.KeyboardEvent) => void` | No | Selection callback. Internal use only. |
 | `role` | `string` | No | - |
 | `size` | `'small' | 'medium'` | No | - |
 | `selected` | `boolean` | No | - |

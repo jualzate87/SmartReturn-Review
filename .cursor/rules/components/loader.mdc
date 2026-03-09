@@ -20,6 +20,16 @@ yarn add @ids-ts/loader
 import { Loader } from '@ids-ts/loader';
 ```
 
+## Props
+
+### Activity (Spinner)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `shape` | `'dots' \| 'bar'` | No | Visual style of the loader. |
+| `size` | `'small' \| 'medium' \| 'large'` | No | Size of the loader indicator. |
+| `automationId` | `string` | No | Test automation identifier. |
+
 ## Token Usage
 
 ### Color

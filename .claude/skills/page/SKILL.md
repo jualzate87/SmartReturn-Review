@@ -8,11 +8,16 @@ model: inherit
 
 Generate an IDS page prototype: $ARGUMENTS
 
+## Before Starting
+
+Confirm which page type you're building and ask: "Should this be a new page, or replace the current one?" If a new page, ask what to call it. Don't write any code until confirmed.
+
 ## 1. Read the Page Templates
 Read `.claude/skills/page/templates/page-templates.md` for available page patterns and their component compositions.
 
 ## 2. Read the Rules
 Read `.cursor/rules/design-system.mdc` for core IDS rules.
+Read `.cursor/rules/routing.mdc` for the multi-page file structure.
 Read `.cursor/rules/tokens.mdc` for token overview.
 
 ## 3. Match the Request to a Page Type
@@ -30,14 +35,23 @@ Identify which page template best matches:
 For the chosen page type, determine which `@ids-ts/*` components are needed. Read each component's rule file at `.cursor/rules/components/<name>.mdc`.
 
 ## 5. Build the Page
-Write the page to `src/App.tsx` and `src/styles/App.module.css`.
+
+**If replacing the current page:** Write to the existing page file and its CSS module.
+
+**If creating a new page:**
+1. Create `src/pages/[Name].tsx`
+2. Create `src/styles/[Name].module.css`
+3. Add the import and entry to `PAGES` in `src/App.tsx`
+
 - Include realistic placeholder content (names, dates, descriptions)
 - Wire up basic interactions (toggles toggle, buttons have hover states)
 - Make it responsive
 - Use semantic HTML structure
+- CSS import path from pages/: `import styles from '../styles/[Name].module.css'`
 
 ## 6. Install & Preview
 Install missing packages with `yarn add`, start the dev server with `npm run dev`.
+If a new page was created, tell the designer: "Your new page is at `http://localhost:5174/#/[path]`"
 
 ## 7. Explain & Customize
 Describe what was built, what components are used, and offer to customize content, add sections, or adjust the layout.
@@ -53,3 +67,11 @@ Describe what was built, what components are used, and offer to customize conten
 8. Flexbox/Grid for layout
 9. Semantic HTML
 10. Responsive at 320px, 768px, 1200px
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`. Always present options in plain language — never show raw error messages to the designer.
+
+Common scenarios:
+- **Page type is ambiguous** — describe what each matching type would look like and ask which fits best
+- **A needed component isn't available** — offer a functionally equivalent alternative and explain the difference

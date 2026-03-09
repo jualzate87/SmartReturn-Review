@@ -31,8 +31,7 @@ import { PageMessage } from '@ids-ts/page-message';
 | `onActionClick` | `React.MouseEventHandler` | No | Callback when action button is clicked |
 | `onClose` | `React.MouseEventHandler` | No | Callback when component is closed. |
 | `open` | `boolean` | Yes | - |
-| `innerRef` | `| ((instance: HTMLDivElement | null) => void)
- ...` | No | Ref to forward to the container div. |
+| `innerRef` | `((instance: HTMLDivElement \| null) => void) \| React.Ref<HTMLDivElement>` | No | Ref to forward to the container div. |
 
 <details>
 <summary>Full TypeScript Interface</summary>

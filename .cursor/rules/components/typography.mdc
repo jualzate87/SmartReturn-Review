@@ -20,6 +20,18 @@ yarn add @ids-ts/typography
 import { Typography } from '@ids-ts/typography';
 ```
 
+## Props
+
+Typography exports semantic components: `D1`, `D2` (Display), `H1`–`H6` (Heading), `B1`–`B3` (Body). All share the same props.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | Yes | Text content. |
+| `as` | `string` | No | Override the rendered HTML element (e.g., `as="h3"` on `B2`). |
+| `weight` | `'regular' \| 'demi' \| 'bold'` | No | Font weight override. |
+| `style` | `CSSProperties` | No | Inline style overrides. |
+| `className` | `string` | No | Additional CSS class names. |
+
 ## Token Usage
 
 ### Color

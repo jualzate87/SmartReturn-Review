@@ -23,8 +23,7 @@ import { ClickAwayListener } from '@ids-ts/click-away-listener';
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
-| `children` | `(
-    ref: (c?: HTMLElement | null) => void | R...` | Yes | * Children prop, it should be a function to return a React node. |
+| `children` | `(ref: (c?: HTMLElement \| null) => void) => ReactNode` | Yes | Function that receives a ref callback and returns a React node. |
 | `onClickAway` | `(event: React.MouseEvent | React.KeyboardEvent)...` | No | * Callback on click away. |
 | `useOnClick` | `boolean` | No | * Boolean prop to determine whether to use onClick event instead of onMouseUp. |
 

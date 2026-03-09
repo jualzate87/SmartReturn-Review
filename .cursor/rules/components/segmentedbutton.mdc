@@ -24,19 +24,14 @@ import { SegmentedButton } from '@ids-ts/segmented-button';
 | --- | --- | --- | --- |
 | `ariaLabel` | `string` | Yes | The aria-label to define the purpose of the group of the buttons |
 | `buttonInfos` | `ButtonInterface[]` | Yes | Type providing information for each button. See ButtonInterface for more information. |
-| `button` | `'standard' or 'mini'
-   *
-   * @default 'standa...` | Yes | - |
-| `container` | `'center','right' or 'left'
-   *
-   * @default '...` | Yes | - |
+| `size` | `'standard' \| 'mini'` | No | Size variant. Defaults to `'standard'`. |
+| `align` | `'center' \| 'right' \| 'left'` | No | Alignment of the button group. Defaults to `'left'`. |
 | `className` | `string` | No | Custom classes to be added to the segmented button's HTML <section>. |
 | `label` | `string` | Yes | Label for button. |
 | `selected` | `boolean` | Yes | The selected button segment; only one segment should be set as a selected. |
 | `content` | `ReactNode` | No | A component or string shown underneath the segmented button. |
 | `buttonAriaLabel` | `string` | No | The aria-label for a single segmented button. |
-| `onClick` | `| React.ReactEventHandler<HTMLButtonElement>
-  ...` | No | A callback to be fired when a single button is clicked. |
+| `onClick` | `React.ReactEventHandler<HTMLButtonElement>` | No | Called when a single button is clicked. |
 | `onKeyDown` | `React.KeyboardEventHandler<HTMLButtonElement>` | No | A callback to be fired when a single button has a key pressed on it. |
 
 <details>

@@ -11,6 +11,18 @@ This is a prototyping playground for the **Intuit Design System (IDS)**. It's de
 - **Start the preview:** Use `/preview` to see your work at `http://localhost:5174`
 - **Start over:** Use `/reset` to get a clean slate
 
+## How We Work Together
+
+This tool works best as a **collaborative pair** — you bring the design intent, the agent handles the implementation.
+
+**What to expect:**
+- Before building anything, the agent will confirm its understanding of your request
+- When decisions come up mid-build, the agent will stop and ask rather than guess
+- When something goes wrong, the agent will explain it in plain language and offer options — always with a **(Recommended)** path clearly marked
+- After each build, the agent will summarize what was created and suggest a next step
+
+**If something isn't right:** Just say so. Describe what you expected and the agent will adjust. You don't need to know why it went wrong — just what you wanted.
+
 ## Available Skills
 
 Skills are advanced slash commands for complex workflows. Type `/` followed by the skill name.
@@ -37,7 +49,7 @@ Skills are advanced slash commands for complex workflows. Type `/` followed by t
 - `/audit-a11y` — Accessibility audit (WCAG AA compliance check)
 - `/audit-style` — Style compliance audit (token usage, forbidden libraries)
 - `/explain` — Explain the current prototype in plain language
-- `/handoff` — Generate a design handoff specification
+- `/spec` — Generate a design specification for the current prototype
 - `/compare <A> vs <B>` — Compare two IDS components side by side
 
 ### Save & Restore
@@ -96,17 +108,22 @@ Example: For color tokens, read `.cursor/rules/tokens/intuit/color.mdc`
 
 ## File Structure
 
-All prototyping happens in two files:
-
 ```
 src/
-├── App.tsx          ← Your prototype (React + IDS components)
+├── App.tsx                  ← Router shell (managed by skills, don't edit directly)
+├── pages/
+│   ├── HomePage.tsx         ← Default page — your prototype starts here
+│   └── [Name].tsx           ← Additional pages created by skills
 ├── styles/
-│   ├── App.module.css   ← Your styles (CSS Modules + design tokens)
-│   ├── index.css    ← Global styles (don't edit)
-│   ├── fonts.css    ← Font imports (don't edit)
-│   └── intuit.css   ← Design tokens from DDMS CDN (don't edit, run npm run sync-tokens to update)
+│   ├── App.module.css       ← Shell-level styles (minimal)
+│   ├── HomePage.module.css  ← Home page styles
+│   ├── [Name].module.css    ← Per-page styles
+│   ├── index.css            ← Global styles (don't edit)
+│   ├── fonts.css            ← Font imports (don't edit)
+│   └── intuit.css           ← Design tokens from DDMS CDN (don't edit)
 ```
+
+Each page has its own file in `src/pages/` and its own CSS module in `src/styles/`. Pages are accessible at `http://localhost:5174/#/[page-path]`. Skills handle creating new pages and wiring them into the router.
 
 ## Available Components
 

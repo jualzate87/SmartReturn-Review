@@ -45,8 +45,9 @@ Read these files before starting any translation:
    - Gaps — any Figma elements without IDS equivalents
 5. **Wait for confirmation** before generating code.
 6. **Generate code:**
-   - Write `src/App.tsx` with IDS components and correct props
-   - Write `src/styles/App.module.css` with token-based styles
+   - Ask: "Should this be a new page, or replace the current one?" If a new page, ask what to call it.
+   - If replacing: write to the existing page file and its CSS module
+   - If new page: create `src/pages/[Name].tsx`, `src/styles/[Name].module.css`, add to `PAGES` in `src/App.tsx`
    - Install missing packages with `yarn add`
 7. **Start the dev server** with `npm run dev`
 8. **Report differences** between the Figma design and the implementation, offer to iterate.
@@ -75,6 +76,17 @@ Read these files before starting any translation:
 - Known differences from the original design
 - Suggestions for iteration
 
+## Collaboration
+
+You are working as a collaborative pair with the designer, not autonomously.
+
+- **Before implementing**: Always present your design analysis first — components detected, tokens mapped, gaps identified. Confirm the designer agrees with the interpretation before writing a single line of code.
+- **When a Figma element has no IDS equivalent**: Do not silently substitute. Flag it clearly in the analysis phase, propose the closest IDS alternative, and ask for direction. The designer owns the design intent.
+- **When design values are ambiguous** (e.g., a color that could map to multiple semantic tokens): Surface the options and ask which meaning fits — don't guess.
+- **When the translation diverges from Figma**: After building, explicitly list every difference and ask if the designer wants to adjust. Never leave gaps undisclosed.
+
+Always prefer a quick confirmation over implementing in the wrong direction and requiring a rebuild.
+
 ## Rules
 
 1. Always follow the `.cursor/rules/figma.mdc` workflow
@@ -83,4 +95,4 @@ Read these files before starting any translation:
 4. Read each component's `.mdc` file before using it
 5. If a Figma element has no IDS equivalent, flag it clearly and suggest the closest alternative
 6. Use CSS Modules and Flexbox/Grid for layout — match the Figma layout structure
-7. All code goes in `src/App.tsx` and `src/styles/App.module.css`
+7. All prototype code goes in `src/pages/[Name].tsx` and `src/styles/[Name].module.css` — never directly in `src/App.tsx` (that is the router shell only)

@@ -20,6 +20,34 @@ yarn add @ids-ts/modal-dialog
 import { ModalDialog } from '@ids-ts/modal-dialog';
 ```
 
+## Props
+
+### Modal
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | Yes | Modal content (ModalHeader, ModalContent, ModalActions). |
+| `automationId` | `string` | No | Test automation identifier. |
+
+### ModalTitle
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `title` | `string` | Yes | The modal dialog title text. |
+
+### ModalContent
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | Yes | Content rendered inside the modal body. |
+| `overflow` | `boolean` | No | Enables scrolling when content overflows. |
+| `maxHeight` | `string` | No | CSS max-height value (e.g., `'50vh'`). |
+
+### Sub-components
+
+- `ModalHeader` — Header area containing ModalTitle
+- `ModalActions` — Footer area for action buttons
+
 ## Token Usage
 
 ### Color

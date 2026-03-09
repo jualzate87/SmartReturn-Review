@@ -24,128 +24,56 @@ import { DatePicker, DatePickerComponent } from '@ids-ts/date-picker';
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
-| `USAGE` | `User would just need to provide the automationI...` | Yes | - |
-| `styling` | `'start' or 'end'.  */
-  'data-drpIndex'?: DrpIn...` | Yes | - |
-| `announcementMinDate` | `string` | No | Used to announce min date via screen reader for accessibility purpose |
-| `announcementMaxDate` | `string` | No | Used to announce max date via screen reader for accessibility purpose |
-| `announcementCurrentDate` | `string` | Yes | - |
-| `Example` | `['2018-06-07', '2018-07-07', '2018-08-07', '201...` | Yes | - |
-| `currentDate` | `The date DatePicker will assume is today. Defau...` | Yes | - |
-| `currentDateTitle` | `string` | Yes | - |
-| `dateFormat` | `string` | Yes | - |
-| `dayOfWeekLabels` | `string[]` | Yes | - |
-| `fullDayOfWeekLabels` | `string[]` | No | Array of full weekday names for accessibility (abbr attribute). Generated from locale. |
-| `disabled` | `boolean` | No | rue = disable input, false = normal operation |
-| `footerTextClass` | `string` | No | Class to be applied to all the footer text (validation & helper). It is passed on to TextField |
-| `hasWeightedLabel` | `boolean` | No | Boolean flag to allow label to be bold. It is passed on to TextField |
-| `helperText` | `string` | No | Text to be display for extra information. It is passed on to TextField |
-| `readOnly` | `boolean` | No | True = readOnly input, false = normal operation |
-| `enableAutoFormatting` | `boolean` | No | flag to enable autoformatting to the textfield |
-| `endingDate` | `string | DateWrapper` | No | - |
-| `id` | `string` | No | Id of the root container |
-| `errorText` | `string` | No | See TextField.errorText |
-| `isMobile` | `boolean` | No | This is set automatically by datePropUtils, but it can be overridden for testing purposes if desired. |
-| `isRangePicker` | `boolean` | No | Used by DateRangePicker for styling reasons. |
-| `isMonthYearPicker` | `boolean` | No | Used by isMonthYearPicker for styling reasons. |
-| `label` | `string` | No | See TextField.label |
-| `https` | `//momentjs.com/). However, the user can overrid...` | Yes | - |
-| `maxDate` | `string | DateWrapper` | No | - |
-| `minDate` | `string | DateWrapper` | No | - |
-| `monthLabels` | `string[]` | Yes | - |
-| `name` | `string` | No | See TextField.props.name |
-| `nextMonthAriaLabel` | `string` | Yes | - |
-| `onFocus` | `React.FocusEventHandler` | No | See TextField.props.onFocus |
-| `onBlur` | `React.FocusEventHandler` | No | See TextField.props.onBlur |
-| `onChange` | `(event: ChangeEventType) => void` | No | See TextField.props.onChange |
-| `onCalendarOpen` | `() => void` | No | - |
-| `onCalendarClose` | `() => void` | No | - |
-| `previousMonthAriaLabel` | `string` | Yes | - |
-| `placeholder` | `string` | No | See TextField.props.placeholder |
-| `preventCalendarOverflow` | `an object variable` | Yes | - |
-| `preventCalendarOverflow` | `PreventOverflow` | No | - |
-| `renderTooltip` | `RenderTooltipType` | No | - |
-| `showCalendar` | `boolean` | No | - |
-| `size` | `TextFieldProps['size']` | No | Size of the datepicker to render. Affects only the text field |
-| `startingDate` | `string | DateWrapper` | No | - |
-| `calendarPositionStyle` | `React.CSSProperties` | No | * The optional styles applied to the calendar position node to additionally style the calendar popover. |
-| `themeClass` | `string` | No | className from styles based of theme and colorScheme |
-| `example` | `* {'2017-06-06': 'Salute', '2017-10-06': 'It is...` | Yes | - |
-| `validationError` | `boolean` | No | - |
-| `ex` | `width={300}
-   * ex: width="200px"
-   * ex: wid...` | Yes | - |
-| `warningText` | `string` | No | Warning message to be rendered. It is passed on to TextField |
-| `useDoubleCalendar` | `boolean` | No | - |
-| `value` | `string | DateWrapper` | Yes | - |
-| `displayStrikeOutsideOfMinMaxRange` | `boolean` | No | Flag to display strikes on any dates that fall outside of the min/max range. |
-| `enableMonthYearQuickSelect` | `boolean` | No | Setting this value to true enables month and year quickselect |
-| `quickSelectMinYear` | `number` | No | The minimum year to start with for the quickselect dropdown menu in MonthHeader |
-| `quickSelectMaxYear` | `number` | No | The maximum year to start with for the quickselect dropdown menu in MonthHeader |
-| `abbreviatedDateFormat` | `string,
-  /** String for tooltip text that woul...` | Yes | Date format abbreviation in case of different format that locale. |
-| `USAGE` | `User would just need to provide the automationI...` | Yes | - |
-| `styling` | `'start' or 'end'.  */
-  'data-drpIndex'?: DrpIn...` | Yes | - |
-| `announcementMinDate` | `string` | No | Used to announce min date via screen reader for accessibility purpose |
-| `announcementMaxDate` | `string` | No | Used to announce max date via screen reader for accessibility purpose |
-| `announcementCurrentDate` | `string` | Yes | - |
-| `Example` | `['2018-06-07', '2018-07-07', '2018-08-07', '201...` | Yes | - |
-| `currentDate` | `The date DatePicker will assume is today. Defau...` | Yes | - |
-| `currentDateTitle` | `string` | Yes | - |
-| `dateFormat` | `string` | Yes | - |
-| `dayOfWeekLabels` | `string[]` | Yes | - |
-| `fullDayOfWeekLabels` | `string[]` | No | Array of full weekday names for accessibility (abbr attribute). Generated from locale. |
-| `disabled` | `boolean` | No | rue = disable input, false = normal operation |
-| `footerTextClass` | `string` | No | Class to be applied to all the footer text (validation & helper). It is passed on to TextField |
-| `hasWeightedLabel` | `boolean` | No | Boolean flag to allow label to be bold. It is passed on to TextField |
-| `helperText` | `string` | No | Text to be display for extra information. It is passed on to TextField |
-| `readOnly` | `boolean` | No | True = readOnly input, false = normal operation |
-| `enableAutoFormatting` | `boolean` | No | flag to enable autoformatting to the textfield |
-| `endingDate` | `string | DateWrapper` | No | - |
-| `id` | `string` | No | Id of the root container |
-| `errorText` | `string` | No | See TextField.errorText |
-| `isMobile` | `boolean` | No | This is set automatically by datePropUtils, but it can be overridden for testing purposes if desired. |
-| `isRangePicker` | `boolean` | No | Used by DateRangePicker for styling reasons. |
-| `isMonthYearPicker` | `boolean` | No | Used by isMonthYearPicker for styling reasons. |
-| `label` | `string` | No | See TextField.label |
-| `https` | `//momentjs.com/). However, the user can overrid...` | Yes | - |
-| `maxDate` | `string | DateWrapper` | No | - |
-| `minDate` | `string | DateWrapper` | No | - |
-| `monthLabels` | `string[]` | Yes | - |
-| `name` | `string` | No | See TextField.props.name |
-| `nextMonthAriaLabel` | `string` | Yes | - |
-| `onFocus` | `React.FocusEventHandler` | No | See TextField.props.onFocus |
-| `onBlur` | `React.FocusEventHandler` | No | See TextField.props.onBlur |
-| `onChange` | `(event: ChangeEventType) => void` | No | See TextField.props.onChange |
-| `onCalendarOpen` | `() => void` | No | - |
-| `onCalendarClose` | `() => void` | No | - |
-| `previousMonthAriaLabel` | `string` | Yes | - |
-| `placeholder` | `string` | No | See TextField.props.placeholder |
-| `preventCalendarOverflow` | `an object variable` | Yes | - |
-| `preventCalendarOverflow` | `PreventOverflow` | No | - |
-| `renderTooltip` | `RenderTooltipType` | No | - |
-| `showCalendar` | `boolean` | No | - |
-| `size` | `TextFieldProps['size']` | No | Size of the datepicker to render. Affects only the text field |
-| `startingDate` | `string | DateWrapper` | No | - |
-| `calendarPositionStyle` | `React.CSSProperties` | No | * The optional styles applied to the calendar position node to additionally style the calendar popover. |
-| `themeClass` | `string` | No | className from styles based of theme and colorScheme |
-| `example` | `* {'2017-06-06': 'Salute', '2017-10-06': 'It is...` | Yes | - |
-| `validationError` | `boolean` | No | - |
-| `ex` | `width={300}
-   * ex: width="200px"
-   * ex: wid...` | Yes | - |
-| `warningText` | `string` | No | Warning message to be rendered. It is passed on to TextField |
-| `useDoubleCalendar` | `boolean` | No | - |
-| `value` | `string | DateWrapper` | Yes | - |
-| `displayStrikeOutsideOfMinMaxRange` | `boolean` | No | Flag to display strikes on any dates that fall outside of the min/max range. |
-| `enableMonthYearQuickSelect` | `boolean` | No | Setting this value to true enables month and year quickselect |
-| `quickSelectMinYear` | `number` | No | The minimum year to start with for the quickselect dropdown menu in MonthHeader |
-| `quickSelectMaxYear` | `number` | No | The maximum year to start with for the quickselect dropdown menu in MonthHeader |
-| `position` | `Positions` | Yes | Tooltip position |
-| `dismissible` | `boolean` | Yes | Tooltip dismissible option |
-| `offsetX` | `number` | Yes | Tooltip offsetX value |
-| `offsetY` | `number` | Yes | Tooltip offsetY value |
+| `automationId` | `string` | No | Automation test identifier. |
+| `data-drpIndex` | `'start' \| 'end'` | No | Index for date range picker styling. |
+| `announcementMinDate` | `string` | No | Used to announce min date via screen reader. |
+| `announcementMaxDate` | `string` | No | Used to announce max date via screen reader. |
+| `announcementCurrentDate` | `string` | No | Used to announce current date via screen reader. |
+| `currentDate` | `string` | No | The date DatePicker will assume is today. Defaults to today. |
+| `currentDateTitle` | `string` | No | Accessible title for the current date. |
+| `dateFormat` | `string` | Yes | Date format string (e.g., `'MM/DD/YYYY'`). |
+| `dayOfWeekLabels` | `string[]` | Yes | Array of abbreviated weekday labels. |
+| `fullDayOfWeekLabels` | `string[]` | No | Array of full weekday names for accessibility. |
+| `disabled` | `boolean` | No | Disables the date input when true. |
+| `footerTextClass` | `string` | No | Class applied to footer text (validation and helper). |
+| `hasWeightedLabel` | `boolean` | No | Makes the label bold when true. |
+| `helperText` | `string` | No | Helper text displayed below the input. |
+| `readOnly` | `boolean` | No | Makes the input read-only when true. |
+| `enableAutoFormatting` | `boolean` | No | Enables auto-formatting of the text field input. |
+| `endingDate` | `string \| DateWrapper` | No | End date for range pickers. |
+| `id` | `string` | No | ID of the root container. |
+| `errorText` | `string` | No | Error message displayed below the input. |
+| `isMobile` | `boolean` | No | Override for mobile detection (used for testing). |
+| `isRangePicker` | `boolean` | No | Used by DateRangePicker for styling. |
+| `isMonthYearPicker` | `boolean` | No | Used by month/year picker variant. |
+| `label` | `string` | No | Label for the date input field. |
+| `maxDate` | `string \| DateWrapper` | No | Maximum selectable date. |
+| `minDate` | `string \| DateWrapper` | No | Minimum selectable date. |
+| `monthLabels` | `string[]` | Yes | Array of month name labels. |
+| `name` | `string` | No | Name attribute for the input. |
+| `nextMonthAriaLabel` | `string` | Yes | Accessible label for the next month button. |
+| `previousMonthAriaLabel` | `string` | Yes | Accessible label for the previous month button. |
+| `onFocus` | `React.FocusEventHandler` | No | Called when the input receives focus. |
+| `onBlur` | `React.FocusEventHandler` | No | Called when the input loses focus. |
+| `onChange` | `(event: ChangeEventType) => void` | No | Called when the selected date changes. |
+| `onCalendarOpen` | `() => void` | No | Called when the calendar opens. |
+| `onCalendarClose` | `() => void` | No | Called when the calendar closes. |
+| `placeholder` | `string` | No | Placeholder text for the input. |
+| `preventCalendarOverflow` | `PreventOverflow` | No | Controls calendar overflow behavior. |
+| `renderTooltip` | `RenderTooltipType` | No | Custom tooltip renderer. |
+| `showCalendar` | `boolean` | No | Controls calendar open/closed state. |
+| `size` | `TextFieldProps['size']` | No | Size of the date picker text field. |
+| `startingDate` | `string \| DateWrapper` | No | Start date for range pickers. |
+| `calendarPositionStyle` | `React.CSSProperties` | No | Additional styles for the calendar position node. |
+| `validationError` | `boolean` | No | Shows error state styling when true. |
+| `warningText` | `string` | No | Warning message displayed below the input. |
+| `useDoubleCalendar` | `boolean` | No | Shows two calendar months side by side. |
+| `value` | `string \| DateWrapper` | Yes | Selected date value. |
+| `displayStrikeOutsideOfMinMaxRange` | `boolean` | No | Strikes through dates outside min/max range. |
+| `enableMonthYearQuickSelect` | `boolean` | No | Enables month and year quick select dropdowns. |
+| `quickSelectMinYear` | `number` | No | Minimum year for the quick select dropdown. |
+| `quickSelectMaxYear` | `number` | No | Maximum year for the quick select dropdown. |
+| `abbreviatedDateFormat` | `string` | No | Date format abbreviation for different locales. |
 
 <details>
 <summary>Full TypeScript Interface</summary>

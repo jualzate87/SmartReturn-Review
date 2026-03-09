@@ -22,18 +22,14 @@ import { StatusDropdown } from '@ids-ts/status-dropdown';
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
-| `children` | `| React.ReactElement<MenuItemProps>
-    | React...` | Yes | Children of Menu or MenuItems |
+| `children` | `ReactElement<MenuItemProps> \| ReactElement<MenuItemProps>[]` | Yes | MenuItem children for the dropdown. |
 | `label` | `string` | Yes | Required label to be placed on the StatusDropdown as the label |
 | `status` | `Status` | Yes | Required status to be placed on the StatusDropdown as the status |
 | `preventMenuOverflow` | `an object variable` | Yes | - |
 | `preventMenuOverflow` | `PreventOverflow` | No | - |
 | `onSelect` | `(event: ReactStatusDropdownEvent) => void` | No | Function which will be called when a menu item is selected |
 | `menuPositionStyle` | `React.CSSProperties` | No | The optional styles applied to the position node wrapped around the root node. |
-| `size` | `standard or mini
-   *
-   * @default 'standard'
-...` | Yes | - |
+| `size` | `'standard' \| 'mini'` | No | Size variant. Defaults to `'standard'`. |
 | `warningText` | `string` | No | warning message to be rendered. |
 | `validationWarning` | `boolean` | No | validation warning displays only warning styles without text |
 | `disabled` | `boolean` | No | whether the component should be disabled or not |

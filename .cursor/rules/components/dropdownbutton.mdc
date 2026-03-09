@@ -29,8 +29,7 @@ import { DropdownButton } from '@ids-ts/dropdown-button';
 | `buttonPriority` | `Priority` | No | - |
 | `buttonPurpose` | `ButtonPurpose` | No | - |
 | `buttonSize` | `ButtonSize` | No | - |
-| `children` | `| React.ReactElement<MenuItemProps>
-    | React...` | No | Children of Menu, which are MenuItem types in the dropdown |
+| `children` | `ReactElement<MenuItemProps> \| ReactElement<MenuItemProps>[]` | No | MenuItem children for the dropdown. |
 | `className` | `string` | No | ClassName to be used on the base element |
 | `maxHeight` | `string | number` | No | Determine the maximum height of the dropdown list, unit is px. |
 | `disabled` | `boolean` | No | - |
@@ -43,12 +42,10 @@ import { DropdownButton } from '@ids-ts/dropdown-button';
 | `preventMenuOverflow` | `PreventOverflow` | No | - |
 | `style` | `React.CSSProperties` | No | styles to be used on the base element |
 | `stylePosition` | `React.CSSProperties` | No | The optional styles applied to the position node wrapped around the root node. |
-| `positions` | `top, bottom
-   * horizontal positions: left, ri...` | Yes | - |
-| `alignments` | `top, bottom, middle
-   * horizontal alignments:...` | Yes | - |
-| `offsetSkidding` | `the cross-axis pixel distance that the popup sh...` | Yes | - |
-| `offsetDistance` | `the main-axis pixel distance that the popup sho...` | Yes | - |
+| `positions` | `string[]` | No | Vertical positions: `'top'`, `'bottom'`. |
+| `alignments` | `string[]` | No | Alignment of the menu relative to the trigger. |
+| `offsetSkidding` | `number` | No | Cross-axis pixel offset of the popup. |
+| `offsetDistance` | `number` | No | Main-axis pixel offset of the popup. |
 | `scrollToSelected` | `boolean` | No | - |
 | `positionDependencies` | `unknown[]` | No | - |
 

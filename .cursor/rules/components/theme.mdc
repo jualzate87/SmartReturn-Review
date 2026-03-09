@@ -19,6 +19,13 @@ yarn add @ids-ts/theme
 import { Theme } from '@ids-ts/theme';
 ```
 
+## Props
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | Yes | Components to render within the theme context. |
+| `name` | `string` | No | Theme name (e.g., `'intuit'`, `'quickbooks'`, `'turbotax'`). |
+
 ## Token Usage
 
 ### Color

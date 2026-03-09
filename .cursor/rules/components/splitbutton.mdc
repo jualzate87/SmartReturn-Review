@@ -26,20 +26,16 @@ import { SplitButton } from '@ids-ts/split-button';
 | `buttonPriority` | `ButtonPriority` | No | - |
 | `buttonPurpose` | `ButtonPurpose` | No | - |
 | `buttonSize` | `ButtonSize` | No | - |
-| `children` | `| React.ReactElement<MenuItemProps>
-    | React...` | No | Consumes menu item(s) to be displayed as additional actions. |
+| `children` | `ReactElement<MenuItemProps> \| ReactElement<MenuItemProps>[]` | No | MenuItem children for the dropdown menu. |
 | `disabled` | `boolean` | No | Disable the actionable item. |
 | `label` | `string` | Yes | Label used to display action choices. |
 | `menuAlignment` | `'right' | 'left'` | No | - |
-| `menuOffsetSkidding` | `the cross-axis pixel distance that the popup sh...` | Yes | - |
-| `menuOffsetDistance` | `the main-axis pixel distance that the popup sho...` | Yes | - |
-| `menuOffsetX` | `the x axis pixel distance that the popup should...` | Yes | - |
-| `menuOffsetY` | `the y axis pixel distance that the popup should...` | Yes | - |
-| `onClick` | `(
-    e:
-      | React.MouseEvent<HTMLButtonEle...` | No | A callback function that is fired when a button has been clicked. |
-| `onSelect` | `(
-    e: React.MouseEvent<HTMLElement> | React....` | No | A Callback function that is fired when an action has been selected. |
+| `menuOffsetSkidding` | `number` | No | Cross-axis pixel offset of the dropdown menu. |
+| `menuOffsetDistance` | `number` | No | Main-axis pixel offset of the dropdown menu. |
+| `menuOffsetX` | `number` | No | X-axis pixel offset of the dropdown menu. |
+| `menuOffsetY` | `number` | No | Y-axis pixel offset of the dropdown menu. |
+| `onClick` | `(e: React.MouseEvent<HTMLButtonElement>) => void` | No | Called when the main button is clicked. |
+| `onSelect` | `(e: React.MouseEvent<HTMLElement> \| React.KeyboardEvent) => void` | No | Called when a dropdown action is selected. |
 | `preventMenuOverflow` | `an object variable` | Yes | - |
 | `preventMenuOverflow` | `PreventOverflow` | No | - |
 | `stylePosition` | `React.CSSProperties` | No | The optional styles applied to the position node wrapped around the root node. |

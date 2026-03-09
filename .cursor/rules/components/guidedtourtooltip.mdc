@@ -22,118 +22,39 @@ import { GuidedTourTooltip } from '@ids-ts/guided-tour-tooltip';
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
-| `autoFocus` | `boolean` | Yes | - |
-| `open` | `boolean` | No | To begin the guided tour |
-| `onClose` | `() => void` | No | Callback for extra functionality when tour is closed |
-| `steps` | `GTTStep[]` | Yes | - |
-| `ofLabel` | `string` | Yes | - |
-| `doneLabel` | `string` | Yes | - |
-| `renderGuidanceTooltip` | `(
-    tooltips: React.ReactNodeArray,
-    onClo...` | No | Function hook that can render a guidance tooltip step and any additional component you need. Usually for coachmarks |
-| `automationId` | `string` | No | automation id |
-| `activeElement` | `HTMLUnknownElement | HTMLUnknownElement[] | null` | No | The HTML DOM element to be used to focus on when tooltip closed. |
-| `targetElement` | `a HTML DOM element
-   * The HTML DOM element to...` | Yes | - |
-| `title` | `string` | No | Text to display as a header for the message. |
-| `message` | `any` | No | content to be displayed under title text |
-| `position` | `Positions` | No | Position for GuidanceTooltip to be placed. |
-| `preventOverflow` | `PreventOverflow` | No | preventOverflow: an object variable; used to prevent GuidanceTooltip from being positioned outside the boundary. |
-| `alignment` | `Alignments` | No | Alignment of GuidanceTooltip to target. |
-| `onBackClick` | `(index: number) => void` | No | Callback function on back button click |
-| `onNextClick` | `(index: number) => void` | No | Callback function on next button click |
-| `onClose` | `(index?: number) => void` | No | Callback for extra functionality when tour is closed |
-| `onPreload` | `CallBackPayload` | No | function that returns a promise and is called before tooltip is rendered. |
-| `onPreUnload` | `CallBackPayload` | No | function that returns a promise and is called when tooltip is about to be unmounted. |
-| `renderOptions` | `any` | No | A collection props passed down to the CoachMarks component |
-| `enableClickAway` | `boolean` | No | Enable onClose trigger on click away based on dismissible prop value. |
-| `offsetX` | `number` | No | - |
-| `offsetY` | `number` | No | - |
-| `tooltipOffsetSkidding` | `the cross-axis pixel distance that the popup sh...` | Yes | - |
-| `tooltipOffsetDistance` | `the main-axis pixel distance that the popup sho...` | Yes | - |
-| `backLabel` | `string` | No | Text label for back button. Default text is 'back'. |
-| `nextLabel` | `string` | No | Text label for next button. Default text is 'next'. |
-| `className` | `string` | No | Class name to be added on the GuidanceTooltip wrapper. |
-| `stylePosition` | `any` | No | The optional styles applied to the position node wrapped around the root node. |
-| `coachMarksOptions` | `any` | No | Used for passing Coachmarks Props |
-| `renderCoachMarks` | `(props: any) => JSX.Element | null` | No | render coachmark individual for each step |
-| `index` | `number) => any` | No | - |
-| `activeElement` | `HTMLUnknownElement | HTMLUnknownElement[] | null` | No | The HTML DOM element to be used to focus on when tooltip closed. |
-| `targetElement` | `a HTML DOM element
-   * The HTML DOM element to...` | Yes | - |
-| `title` | `string` | No | Text to display as a header for the message. |
-| `message` | `any` | No | content to be displayed under title text |
-| `position` | `Positions` | No | Position for GuidanceTooltip to be placed. |
-| `preventOverflow` | `PreventOverflow` | No | preventOverflow: an object variable; used to prevent GuidanceTooltip from being positioned outside the boundary. |
-| `alignment` | `Alignments` | No | Alignment of GuidanceTooltip to target. |
-| `onBackClick` | `(index: number) => void` | No | Callback function on back button click |
-| `onNextClick` | `(index: number) => void` | No | Callback function on next button click |
-| `onClose` | `(index?: number) => void` | No | Callback for extra functionality when tour is closed |
-| `onPreload` | `CallBackPayload` | No | function that returns a promise and is called before tooltip is rendered. |
-| `onPreUnload` | `CallBackPayload` | No | function that returns a promise and is called when tooltip is about to be unmounted. |
-| `renderOptions` | `any` | No | A collection props passed down to the CoachMarks component |
-| `enableClickAway` | `boolean` | No | Enable onClose trigger on click away based on dismissible prop value. |
-| `offsetX` | `number` | No | - |
-| `offsetY` | `number` | No | - |
-| `tooltipOffsetSkidding` | `the cross-axis pixel distance that the popup sh...` | Yes | - |
-| `tooltipOffsetDistance` | `the main-axis pixel distance that the popup sho...` | Yes | - |
-| `backLabel` | `string` | No | Text label for back button. Default text is 'back'. |
-| `nextLabel` | `string` | No | Text label for next button. Default text is 'next'. |
-| `className` | `string` | No | Class name to be added on the GuidanceTooltip wrapper. |
-| `stylePosition` | `any` | No | The optional styles applied to the position node wrapped around the root node. |
-| `coachMarksOptions` | `any` | No | Used for passing Coachmarks Props |
-| `renderCoachMarks` | `(props: any) => JSX.Element | null` | No | render coachmark individual for each step |
-| `callback` | `CallBackPayload` | No | - |
-| `index` | `number` | No | - |
-| `autoFocus` | `boolean` | Yes | - |
-| `open` | `boolean` | No | To begin the guided tour |
-| `onClose` | `() => void` | No | Callback for extra functionality when tour is closed |
-| `steps` | `GTTStep[]` | Yes | - |
-| `ofLabel` | `string` | Yes | - |
-| `doneLabel` | `string` | Yes | - |
-| `renderGuidanceTooltip` | `(
-    tooltips: React.ReactNodeArray,
-    onClo...` | No | Function hook that can render a guidance tooltip step and any additional component you need. Usually for coachmarks |
-| `automationId` | `string` | No | automation id |
-| `props` | `GuidedTourTooltipProps) => {
-  const [index, se...` | Yes | - |
-| `method` | `any) =>
-    !!method && typeof method.then === ...` | Yes | - |
-| `onClose` | `onCloseTour } = props` | Yes | - |
-| `callbackList` | `CallbackType[],
-    callbackIndex = 0
-  ) => {
-...` | Yes | - |
-| `error` | `React.ErrorInfo) => {
-          console.warn(er...` | Yes | - |
-| `currIndex` | `number,
-    newIndex: number,
-    callback: Cal...` | Yes | - |
-| `callback` | `onPreUnload,
-        index: currIndex
-      })` | Yes | - |
-| `callback` | `onPreload,
-        index: newIndex
-      })` | Yes | - |
-| `callbackList` | `CallbackType[] = []` | Yes | - |
-| `callback` | `props.steps[index].onPreUnload,
-        index
- ...` | Yes | - |
-| `callback` | `() => {
-        closeTour()` | Yes | - |
-| `stepCount` | `number): React.ReactNodeArray => {
-    const { ...` | Yes | - |
-| `children` | `guidanceTooltip,
-              key: stepIndex,
-...` | Yes | - |
-| `stepCount` | `number) => {
-    const tooltips = getTooltips(s...` | Yes | - |
-| `autoFocus` | `true,
-  steps: [{}],
-  ofLabel: 'of',
-  doneLab...` | Yes | - |
-| `callback` | `CallBackPayload` | No | - |
-| `index` | `number` | No | - |
+| `autoFocus` | `boolean` | Yes | Whether focus moves inside the tooltip once opened. Defaults to `true`. |
+| `open` | `boolean` | No | Controls whether the guided tour is active. |
+| `steps` | `GTTStep[]` | Yes | Array of step configurations for the guided tour. |
+| `ofLabel` | `string` | Yes | Label for the step counter (e.g., `'of'` in "1 of 5"). |
+| `doneLabel` | `string` | Yes | Label for the done/finish button on the last step. |
+| `backLabel` | `string` | No | Label for the back button. Defaults to `'back'`. |
+| `nextLabel` | `string` | No | Label for the next button. Defaults to `'next'`. |
+| `automationId` | `string` | No | Automation test identifier. |
+| `targetElement` | `HTMLElement` | Yes | The DOM element the tooltip is anchored to. |
+| `activeElement` | `HTMLUnknownElement \| HTMLUnknownElement[] \| null` | No | Element to focus when the tooltip closes. |
+| `title` | `string` | No | Header text for the tooltip. |
+| `message` | `ReactNode` | No | Content displayed under the title. |
+| `position` | `Positions` | No | Position for the tooltip: `'top'`, `'bottom'`, `'left'`, `'right'`. |
+| `alignment` | `Alignments` | No | Alignment of the tooltip relative to the target. |
+| `preventOverflow` | `PreventOverflow` | No | Prevents tooltip from overflowing outside the boundary. |
+| `onClose` | `(index?: number) => void` | No | Called when the tour is closed. |
+| `onBackClick` | `(index: number) => void` | No | Called when the back button is clicked. |
+| `onNextClick` | `(index: number) => void` | No | Called when the next button is clicked. |
+| `onPreload` | `CallBackPayload` | No | Called before a tooltip step is rendered. |
+| `onPreUnload` | `CallBackPayload` | No | Called before a tooltip step is unmounted. |
+| `renderGuidanceTooltip` | `(tooltips: ReactNodeArray, onClose: () => void) => ReactNode` | No | Custom renderer for tooltip steps (used for coachmarks). |
+| `renderCoachMarks` | `(props: any) => JSX.Element \| null` | No | Renders coachmarks for each step. |
+| `renderOptions` | `any` | No | Props passed to the CoachMarks component. |
+| `coachMarksOptions` | `any` | No | Additional Coachmarks configuration. |
+| `enableClickAway` | `boolean` | No | Enables closing the tooltip on outside click. |
+| `tooltipOffsetSkidding` | `number` | No | Cross-axis pixel offset of the tooltip. |
+| `tooltipOffsetDistance` | `number` | No | Main-axis pixel offset of the tooltip. |
+| `offsetX` | `number` | No | X-axis offset. |
+| `offsetY` | `number` | No | Y-axis offset. |
+| `stylePosition` | `React.CSSProperties` | No | Styles for the position wrapper node. |
+| `className` | `string` | No | Additional class name for the tooltip wrapper. |
+| `callback` | `CallBackPayload` | No | General callback payload. |
+| `index` | `number` | No | Current step index. |
 
 <details>
 <summary>Full TypeScript Interface</summary>

@@ -8,6 +8,10 @@ model: inherit
 
 Help compose these IDS components together: $ARGUMENTS
 
+## Before Starting
+
+Ask: "Which page should this composition be added to, or would you like a new one?" If the components to compose aren't specified in `$ARGUMENTS`, ask which ones they have in mind. Wait for the answer before proceeding.
+
 ## 1. Identify the Components
 Parse the user's request to identify which `@ids-ts/*` components they want to combine. If the names are ambiguous, clarify.
 
@@ -34,7 +38,7 @@ Write a working composition example showing:
 - Any CSS needed for layout (using tokens)
 
 ## 6. Offer to Add
-Ask if the designer wants this composition added to their prototype in `src/App.tsx` and `src/styles/App.module.css`.
+Ask if the designer wants this composition added to their prototype. If yes, add it to the target page file and its matching CSS module.
 
 ## Example Compositions
 - **Card with actions:** `Cards` → `Typography` + `Button`
@@ -49,3 +53,12 @@ Ask if the designer wants this composition added to their prototype in `src/App.
 3. All spacing/styling via design tokens
 4. No wrapper components — use IDS components directly
 5. Correct nesting and prop usage per `.mdc` files
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.
+
+Common scenarios:
+- **Component nesting isn't supported** — check the `.mdc` file for composition constraints and suggest a valid alternative structure
+- **Components conflict visually** — ask the designer which one should take visual precedence, then adjust spacing and layout tokens accordingly
+- **A component name is ambiguous** — list the closest matches from the available `@ids-ts/*` packages and ask the designer to confirm

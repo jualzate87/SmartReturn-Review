@@ -8,6 +8,10 @@ model: inherit
 
 Build an IDS data table with these columns: $ARGUMENTS
 
+## Before Starting
+
+Ask: "Should this table go on a new page, or would you like it added to an existing one?" If a new page, ask what to name it. Wait for the answer before proceeding.
+
 ## 1. Read the Table Patterns
 Read `.claude/skills/table-builder/templates/table-patterns.md` for column type mapping, sample data patterns, and configuration options.
 
@@ -57,10 +61,19 @@ List the columns, their types, and rendering. Offer to:
 - Add bulk actions
 
 ## Evaluation Criteria
-1. Table uses `@ids-ts/table`
-2. Every component CSS imported
-3. All styling via design tokens
-4. Status columns use `@ids-ts/badge`
-5. Pagination uses `@ids-ts/pagination`
-6. Responsive with horizontal scroll on mobile
-7. Realistic sample data
+1. All components from `@ids-ts/*` only
+2. Every component CSS imported (`@ids-ts/<name>/dist/main.css`)
+3. All visual values via design tokens (zero hardcoded)
+4. Semantic tokens preferred over primitives
+5. No wrapper components
+6. CSS Modules only
+7. Responsive — table scrolls horizontally on small screens
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.
+
+Common scenarios:
+- **Column type is ambiguous** — ask the designer what type of data goes in that column (text, number, date, status, etc.) before building
+- **A required package isn't installed** — run `yarn add @ids-ts/<package>` for each missing component before writing code
+- **Table doesn't fit the existing page layout** — describe the conflict and ask if they want to restructure the layout or create a new page

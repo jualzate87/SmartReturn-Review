@@ -19,6 +19,16 @@ yarn add @ids-ts/core
 import { core } from '@ids-ts/core';
 ```
 
+## Props
+
+`@ids-ts/core` is a utility package with no visual props. It exports helper utilities:
+
+- `deviceUtils` — Device detection helpers
+- `a11y` — Accessibility utilities
+- Debounce helpers
+
+No React component props to configure directly.
+
 ## Token Usage
 
 ### Color

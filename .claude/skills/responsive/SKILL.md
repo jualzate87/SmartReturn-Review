@@ -7,8 +7,13 @@ model: inherit
 
 Make the current prototype responsive across all breakpoints.
 
+## Before Starting
+
+If there are multiple pages, ask: "Which page should I make responsive, or should I do all of them?" Wait for the answer before reading page files.
+
 ## 1. Read the Current Prototype
-Read `src/App.tsx` and `src/styles/App.module.css` to understand the existing layout.
+Read `src/App.tsx` to get the page list.
+Read the target page file(s) in `src/pages/` and their CSS modules in `src/styles/`.
 
 ## 2. Read the Rules
 Read `.cursor/rules/design-system.mdc` for core rules.
@@ -34,7 +39,7 @@ For each breakpoint, determine what changes:
 | Desktop | 1200px+ | Full layout, all sidebars visible, full navigation, large headings |
 
 ## 5. Apply Media Queries
-Update `src/styles/App.module.css` with mobile-first media queries:
+Update the target page's CSS module in `src/styles/` with mobile-first media queries:
 
 ```css
 /* Base styles = mobile */
@@ -51,7 +56,7 @@ Update `src/styles/App.module.css` with mobile-first media queries:
 Use `min-width` (mobile-first), not `max-width`.
 
 ## 6. Modify JSX if Needed
-If responsive behavior requires structural changes (e.g., hiding a sidebar component, switching from a table to card list), update `src/App.tsx`.
+If responsive behavior requires structural changes (e.g., hiding a sidebar component, switching from a table to card list), update the target page component in `src/pages/`.
 
 ## 7. Add Reduced Motion Support
 ```css
@@ -76,3 +81,10 @@ Start the dev server with `npm run dev` and report:
 - Don't hide critical content on mobile — reflow it
 - Maintain 44x44px minimum touch targets on mobile
 - Test at 320px, 768px, and 1200px
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.
+
+Common scenarios:
+- **Component doesn't reflow well at a breakpoint** — show the designer what's possible and ask if they'd prefer a structural change (e.g., switching from table to card list on mobile)

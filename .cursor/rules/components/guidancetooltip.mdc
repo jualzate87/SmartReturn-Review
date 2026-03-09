@@ -22,8 +22,7 @@ import { GuidanceTooltip } from '@ids-ts/guidance-tooltip';
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
-| `alignment` | `string of alignments
-   * vertical alignments: ...` | Yes | - |
+| `alignment` | `Alignments` | Yes | Tooltip alignment (e.g., `'top'`, `'bottom'`, `'left'`, `'right'`). |
 | `animationOn` | `boolean` | Yes | - |
 | `autoFocus` | `boolean` | Yes | - |
 | `automationId` | `string` | No | Test automation ID. |
@@ -35,18 +34,15 @@ import { GuidanceTooltip } from '@ids-ts/guidance-tooltip';
 | `offsetY` | `number` | Yes | - |
 | `onClose` | `React.ReactEventHandler` | No | On close callback. |
 | `open` | `boolean` | Yes | - |
-| `position` | `string of positions to try
-   * vertical positi...` | Yes | - |
+| `position` | `Positions` | Yes | Tooltip position: `'top'`, `'bottom'`, `'left'`, `'right'`. |
 | `preventOverflow` | `an object variable` | Yes | - |
 | `preventOverflow` | `PreventOverflow` | No | - |
 | `stylePosition` | `React.CSSProperties` | No | * The optional styles applied to the position node wrapped around the root node. |
-| `targetElement` | `a HTML DOM element
-   * The HTML DOM element to...` | Yes | - |
-| `title` | `string` | Yes | - |
-| `tooltipOffsetSkidding` | `the cross-axis pixel distance that the popup sh...` | Yes | - |
-| `tooltipOffsetDistance` | `the main-axis pixel distance that the popup sho...` | Yes | - |
-| `activeElement` | `a HTML DOM element
-   * The HTML DOM element to...` | Yes | - |
+| `targetElement` | `HTMLElement` | Yes | The DOM element the tooltip is anchored to. |
+| `title` | `string` | No | Header text displayed in the tooltip. |
+| `tooltipOffsetSkidding` | `number` | No | Cross-axis pixel offset of the tooltip popup. |
+| `tooltipOffsetDistance` | `number` | No | Main-axis pixel offset of the tooltip popup. |
+| `activeElement` | `HTMLElement` | No | Element to focus when the tooltip closes. |
 | `usedForGuidedTour` | `boolean` | No | flag used to apply guidedTourQuickbooks theme |
 
 <details>

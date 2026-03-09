@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "sync-tokens": "node scripts/sync-tokens.mjs",
-    "postinstall": "node scripts/sync-tokens.mjs"
+    "postinstall": "node scripts/sync-tokens.mjs",
+    "validate-rules": "node scripts/validate-rules.mjs",
+    "validate-rules:report": "node scripts/validate-rules.mjs --report"
   },
   "dependencies": {
     "@design-systems/icons": "*",
@@ -31,8 +33,10 @@
     "@ids-ts/link-action-button": "*",
     "@ids-ts/loader": "*",
     "@ids-ts/menu": "*",
+    "@ids-ts/product-header": "5.151.0",
     "@ids-ts/radio": "*",
     "@ids-ts/skeleton": "*",
+    "@ids-ts/switch": "5.151.0",
     "@ids-ts/table": "*",
     "@ids-ts/tabs": "*",
     "@ids-ts/text-field": "*",
@@ -42,7 +46,8 @@
     "@ids-ts/trowser": "*",
     "@ids-ts/typography": "*",
     "react": "^18.0.2",
-    "react-dom": "^18.0.2"
+    "react-dom": "^18.0.2",
+    "react-router-dom": "^6.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

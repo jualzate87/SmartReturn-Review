@@ -8,6 +8,10 @@ model: inherit
 
 Generate a wireframe using IDS skeleton components: $ARGUMENTS
 
+## Before Starting
+
+If multiple pages exist in `src/pages/`, ask: "Which page should I wireframe, or would you like me to create a new one?" Wait for the answer before proceeding.
+
 ## 1. Read the Rules
 Read `.cursor/rules/components/skeleton.mdc` for the Skeleton component API.
 Read `.cursor/rules/design-system.mdc` for core rules.
@@ -39,7 +43,12 @@ Replace content with Skeleton placeholders:
 | Input field | `<Skeleton variant="rect" height="40px" />` |
 
 ## 4. Build the Wireframe
-Write the wireframe to `src/App.tsx` and `src/styles/App.module.css`.
+**If replacing an existing page:** Write to that page's existing file (e.g. `src/pages/HomePage.tsx`) and its matching CSS module.
+
+**If creating a new page:**
+1. Create `src/pages/[Name].tsx`
+2. Create `src/styles/[Name].module.css`
+3. Add the import and entry to `PAGES` in `src/App.tsx`
 
 Use:
 - `@ids-ts/skeleton` for all placeholder content
@@ -72,3 +81,12 @@ Describe the wireframe structure and ask:
 - Add JSX comments explaining what each skeleton represents
 - Make the wireframe responsive
 - Keep it simple — the point is structure, not detail
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.
+
+Common scenarios:
+- **Skeleton component not installed** — run `yarn add @ids-ts/skeleton` before proceeding
+- **Layout description is too vague** — ask one focused question: "What are the main sections? (e.g., header, sidebar, content cards)"
+- **Requested layout conflicts with existing page structure** — show the designer what's already there and ask if they want to replace it or start a new page

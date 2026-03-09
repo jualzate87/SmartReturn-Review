@@ -7,8 +7,14 @@ model: inherit
 
 Explain the current prototype in plain language.
 
+## Before Starting
+
+If there are multiple pages (check `src/App.tsx` PAGES array), ask: "Should I explain all pages, or a specific one?" Wait for the answer before proceeding.
+
 ## 1. Read the Current Prototype
-Read `src/App.tsx` and `src/styles/App.module.css`.
+Read `src/App.tsx` to get the list of pages.
+Read all files in `src/pages/` (or just the specific page if requested).
+Read the matching CSS module file(s) in `src/styles/`.
 
 ## 2. Identify Everything in Use
 - **Components:** List every `@ids-ts/*` component and what it's used for
@@ -47,3 +53,7 @@ Note anything that's custom CSS vs. provided by IDS components.
 - Use designer-friendly language — avoid React jargon
 - Be concise but complete — don't skip components or tokens
 - If the prototype is empty or minimal, say so clearly
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.

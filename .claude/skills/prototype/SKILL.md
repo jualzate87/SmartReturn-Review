@@ -10,16 +10,18 @@ Build an IDS prototype from this description: $ARGUMENTS
 
 Follow these steps in order:
 
-## 1. Understand the Request
-Read the description carefully. Identify what UI elements, layouts, and interactions are needed. If the description is vague, ask one clarifying question before proceeding.
+## Before Starting
 
-## 2. Read the Rules
+State your interpretation of the request in one sentence and ask the designer to confirm before writing any code. Also ask: "Should this be a new page, or replace the current one?" If a new page, ask what to call it. Don't proceed until you have confirmation.
+
+## 1. Read the Rules
 Read `.cursor/rules/design-system.mdc` to refresh the core IDS rules.
+Read `.cursor/rules/routing.mdc` to understand the multi-page file structure.
 
-## 3. Identify Components
+## 2. Identify Components
 Figure out which `@ids-ts/*` components are needed. For each one, read its rule file at `.cursor/rules/components/<name>.mdc` to understand its props and usage.
 
-## 4. Identify Tokens
+## 3. Identify Tokens
 If specific colors, spacing, or typography are mentioned, read the relevant token files:
 - Colors: `.cursor/rules/tokens/intuit/color.mdc`
 - Spacing: `.cursor/rules/tokens/intuit/space.mdc`
@@ -30,8 +32,14 @@ If specific colors, spacing, or typography are mentioned, read the relevant toke
 
 For a full overview of available token categories, read `.cursor/rules/tokens.mdc`.
 
-## 5. Build the Prototype
-Write the code in `src/App.tsx` and styles in `src/styles/App.module.css`.
+## 4. Build the Prototype
+
+**If replacing the current page:** Write the code to the existing page file (e.g. `src/pages/HomePage.tsx`) and its matching CSS module.
+
+**If creating a new page:**
+1. Create `src/pages/[Name].tsx`
+2. Create `src/styles/[Name].module.css`
+3. Add the import and entry to `PAGES` in `src/App.tsx`
 
 Rules to follow:
 - Use `@ids-ts/*` components directly (no wrappers)
@@ -39,18 +47,19 @@ Rules to follow:
 - Use CSS Modules with design tokens for all custom styling
 - Use `@design-systems/icons` for any icons (read `.cursor/rules/icons.mdc` if needed)
 - Use Flexbox/Grid for layout
-- Keep everything in `App.tsx` — this is a prototype, not a production app
+- CSS import path from pages/: `import styles from '../styles/[Name].module.css'`
 
-## 6. Install Missing Packages
+## 5. Install Missing Packages
 If any `@ids-ts/*` packages are used but not in `package.json`, install them:
 ```
 yarn add @ids-ts/<package-name>
 ```
 
-## 7. Start the Dev Server
+## 6. Start the Dev Server
 Run `npm run dev` to start the preview at `http://localhost:5174`.
+If a new page was created, tell the designer: "Your new page is at `http://localhost:5174/#/[path]`"
 
-## 8. Explain What You Built
+## 7. Explain What You Built
 Give a brief, plain-language summary:
 - What components were used and why
 - What design tokens were applied
@@ -69,3 +78,11 @@ Before finishing, verify:
 8. Flexbox/Grid for layout
 9. Semantic HTML
 10. Responsive at 320px, 768px, 1200px
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`. Always present options in plain language — never show raw error messages to the designer.
+
+Common scenarios:
+- **A component can't be installed** — offer to use a similar available component, or build a placeholder so the rest of the prototype is functional
+- **Request is too vague to build confidently** — ask one focused question about the most important unknown, explain why you need it

@@ -17,19 +17,16 @@ List all directories inside `.claude/snapshots/`.
 
 If no snapshots exist, tell the user:
 
-> No snapshots saved yet. Use `/snapshot <name>` to save your current prototype.
+> No snapshots saved yet. Use `/snapshot <name>` to save your current prototype before making big changes.
 
 Then stop — do not continue to step 3.
 
 ## 3. Build the Snapshot List
 
-For each snapshot directory, gather:
-- **Name** — the directory name
-- **Saved** — the file modification timestamp of `App.tsx` in that snapshot (use `ls -l` or `stat` to get the date)
-- **Preview** — read the first 15-20 lines of the snapshot's `App.tsx` and extract a brief description:
-  - Look for a comment at the top of the file (e.g., `// Dashboard prototype`)
-  - Or identify the main component/layout from the JSX (e.g., "Form with text fields and dropdown")
-  - Keep the preview to one short sentence
+For each snapshot directory:
+
+1. **Read `snapshot.json`** if it exists — use `name`, `created`, `pages`, and `description` from it
+2. **Legacy fallback** (no `snapshot.json`): read the file modification timestamp of `App.tsx` and generate a one-sentence description from the first 15–20 lines of `App.tsx`. Note it as "(legacy format)".
 
 ## 4. Sort and Display
 
@@ -37,10 +34,10 @@ Sort snapshots by date, **newest first**.
 
 Present as a formatted list:
 
-> **Snapshots**
+> **Your Saved Snapshots**
 >
-> 1. **<name>** — <date> — <preview>
-> 2. **<name>** — <date> — <preview>
+> 1. **<name>** — <date> — <description> (<page count> page(s))
+> 2. **<name>** — <date> — <description> (<page count> page(s))
 > ...
 
 ## 5. Remind About Commands
@@ -52,6 +49,7 @@ After the list, add:
 ## Rules
 
 - Sort by date, newest first
-- Keep the preview brief — just enough to identify the version
+- Read `snapshot.json` first — prefer its data over filesystem inspection
+- Keep the description brief — just enough to identify the version
 - Never modify any files when listing snapshots
-- If a snapshot directory is missing `App.tsx`, skip it and note it as "(incomplete snapshot)"
+- If a snapshot directory is missing both `snapshot.json` and `App.tsx`, skip it and note it as "(incomplete)"

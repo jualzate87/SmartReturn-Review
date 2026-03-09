@@ -30,8 +30,7 @@ import {
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
-| `alignment` | `string of alignments
-   * vertical alignments: ...` | Yes | - |
+| `alignment` | `Alignments` | Yes | Alignment of popover to target (e.g., `'top'`, `'middle'`, `'left'`, `'right'`). |
 | `animationOn` | `boolean` | Yes | - |
 | `children` | `React.ReactElement | React.ReactElement[]` | Yes | Inner content of popover |
 | `enableClickAway` | `boolean` | No | Disable onClose trigger on click away when dismissible is true. |
@@ -39,25 +38,20 @@ import {
 | `disableRestoreFocus` | `boolean` | No | If true, does not focus back on the element that initiated |
 | `dismissible` | `boolean` | No | - |
 | `onClose` | `React.ReactEventHandler` | Yes | On close callback. |
-| `onPosition` | `(
-    popoverRef: React.Ref<HTMLDivElement>,
-  ...` | Yes | - |
+| `onPosition` | `(popoverRef: React.Ref<HTMLDivElement>) => void` | No | Callback with the popover ref after positioning. |
 | `open` | `boolean` | Yes | - |
 | `popoverOffsetX` | `number` | No | - |
 | `popoverOffsetY` | `number` | No | - |
-| `popoverOffsetSkidding` | `the cross-axis pixel distance that the popup sh...` | Yes | - |
-| `popoverOffsetDistance` | `the main-axis pixel distance that the popup sho...` | Yes | - |
-| `position` | `string of positions to try
-   * vertical positi...` | Yes | - |
+| `popoverOffsetSkidding` | `number` | No | Cross-axis pixel offset of the popover. |
+| `popoverOffsetDistance` | `number` | No | Main-axis pixel offset of the popover. |
+| `position` | `Positions` | Yes | Position of the popover: `'top'`, `'bottom'`, `'left'`, `'right'`. |
 | `preventOverflow` | `PreventOverflow` | No | - |
 | `stylePosition` | `React.CSSProperties` | No | * The optional styles applied to the position node wrapped around the root node. |
 | `targetElement` | `React.ReactNode | HTMLElement` | Yes | - |
 | `variant` | `'popover' | 'flyout'` | Yes | - |
 | `suppressPointer` | `boolean` | Yes | - |
 | `unmountDelay` | `number` | Yes | - |
-| `animationProperties` | `{
-    /**
-     * The className to apply when th...` | No | - |
+| `animationProperties` | `{ enterClassName?: string; exitClassName?: string }` | No | CSS class names for enter and exit animations. |
 | `transitionExit` | `string` | No | * The className to apply when the popover is exiting. |
 
 <details>

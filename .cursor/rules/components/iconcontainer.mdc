@@ -18,6 +18,14 @@ yarn add @ids-ts/icon-container
 import { IconContainer } from '@ids-ts/icon-container';
 ```
 
+## Props
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | Yes | Icon component to wrap. |
+| `size` | `'small' \| 'medium' \| 'large'` | No | Container size. |
+| `automationId` | `string` | No | Test automation identifier. |
+
 ## Token Usage
 
 ### Color

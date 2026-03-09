@@ -20,6 +20,18 @@ yarn add @ids-ts/progress-bar
 import { ProgressBar } from '@ids-ts/progress-bar';
 ```
 
+## Props
+
+> **Deprecated** — Use the `loader` component instead.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `value` | `number` | Yes | Current progress value. |
+| `max` | `number` | Yes | Maximum progress value. |
+| `counterElement` | `ReactNode` | No | Custom counter element displayed above the bar. |
+| `isReversed` | `boolean` | No | Reverses the fill direction when true. |
+| `automationId` | `string` | No | Test automation identifier. |
+
 ## Token Usage
 
 ### Color

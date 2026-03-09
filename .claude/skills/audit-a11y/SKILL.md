@@ -7,8 +7,13 @@ model: inherit
 
 Run an accessibility audit on the current prototype.
 
+## Before Starting
+
+If there are multiple pages (check `src/App.tsx` PAGES array), ask: "Should I audit all pages, or a specific one?" Wait for the answer before proceeding.
+
 ## 1. Read the Current Prototype
-Read `src/App.tsx` and `src/styles/App.module.css`.
+Read `src/App.tsx` to get the list of pages.
+Read all relevant page files in `src/pages/` and their matching CSS modules in `src/styles/`.
 
 ## 2. Read Component Rules
 For each `@ids-ts/*` component used in the prototype, read its rule file at `.cursor/rules/components/<name>.mdc` to check for required accessibility props.
@@ -87,3 +92,7 @@ Ask if the designer wants the critical and warning issues auto-fixed in the code
 - Provide specific code snippets for every fix
 - Don't suggest changes that would break IDS component APIs
 - Score fairly — a prototype with IDS components starts with a good baseline
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.

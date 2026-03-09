@@ -28,16 +28,14 @@ import { LeftNavigation } from '@ids-ts/left-navigation';
 | `footer` | `React.ReactNode` | No | Global navigation actions/content to render at the bottom |
 | `logo` | `React.ReactNode` | No | Product logo to render at the bottom |
 | `open` | `boolean` | No | Whether the Navigation menu is open or not |
-| `ex` | `you have a custom wrapper around <NavigationIte...` | Yes | - |
+| `anchorElementRefPropName` | `string` | No | Ref prop name if the anchor element is a custom React component. |
 | `onSelect` | `(newSelectedItem: string) => void` | No | * Callback that is invoked whenever a new item is selected, with the ID of the newly selected item |
 | `onClose` | `() => void` | No | - |
 | `variant` | `LeftNavigationVariant` | No | * What use case the left navigation component is for. Defaults to 'unified' |
 | `responsiveHeader` | `string` | No | * Header text to render above all nav items when the left nav is in responsive mode. |
 | `expandedItems` | `string[]` | No | - |
-| `onExpandedChange` | `(
-    /** Array of currently expanded itemIds *...` | No | - |
-| `itemId` | `string` | Yes | * The itemId of the item that was expanded or collapsed |
-| `Uncontrolled` | `array of itemIds that should be expanded on ini...` | Yes | - |
+| `onExpandedChange` | `(expandedItems: string[]) => void` | No | Called when expanded items change. |
+| `defaultExpandedItems` | `string[]` | No | Array of itemIds that should be expanded on initial render. |
 
 <details>
 <summary>Full TypeScript Interface</summary>

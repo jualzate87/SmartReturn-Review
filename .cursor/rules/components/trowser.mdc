@@ -35,8 +35,7 @@ import { Trowser } from '@ids-ts/trowser';
 | `feedbackLabel` | `string` | No | label to change feedback label text |
 | `footerButton` | `React.ReactElement[]` | No | array of different type of buttons that can be rendered |
 | `panelContent` | `React.ReactElement` | No | render panel component either on the left or right |
-| `footerCenterLinkActions` | `((
-    event: React.MouseEvent<HTMLButtonElemen...` | No | an array of callback functions for center footer links |
+| `footerCenterLinkActions` | `((event: React.MouseEvent<HTMLButtonElement>) => void)[]` | No | Array of callback functions for center footer links. |
 | `footerCenterLinkLabels` | `string[]` | No | an array of labels for center footer links |
 | `moreButton` | `React.ReactElement` | No | - |
 | `hideOverflow` | `boolean` | No | - |
@@ -78,16 +77,6 @@ import { Trowser } from '@ids-ts/trowser';
 | `cancelFooterButtonLabel` | `string` | No | Prop to set the label for Cancel button as per user's choice |
 | `theme` | `string` | No | Product Theme type to render the footer |
 | `backgroundColor` | `BackgroundColorType` | No | background color for body content of trowser |
-| `event` | `React.MouseEvent<HTMLButtonElement>
-) => void` | No | - |
-| `el` | `React.ReactElement) => React.ReactElement` | Yes | - |
-| `event` | `React.KeyboardEvent<HTMLDivElement>
-) => void` | No | - |
-| `event` | `React.KeyboardEvent<HTMLDivElement>
-) => void` | No | - |
-| `el` | `React.ReactElement) => React.ReactElement` | Yes | - |
-| `event` | `React.KeyboardEvent<HTMLDivElement>
-) => void` | No | - |
 
 <details>
 <summary>Full TypeScript Interface</summary>

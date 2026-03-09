@@ -1,0 +1,137 @@
+---
+description: Multi-page routing architecture for the IDS prototyping environment
+alwaysApply: false
+---
+
+# Routing Architecture
+
+This prototyping environment uses React Router v6 with HashRouter. Pages are accessed via hash URLs (e.g., `http://localhost:5174/#/home`).
+
+## How It Works
+
+- `src/App.tsx` is the router shell — skills manage it, designers don't edit it directly
+- Each page lives in `src/pages/[Name].tsx`
+- Each page has its own stylesheet at `src/styles/[Name].module.css`
+- The `PAGES` array in `App.tsx` is the single source of truth for registered routes
+
+## Adding a New Page
+
+When creating a new page, do all four of these things in order:
+
+1. Create `src/pages/[Name].tsx` — the page component
+2. Create `src/styles/[Name].module.css` — the page stylesheet
+3. Add an import to `App.tsx`: `import [Name] from './pages/[Name]'`
+4. Add an entry to the `PAGES` array in `App.tsx`: `{ label: '[Label]', path: '/[path]', component: [Name] }`
+
+After creating a page, always tell the designer: "Your new page is at `http://localhost:5174/#/[path]`"
+
+## Page Naming Conventions
+
+- **File names**: PascalCase with "Page" suffix — `SettingsPage.tsx`, `DashboardPage.tsx`
+- **CSS files**: match the page file — `SettingsPage.module.css`
+- **Paths**: lowercase, hyphenated — `/settings`, `/user-profile`
+- **Labels**: title case, short — `Settings`, `User Profile`
+
+## CSS Import in Page Files
+
+Each page imports its own module CSS using a relative path from `src/pages/`:
+
+```tsx
+import styles from '../styles/SettingsPage.module.css'
+```
+
+Note the `../styles/` prefix — page files live one level deeper than `src/`.
+
+## App.tsx Structure
+
+```tsx
+// App.tsx — Router shell. Skills manage the imports and PAGES array.
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import HomePage from './pages/HomePage'
+import SettingsPage from './pages/SettingsPage'
+
+const PAGES = [
+  { label: 'Home', path: '/home', component: HomePage },
+  { label: 'Settings', path: '/settings', component: SettingsPage },
+]
+
+export default function App() {
+  return (
+    <HashRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/home" replace />} />
+        {PAGES.map(({ path, component: Page }) => (
+          <Route key={path} path={path} element={<Page />} />
+        ))}
+      </Routes>
+    </HashRouter>
+  )
+}
+```
+
+## Styles Directory
+
+```
+src/styles/
+├── App.module.css          ← Shell-level styles (minimal, for the router shell only)
+├── HomePage.module.css     ← Home page styles
+├── [Name].module.css       ← Per-page styles
+├── index.css               ← Global styles (do not edit)
+├── fonts.css               ← Font imports (do not edit)
+└── intuit.css              ← IDS design tokens (do not edit)
+```
+
+## Navigation Between Pages
+
+Navigation is part of the prototype, not a meta layer. There is no built-in nav shell — designers choose the right IDS navigation component for their use case and add it directly to their page components.
+
+### Common Patterns
+
+**Tabs navigation** — use `@ids-ts/tabs` with React Router's `useNavigate`:
+
+```tsx
+import { useNavigate, useLocation } from 'react-router-dom'
+// In component:
+const navigate = useNavigate()
+const location = useLocation()
+// Pass to Tabs: activeTab={location.pathname}, onTabChange={(path) => navigate(path)}
+```
+
+**Left sidebar navigation** — use `@ids-ts/left-navigation`:
+
+```tsx
+import { useNavigate, useLocation } from 'react-router-dom'
+// Use location.pathname to set the active item, navigate(path) on item click
+```
+
+**Simple links** — use `@ids-ts/link` with React Router's `Link` component via the `as` prop, or use `useNavigate` in an `onClick` handler on a Button:
+
+```tsx
+import { Link as RouterLink } from 'react-router-dom'
+import Link from '@ids-ts/link'
+import '@ids-ts/link/dist/main.css'
+
+// Option A: as prop
+<Link as={RouterLink} to="/settings">Go to Settings</Link>
+
+// Option B: navigate in onClick
+const navigate = useNavigate()
+<Button purpose="standard" priority="secondary" onClick={() => navigate('/settings')}>
+  Go to Settings
+</Button>
+```
+
+### Hash-Based URLs
+
+Since the app uses HashRouter, all URLs are hash-based: `/#/page-name`. The `path` values in the `PAGES` array in `App.tsx` are relative (e.g. `'/settings'`) and the router handles the `#` prefix automatically. Link to pages using just the path — no need to add `#` manually.
+
+### Tip for Designers
+
+When a designer asks to "link" two pages or "add navigation", the right component depends on the design. Ask which IDS navigation pattern fits their prototype: tabs, left nav, breadcrumbs, pagination, or step flow. Each has a different use case and visual weight.
+
+## Snapshot Awareness
+
+Skills that snapshot the prototype must capture:
+- `src/App.tsx`
+- All files in `src/pages/`
+- All `*.module.css` files in `src/styles/` (excluding `index.css`, `fonts.css`, `intuit.css`)

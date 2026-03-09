@@ -8,6 +8,10 @@ model: inherit
 
 Add navigation to the prototype: $ARGUMENTS
 
+## Before Starting
+
+If the navigation type isn't clear from `$ARGUMENTS`, ask: "What type of navigation do you want — tabs, sidebar, pagination, step-flow, or accordion?" Also ask which page it should be added to if multiple pages exist. Wait for the answer before proceeding.
+
 ## 1. Read the Navigation Patterns
 Read `.claude/skills/navigation/templates/nav-patterns.md` for available navigation patterns and their implementations.
 
@@ -30,10 +34,10 @@ Identify which navigation pattern best matches:
 - **accordion** — expandable/collapsible sections
 
 ## 4. Read the Current Prototype
-Read `src/App.tsx` and `src/styles/App.module.css` to understand the existing structure. The navigation should integrate with what's already there.
+Read `src/App.tsx` to get the PAGES array. Then read the target page file in `src/pages/` and its matching CSS module in `src/styles/` to understand the existing structure. The navigation should integrate with what's already there.
 
 ## 5. Add the Navigation
-Update `src/App.tsx` and `src/styles/App.module.css`:
+Update the target page file and its matching CSS module:
 - Add the navigation component with proper props
 - Wire up basic state management for active tab/page/step
 - Include realistic labels for navigation items
@@ -56,3 +60,12 @@ Describe what was added and offer to:
 4. Basic state management for active item
 5. Keyboard accessible
 6. Integrates with existing prototype layout
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.
+
+Common scenarios:
+- **Navigation type not recognized** — list the five supported types (tabs, sidebar, pagination, step-flow, accordion) and ask the designer to pick one
+- **Navigation conflicts with existing layout** — describe the conflict and ask if they want to replace the existing structure or integrate alongside it
+- **Missing navigation package** — run `yarn add @ids-ts/<package>` for the relevant component before proceeding

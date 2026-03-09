@@ -8,6 +8,10 @@ model: inherit
 
 Switch or explore IDS themes: $ARGUMENTS
 
+## Before Starting
+
+If `$ARGUMENTS` doesn't specify a theme or intent, ask: "Do you want to switch to a different theme (e.g., dark, TurboTax, QuickBooks), or would you like to preview and explore the available token values for a theme?" Wait for the answer before proceeding.
+
 ## 1. Read Theme Information
 Read `.cursor/rules/tokens.mdc` for the overview of available themes and how theming works in IDS.
 
@@ -57,3 +61,12 @@ Explain:
 - Never hardcode colors — they break when themes change
 - Don't edit `src/styles/intuit.css` directly — it's auto-generated
 - If a theme isn't available, explain clearly and suggest alternatives
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.
+
+Common scenarios:
+- **Requested theme isn't available** — explain which themes are supported and offer the closest alternative
+- **Prototype uses hardcoded colors that don't adapt** — flag each instance and offer to fix them using semantic tokens before switching themes
+- **Theme switch causes contrast or readability issues** — report specific problem areas and ask if the designer wants to adjust or revert

@@ -19,6 +19,17 @@ yarn add @ids-ts/switch
 import { Switch } from '@ids-ts/switch';
 ```
 
+## Props
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `checked` | `boolean` | No | Controlled checked state. |
+| `onChange` | `(e: ChangeEvent<HTMLInputElement>) => void` | No | Called when the toggle state changes. |
+| `children` | `ReactNode` | No | Label text displayed next to the switch. |
+| `disabled` | `boolean` | No | Disables the switch when true. |
+| `automationId` | `string` | No | Test automation identifier. |
+| `aria-label` | `string` | No | Accessible label when no visible label is used. |
+
 ## Token Usage
 
 ### Color

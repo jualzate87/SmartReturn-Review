@@ -7,8 +7,13 @@ model: inherit
 
 Run an IDS style compliance audit on the current prototype.
 
+## Before Starting
+
+If there are multiple pages (check `src/App.tsx` PAGES array), ask: "Should I audit all pages, or a specific one?" Wait for the answer before proceeding.
+
 ## 1. Read the Current Prototype
-Read `src/App.tsx` and `src/styles/App.module.css`.
+Read `src/App.tsx` to get the list of pages.
+Read all relevant page files in `src/pages/` and their matching CSS modules in `src/styles/`.
 
 ## 2. Read the Rules
 Read `.cursor/rules/design-system.mdc` for core rules.
@@ -48,7 +53,7 @@ Read `.cursor/rules/tokens/intuit/space.mdc` for spacing tokens.
 ### Layout & Structure
 - [ ] No `position: absolute` for page layout
 - [ ] Flexbox or Grid used for layout
-- [ ] All prototype code in `src/App.tsx` and `src/styles/App.module.css`
+- [ ] Prototype code in `src/pages/*.tsx` and `src/styles/*.module.css` (not hardcoded in `src/App.tsx`)
 
 ## 4. Calculate Compliance Score
 Score = (passed checks / total checks) × 100
@@ -80,3 +85,7 @@ Ask if the designer wants the violations auto-fixed. For each fixable violation,
 - Suggest the correct token for every hardcoded value
 - Calculate a percentage score
 - Offer to auto-fix simple violations (token swaps)
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.

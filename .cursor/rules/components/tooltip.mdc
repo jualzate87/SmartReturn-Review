@@ -45,11 +45,10 @@ import { Tooltip } from '@ids-ts/tooltip';
 | `preventOverflow` | `PreventOverflow` | No | preventOverflow: an object variable; used to prevent Tooltip from being positioned outside the boundary. |
 | `stylePosition` | `React.CSSProperties` | No | The optional styles applied to the position node wrapped around the root node. |
 | `title` | `string` | No | A Tooltip title. |
-| `tooltipOffsetSkidding` | `the cross-axis pixel distance that the popup sh...` | Yes | - |
-| `tooltipOffsetDistance` | `the main-axis pixel distance that the popup sho...` | Yes | - |
-| `delayOpen` | `Whether to delay the open of tooltip or not
-   ...` | Yes | - |
-| `delayOpenDuration` | `Time in milliseconds before Tooltip shows after...` | Yes | - |
+| `tooltipOffsetSkidding` | `number` | No | Cross-axis pixel offset of the tooltip. |
+| `tooltipOffsetDistance` | `number` | No | Main-axis pixel offset of the tooltip. |
+| `delayOpen` | `boolean` | No | Whether to delay showing the tooltip. |
+| `delayOpenDuration` | `number` | No | Time in milliseconds before tooltip shows when `delayOpen` is true. |
 | `event` | `ReactEvent) => void` | Yes | - |
 
 <details>

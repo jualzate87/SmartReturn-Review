@@ -28,9 +28,7 @@ import { Checkbox, CheckboxGroup } from '@ids-ts/checkbox';
 | `checked` | `boolean` | No | Specifies whether the checkbox is checked. |
 | `children` | `ReactNode | string` | No | The Checkbox label. |
 | `description` | `ReactNode | string` | No | * Description text below the label |
-| `state` | `whether or not the checkbox is checked.
-   *
-  ...` | Yes | - |
+| `defaultChecked` | `boolean` | No | Initial checked state (uncontrolled). |
 | `disabled` | `boolean` | No | - |
 | `indeterminate` | `boolean` | No | - |
 | `name` | `string` | No | a name assign to the checkbox input |
@@ -44,9 +42,7 @@ import { Checkbox, CheckboxGroup } from '@ids-ts/checkbox';
 | `InlineValidationMessage` | `'error', 'warning', 'success', 'invalid', 'info...` | Yes | - |
 | `value` | `string` | No | Checkbox current value. |
 | `e` | `CheckboxOnChangeEventType): void` | Yes | - |
-| `target` | `{
-    /** a event target check value */
-    che...` | Yes | a modify event target |
+| `target` | `{ checked: boolean; value: string }` | Yes | Modified event target with check value. |
 
 <details>
 <summary>Full TypeScript Interface</summary>

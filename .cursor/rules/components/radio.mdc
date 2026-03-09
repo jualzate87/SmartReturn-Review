@@ -33,9 +33,7 @@ import { Radio, RadioGroup } from '@ids-ts/radio';
 | `value` | `string` | No | Radio current value. |
 | `validationType` | `InlineValidationType` | No | - |
 | `e` | `RadioOnChangeEventType): void` | Yes | - |
-| `target` | `{
-    /** a event target check value */
-    che...` | Yes | a modify event target |
+| `target` | `{ checked: boolean; value: string }` | Yes | Modified event target with radio value. |
 | `value` | `string` | No | a event target value |
 
 <details>

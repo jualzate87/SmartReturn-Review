@@ -23,8 +23,7 @@ import { ComboLink } from '@ids-ts/combo-link';
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
-| `children` | `| React.ReactElement<MenuItemProps>
-    | React...` | Yes | Children of MenuItem |
+| `children` | `ReactElement<MenuItemProps> \| ReactElement<MenuItemProps>[]` | Yes | MenuItem children for the dropdown. |
 | `label` | `string` | Yes | Required label to be placed on the combo link as the link |
 | `disabled` | `boolean` | No | Determines whether to disable the ComboLink and make it un-click-able |
 | `preventMenuOverflow` | `an object variable` | Yes | - |
@@ -32,10 +31,7 @@ import { ComboLink } from '@ids-ts/combo-link';
 | `onClick` | `(event: ReactComboLinkEvent) => void` | No | Function which will be called when the link section of ComboLink is clicked |
 | `onSelect` | `(event: ReactComboLinkEvent) => void` | No | Function which will be called when a menu item is selected |
 | `menuPositionStyle` | `React.CSSProperties` | No | The optional styles applied to the position node wrapped around the root node. |
-| `size` | `standard or mini
-   *
-   * @default 'standard'
-...` | Yes | - |
+| `size` | `'standard' \| 'mini'` | No | Size variant. Defaults to `'standard'`. |
 | `displayMenuOnLinkClick` | `boolean` | No | - |
 | `badgeType` | `BadgeProps['status']` | No | badge type to display badge with combolink |
 | `preventMenuSelect` | `boolean` | No | - |

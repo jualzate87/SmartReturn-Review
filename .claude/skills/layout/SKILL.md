@@ -8,6 +8,10 @@ model: inherit
 
 Generate an IDS layout: $ARGUMENTS
 
+## Before Starting
+
+Confirm the layout type and ask: "Should this be a new page, or replace the current one?" If a new page, ask what to call it. Don't write any code until confirmed.
+
 ## 1. Read the Layout Templates
 Read `.claude/skills/layout/templates/layouts.md` for available layout patterns and their implementations.
 
@@ -38,7 +42,12 @@ Determine which IDS components are needed for the layout. Common ones:
 Read each component's rule file at `.cursor/rules/components/<name>.mdc`.
 
 ## 5. Build the Layout
-Write the layout to `src/App.tsx` and `src/styles/App.module.css`.
+
+**If replacing the current page:** Write to the existing page file and CSS module.
+
+**If creating a new page:** Create `src/pages/[Name].tsx` and `src/styles/[Name].module.css`, then add to `PAGES` in `App.tsx`.
+
+Write the layout with these rules:
 - Use CSS Grid or Flexbox for the layout structure
 - Use design tokens for all spacing, colors, and sizing
 - Make it responsive (mobile-first with tablet and desktop breakpoints)
@@ -57,3 +66,11 @@ Describe the layout structure and offer to customize it (swap sections, adjust p
 4. CSS Grid/Flexbox for layout — no absolute positioning
 5. Responsive at 320px, 768px, 1200px
 6. Semantic HTML structure (header, nav, main, aside, footer)
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.
+
+Common scenarios:
+- **Layout type unclear** — describe what each option would look like and ask which fits best
+- **A needed IDS navigation/panel component has unexpected behavior** — show the designer what you can achieve and ask if it's close enough or if they'd prefer a different approach

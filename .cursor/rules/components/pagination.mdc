@@ -33,8 +33,7 @@ import { Pagination } from '@ids-ts/pagination';
 | `allowNextWhenLoading` | `boolean` | No | when true, allows the next button to remain enabled when in loading mode (isLoadingTotals === true) |
 | `showBoundaryControls` | `boolean` | No | when true, shows the first and last buttons |
 | `preventPageJump` | `boolean` | No | when true, prevents the ability to jump to a specific page |
-| `labels` | `{
-    /** label for the 'Page' word, ex: Page 1...` | No | Labels for i18n related to pagination |
+| `labels` | `{ page?: string; of?: string; items?: string }` | No | Labels for i18n (e.g., `'Page'`, `'of'`, `'items'`). |
 | `fullSummaryContent` | `string` | No | - |
 | `of` | `string` | No | label for the 'of' word, ex: Page 1 of 5 or 1-50 of 600 items |
 | `summaryItems` | `string` | No | label applied to summary section as kind of data, ex: 1 of 5 items |

@@ -18,6 +18,18 @@ yarn add @ids-ts/point-of-need
 import { PointOfNeed } from '@ids-ts/point-of-need';
 ```
 
+## Props
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `message` | `string` | Yes | Tooltip message content. |
+| `position` | `'left' \| 'right' \| 'top' \| 'bottom'` | No | Tooltip position relative to the icon. |
+| `alignment` | `string` | No | Alignment of the tooltip. |
+| `enableClickAway` | `boolean` | No | Closes tooltip on outside click when true. |
+| `duration` | `number` | No | Auto-close duration in ms (0 = no auto-close). |
+| `delayOpen` | `boolean` | No | Delays tooltip opening. |
+| `delayOpenDuration` | `number` | No | Delay duration in ms when `delayOpen` is true. |
+
 ## Token Usage
 
 ### Color

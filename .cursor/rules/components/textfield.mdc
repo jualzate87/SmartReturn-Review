@@ -44,10 +44,7 @@ import { TextField } from '@ids-ts/text-field';
 | `onBlur` | `FocusEventHandler` | No | Callback fired when the input loses focus (blurs) |
 | `onFocus` | `FocusEventHandler` | No | Callback fired when the input receives focus |
 | `placeholder` | `string` | No | Placeholder label displayed in the field |
-| `as` | `text, tel, number)
-   *
-   * @default 'text'
-  ...` | Yes | - |
+| `type` | `'text' \| 'tel' \| 'number' \| 'email' \| 'password'` | No | Input type. Defaults to `'text'`. |
 | `validationError` | `boolean` | No | - |
 | `value` | `number | string` | No | Input value |
 | `warningText` | `string` | No | Warning message to be rendered |

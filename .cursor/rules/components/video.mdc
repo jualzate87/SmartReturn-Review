@@ -29,8 +29,7 @@ import { Video } from '@ids-ts/video';
 | `restoreAriaLabel` | `string` | No | Label for screen readers for the restore button |
 | `titleText` | `string` | No | Optional title string that overrides the YouTube |
 | `url` | `string` | Yes | The YouTube embed URL of the video to play |
-| `onCloseVideo` | `(
-    event: React.MouseEvent<HTMLElement> | Re...` | Yes | Callback function that fires when the X icon is clicked |
+| `onCloseVideo` | `(event: React.MouseEvent<HTMLElement> \| React.KeyboardEvent) => void` | Yes | Called when the X icon is clicked to close the video. |
 
 <details>
 <summary>Full TypeScript Interface</summary>

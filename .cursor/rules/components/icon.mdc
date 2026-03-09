@@ -22,6 +22,16 @@ yarn add @ids-ts/icon
 import { Icon } from '@ids-ts/icon';
 ```
 
+## Props
+
+> **Deprecated** — Use `@design-systems/icons` instead.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `name` | `string` | Yes | Icon name from the IDS icon set. |
+| `size` | `'small' \| 'medium' \| 'large'` | No | Icon size. |
+| `color` | `string` | No | Icon color override. |
+
 ## Token Usage
 
 ### Color

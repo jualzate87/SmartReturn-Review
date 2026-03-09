@@ -41,3 +41,12 @@ Ask if the designer wants this icon added to their current prototype in `src/App
 - Only use icons from `@design-systems/icons` — never inline SVGs or third-party icon packs
 - Always read `.cursor/rules/icons.mdc` before suggesting icons — don't guess at icon names
 - Show the import statement so the designer can see the correct package
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.
+
+Common scenarios:
+- **No icon closely matches the description** — show the 3-5 nearest alternatives and explain the semantic difference between them
+- **Icon name is ambiguous** — present all plausible matches (e.g., "Close" vs "X" vs "Cancel") and let the designer choose
+- **Designer wants to add the icon but the prototype target isn't clear** — ask which page and which element the icon should be placed on

@@ -112,7 +112,7 @@ Parse inline styles to extract all design token values:
 
 When receiving a Figma export, output:
 
-
+```markdown
 ## Figma Export Analysis
 
 ### IDS Components Detected:

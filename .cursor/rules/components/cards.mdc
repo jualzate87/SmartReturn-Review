@@ -16,6 +16,25 @@ yarn add @ids-ts/cards
 import { Cards } from '@ids-ts/cards';
 ```
 
+## Props
+
+### Card
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `size` | `'standard' \| 'small' \| 'xsmall'` | No | Card size variant. Defaults to `'standard'`. |
+| `onClick` | `MouseEventHandler` | No | Click handler for the card. |
+| `disableCardClick` | `boolean` | No | When true, disables the card click interaction. |
+| `automationId` | `string` | No | Test automation identifier. |
+| `style` | `CSSProperties` | No | Inline style overrides. |
+
+### Sub-components
+
+- `CardContent` — Wraps the main card content
+- `CardActions` — Footer area for buttons and links
+- `CardUpperControl` — Top-right control area (CloseIconControl, EditIconControl, etc.)
+- `CardProgressBarIndicator` — Progress bar at the bottom of a card
+
 ## Token Usage
 
 ### Color

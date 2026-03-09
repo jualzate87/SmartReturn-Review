@@ -50,8 +50,7 @@ import { DropdownTypeahead } from '@ids-ts/dropdown-typeahead';
 | `preventMenuOverflow` | `an object variable` | Yes | - |
 | `preventMenuOverflow` | `PreventOverflow` | No | - |
 | `readOnly` | `boolean` | No | * To set the component to "readonly" mode. Input will not be accepted but still focusable for a11y. The dropdown menu will be disabled. |
-| `renderItem` | `(
-    data: DropdownTypeaheadStateProps & Recor...` | Yes | - |
+| `renderItem` | `(data: DropdownTypeaheadStateProps & Record<string, any>) => ReactNode` | No | Custom item renderer for dropdown options. |
 | `selectTextOnFocus` | `boolean` | No | - |
 | `showCheckmark` | `boolean` | No | - |
 | `size` | `TextFieldProps['size']` | No | Size to render the TextField at |
@@ -106,8 +105,7 @@ import { DropdownTypeahead } from '@ids-ts/dropdown-typeahead';
 | `preventMenuOverflow` | `an object variable` | Yes | - |
 | `preventMenuOverflow` | `PreventOverflow` | No | - |
 | `readOnly` | `boolean` | No | * To set the component to "readonly" mode. Input will not be accepted but still focusable for a11y. The dropdown menu will be disabled. |
-| `renderItem` | `(
-    data: DropdownTypeaheadStateProps & Recor...` | Yes | - |
+| `renderItem` | `(data: DropdownTypeaheadStateProps & Record<string, any>) => ReactNode` | No | Custom item renderer for dropdown options. |
 | `selectTextOnFocus` | `boolean` | No | - |
 | `showCheckmark` | `boolean` | No | - |
 | `size` | `TextFieldProps['size']` | No | Size to render the TextField at |

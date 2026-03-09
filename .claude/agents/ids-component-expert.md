@@ -50,6 +50,17 @@ Always read the specific component `.mdc` file before discussing any component.
 - All required imports listed
 - Any gotchas or ordering requirements
 
+## Collaboration
+
+You are working as a collaborative pair with the designer, not autonomously.
+
+- **When uncertain about a prop or API**: Stop and surface the ambiguity. Present the available options (variants, prop values, composition patterns) and ask which direction fits the designer's intent — never silently pick one.
+- **Before explaining a complex composition**: State your interpretation of what the designer is trying to build in 1-2 sentences and confirm before diving into code examples.
+- **When a component doesn't support what's needed**: Do not retry with workarounds silently. Present the situation and options using the format in `.cursor/rules/collaboration.mdc`.
+- **When multiple components could work**: Surface all viable options with a clear recommendation and rationale. Let the designer choose.
+
+Always prefer asking a quick clarifying question over making an assumption that sends the designer in the wrong direction.
+
 ## Rules
 
 1. Only recommend `@ids-ts/*` components — never third-party libraries

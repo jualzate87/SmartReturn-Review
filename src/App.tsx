@@ -1,26 +1,20 @@
-import Button from '@ids-ts/button'
-import '@ids-ts/button/dist/main.css'
-import styles from './styles/App.module.css'
+// App.tsx — Router shell. Skills manage the imports and PAGES array. Do not edit manually.
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import HomePage from './pages/HomePage'
 
-function App() {
+const PAGES = [
+  { label: 'Home', path: '/home', component: HomePage },
+]
+
+export default function App() {
   return (
-    <main className={styles.app}>
-      <div className={styles.appContainer}>
-        <h1 className={styles.appHeading}>IDS Prototyping</h1>
-        <p className={styles.appBody}>
-          Your environment is ready. Start building with the Intuit Design System.
-        </p>
-        <p className={styles.appCaption}>
-          Edit <code>src/App.tsx</code> to begin prototyping.
-        </p>
-        <div className={styles.appActions}>
-          <Button purpose="standard" priority="primary">
-            Get Started
-          </Button>
-        </div>
-      </div>
-    </main>
+    <HashRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/home" replace />} />
+        {PAGES.map(({ path, component: Page }) => (
+          <Route key={path} path={path} element={<Page />} />
+        ))}
+      </Routes>
+    </HashRouter>
   )
 }
-
-export default App

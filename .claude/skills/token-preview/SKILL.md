@@ -8,6 +8,10 @@ model: inherit
 
 Render a visual token preview: $ARGUMENTS
 
+## Before Starting
+
+If no token category is specified in `$ARGUMENTS`, ask: "Which token category do you want to preview — colors, spacing, typography, elevation, radius, or all?" Wait for the answer before proceeding.
+
 1. **Determine the category** from `$ARGUMENTS`:
    - "colors" or "color" → color token swatches
    - "spacing" or "space" → spacing scale visualization
@@ -44,3 +48,18 @@ Rules:
 - Group tokens by category with clear headings
 - Keep the layout clean and scannable
 - Always auto-save before overwriting the prototype
+
+## Evaluation Criteria
+1. All token values sourced from the actual token rule files — never guessed
+2. Every displayed token uses `var(--token-name)` CSS variable syntax
+3. Token categories clearly labeled
+4. Output is visually scannable — grouped by category, not a flat list
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.
+
+Common scenarios:
+- **Token file for the requested category doesn't exist** — check `.cursor/rules/tokens/` for what's available and offer the closest match
+- **Auto-save fails before overwriting** — stop and warn the designer; do not overwrite the prototype until the snapshot is confirmed
+- **Token values don't render visibly** — check that `src/styles/intuit.css` is loaded and that the correct `var(--token-name)` syntax is used

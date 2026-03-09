@@ -8,6 +8,10 @@ model: inherit
 
 Build an IDS form with these fields: $ARGUMENTS
 
+## Before Starting
+
+Ask: "Should this form go on a new page, or would you like it added to an existing one?" If a new page, ask what to name it. Wait for the answer before proceeding.
+
 ## 1. Read the Form Patterns
 Read `.claude/skills/form/templates/form-patterns.md` for field type mapping and validation patterns.
 
@@ -35,7 +39,12 @@ For each field the user listed, determine:
 Use the field type mapping from `form-patterns.md`.
 
 ## 4. Build the Form
-Write the form to `src/App.tsx` and `src/styles/App.module.css`.
+**If adding to an existing page:** Write to that page file and its matching CSS module.
+
+**If creating a new page:**
+1. Create `src/pages/[Name].tsx`
+2. Create `src/styles/[Name].module.css`
+3. Add the import and entry to `PAGES` in `src/App.tsx`
 
 Include:
 - Proper `<form>` element with `onSubmit` handler
@@ -63,3 +72,12 @@ List the fields created, their types, and validation rules. Offer to:
 5. Validation messages use `@ids-ts/inline-validation-message`
 6. Form is inside a `<form>` element
 7. Responsive layout
+
+## On Error
+
+Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.
+
+Common scenarios:
+- **Field type is ambiguous** — ask the designer what kind of input is needed (e.g., "Is 'phone' a text field or a formatted number input?") before building
+- **A required package isn't installed** — run `yarn add @ids-ts/<package>` for each missing component before writing code
+- **Form layout conflicts with the existing page** — describe the conflict and ask if they want to restructure or place the form on a new page

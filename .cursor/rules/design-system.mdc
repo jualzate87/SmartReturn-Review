@@ -37,13 +37,20 @@ alwaysApply: true
 
 ```
 src/
-├── App.tsx                 (main component, use inline JSX)
+├── App.tsx                 (router shell — skills manage this, don't edit directly)
+├── pages/
+│   ├── HomePage.tsx        (default page — prototype starts here)
+│   └── [Name].tsx          (additional pages created by skills)
 ├── styles/
-│   ├── App.module.css      (all styling for App, CSS Modules)
-│   ├── index.css           (global styles)
-│   ├── fonts.css           (font imports)
-│   └── intuit.css          (IDS design tokens, synced from DDMS CDN)
+│   ├── App.module.css      (shell-level styles only)
+│   ├── HomePage.module.css (home page styles)
+│   ├── [Name].module.css   (per-page styles, one file per page)
+│   ├── index.css           (global styles, don't edit)
+│   ├── fonts.css           (font imports, don't edit)
+│   └── intuit.css          (IDS design tokens, synced from DDMS CDN, don't edit)
 ```
+
+Pages use React Router v6 (HashRouter). Each page is a standalone component at `src/pages/[Name].tsx` with its own CSS module. See `routing` rule for full details on adding pages.
 
 ## Components
 
@@ -133,7 +140,8 @@ src/
 ### Good Example - Using Design System Components
 
 ```tsx
-import styles from './styles/App.module.css'
+// Page component — import path is relative from src/pages/
+import styles from '../styles/[Name].module.css'
 
 function App() {
   return (

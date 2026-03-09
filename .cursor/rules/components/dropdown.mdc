@@ -42,11 +42,8 @@ import { Dropdown } from '@ids-ts/dropdown';
 | `multiselect` | `boolean` | No | Enable Multi Select dropdown if true. |
 | `name` | `string` | No | Name to be assigned to the input field. |
 | `onBlur` | `(e: FocusEvent, infoObject?: OnEventInfoType) =...` | No | Callback function to be executed on blur event. |
-| `onChange` | `(
-    e: KeyboardEvent | MouseEvent,
-    infoOb...` | No | Callback function to be executed on change, receives 2 params: event object and value. |
-| `type` | `'clickAway' }
-   * when clicked away from the f...` | Yes | - |
+| `onChange` | `(e: KeyboardEvent \| MouseEvent, infoObject?: object) => void` | No | Callback on change, receives event and value info. |
+| `onClose` | `(type: 'clickAway' \| 'select') => void` | No | Called when the dropdown closes, with close reason. |
 | `onOpen` | `() => void` | No | Callback function to be executed on dropdown open event. |
 | `onClick` | `(e: MouseEvent) => void` | No | - |
 | `preventMenuOverflow` | `an object variable` | Yes | - |
@@ -58,22 +55,16 @@ import { Dropdown } from '@ids-ts/dropdown';
 | `value` | `string | number | (string | number)[]` | No | Selected value. |
 | `warningText` | `string` | No | warning message to be rendered. |
 | `stylePosition` | `CSSProperties` | No | The optional styles applied to the position node wrapped around the root node. |
-| `positions` | `top, bottom
-   * horizontal positions: left, ri...` | Yes | - |
-| `alignments` | `top, bottom, middle
-   * horizontal alignments:...` | Yes | - |
-| `offsetSkidding` | `the cross-axis pixel distance that the popup sh...` | Yes | - |
-| `offsetDistance` | `the main-axis pixel distance that the popup sho...` | Yes | - |
-| `width` | `width of the dropdown
-   *
-   * @default 'fit-c...` | Yes | - |
-| `size` | `choose whether to render with small (14px) or m...` | Yes | - |
+| `positions` | `string[]` | No | Vertical positions: `'top'`, `'bottom'`. |
+| `alignments` | `string[]` | No | Alignment of the dropdown menu relative to the trigger. |
+| `offsetSkidding` | `number` | No | Cross-axis pixel offset of the popup. |
+| `offsetDistance` | `number` | No | Main-axis pixel offset of the popup. |
+| `width` | `string \| number` | No | Width of the dropdown. Defaults to `'fit-content'`. |
+| `size` | `'small' \| 'medium'` | No | Font size variant: `'small'` (14px) or `'medium'` (16px). |
 | `positionDependencies` | `unknown[]` | No | - |
-| `controlled` | `when true, the component will not manage its ow...` | Yes | - |
+| `controlled` | `boolean` | No | When true, component won't manage its own open state. |
 | `selectedItem` | `ReactEventRelatedTarget | ReactFocusEventRelate...` | No | A selected item |
-| `target` | `{
-    /** ReactEventRelatedTarget */
-    e?: Re...` | No | Index of highlighted item in Menu |
+| `target` | `{ e?: ReactEventRelatedTarget }` | No | Index of highlighted item in Menu. |
 | `name` | `string` | No | name |
 
 <details>
