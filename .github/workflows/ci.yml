@@ -1,14 +1,8 @@
 # CI workflow for IDS Prototyping Environment
 #
-# REQUIRED SETUP:
-#   This workflow requires the NPM_INTUIT_TOKEN secret to be configured in
-#   your GitHub repository settings (Settings > Secrets and variables > Actions).
-#
-#   The token should be a valid auth token for Intuit's private npm registry
-#   at registry.npmjs.intuit.com. This is required because @ids-ts/* and
-#   @genux-ds/* packages are hosted on that private registry.
-#
-#   Without this token, yarn install will fail to resolve private packages.
+# Registry auth for @ids-ts/* and @genux-ds/* packages is handled via
+# .yarnrc.yml scopes pointing to registry.npmjs.intuit.com.
+# Configure IDPS credentials as needed for your environment.
 
 name: CI
 
@@ -19,7 +13,11 @@ on:
     branches: [main]
 
 jobs:
+  validation:
+    uses: actions-intuit/ibp-wf/.github/workflows/validation.yml@v1
+
   build-and-test:
+    needs: validation
     runs-on: ubuntu-latest
 
     steps:
@@ -41,13 +39,6 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-
-      # Configure auth tokens for Intuit's private npm registry.
-      # All @ids-ts/*, @genux-ds/*, @design-systems/*, @sbg/*, @cgds/*,
-      # @design-tokens/*, @appfabric/*, and @qbds/* scopes require this.
-      - name: Configure private registry auth
-        run: |
-          yarn config set 'npmRegistries["https://registry.npmjs.intuit.com"].npmAuthToken' "${{ secrets.NPM_INTUIT_TOKEN }}"
 
       - name: Install dependencies
         run: yarn install --immutable
