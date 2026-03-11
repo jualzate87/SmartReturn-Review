@@ -2,28 +2,42 @@
 description: Reset the prototype to a clean starting point (multi-page architecture)
 ---
 
-Reset the prototype to a clean starting point.
+Reset the prototype to the pre-onboarding state — the same state a fresh clone has before the user picks any frameworks.
 
 ## Step 1 — Confirm Before Destroying
 
 **Always ask for confirmation first.** Say exactly this to the designer:
 
-> "This will delete all pages and styles and cannot be undone. Do you want to continue?"
+> "This will reset the prototype back to the onboarding flow and cannot be undone. Any pages, components, or scaffolding you've added will be removed. Do you want to continue?"
 
 Wait for an explicit "yes" or "continue" before proceeding. If the designer says no or is unsure, stop and do not make any changes.
 
-## Step 2 — Reset App.tsx
+## Step 2 — Run Unscaffold Scripts
 
-Replace the entire contents of `src/App.tsx` with the router shell containing only HomePage:
+Run both unscaffold scripts to cleanly reverse any scaffolding. These are idempotent — safe to run even if the scaffold was never applied.
+
+```bash
+yarn unscaffold:appshell && yarn unscaffold:genux
+```
+
+This removes AppShell components, contexts, navigation, assets, GenUX pages/styles, and restores App.tsx from backup if one exists.
+
+## Step 3 — Restore App.tsx to the Base Version with Onboarding
+
+After unscaffolding, replace `src/App.tsx` with the standard base version that includes onboarding. This is the canonical pre-scaffold App.tsx:
 
 ```tsx
 // App.tsx — Router shell. Skills manage the imports and PAGES array. Do not edit manually.
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import ErrorBoundary from './ErrorBoundary'
 import HomePage from './pages/HomePage'
+import OnboardingPage from './pages/OnboardingPage'
+import WorkspacePage from './pages/WorkspacePage'
 
 const PAGES = [
   { label: 'Home', path: '/home', component: HomePage },
+  { label: 'Onboarding', path: '/onboarding', component: OnboardingPage },
+  { label: 'Workspace', path: '/workspace', component: WorkspacePage },
 ]
 
 export default function App() {
@@ -31,7 +45,7 @@ export default function App() {
     <ErrorBoundary>
       <HashRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/" element={<Navigate to="/onboarding" replace />} />
           {PAGES.map(({ path, component: Page }) => (
             <Route key={path} path={path} element={<Page />} />
           ))}
@@ -42,87 +56,39 @@ export default function App() {
 }
 ```
 
-## Step 3 — Reset HomePage.tsx
+## Step 4 — Delete Prototype Pages and Styles
 
-Replace the entire contents of `src/pages/HomePage.tsx` with the clean starting state:
+Delete all files in `src/pages/` **except** these core files:
 
-```tsx
-import { H2, B1, B2, B3 } from '@ids-ts/typography'
-import '@ids-ts/typography/dist/main.css'
-import { Card, CardContent } from '@ids-ts/cards'
-import '@ids-ts/cards/dist/main.css'
-import styles from '../styles/HomePage.module.css'
+- `HomePage.tsx`
+- `OnboardingPage.tsx`
+- `WorkspacePage.tsx`
 
-export default function HomePage() {
-  return (
-    <div className={styles.page}>
-      <div className={styles.hero}>
-        <H2>Ready to prototype.</H2>
-        <B1>Describe what you want to build and Claude will create it using real IDS components and design tokens.</B1>
-      </div>
-      <div className={styles.grid}>
-        <Card size="standard">
-          <CardContent>
-            <B2 weight="demi">Build from a description</B2>
-            <B3>Type /prototype followed by what you want to build.</B3>
-          </CardContent>
-        </Card>
-        <Card size="standard">
-          <CardContent>
-            <B2 weight="demi">Build from Figma</B2>
-            <B3>Type /figma with a Figma URL or pasted design data.</B3>
-          </CardContent>
-        </Card>
-        <Card size="standard">
-          <CardContent>
-            <B2 weight="demi">Start with a layout</B2>
-            <B3>Type /layout followed by the type: sidebar, dashboard, split-view, or centered.</B3>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
-}
+Delete all `*.module.css` files in `src/styles/` **except** these core files:
+
+- `App.module.css`
+- `HomePage.module.css`
+- `OnboardingPage.module.css`
+- `WorkspacePage.module.css`
+
+Use the Glob tool to find the files, then delete them individually. Do **not** delete `ErrorBoundary.tsx`, `main.tsx`, `vite-env.d.ts`, `config.ts`, `index.css`, `fonts.css`, or `intuit.css`.
+
+Also remove the `App.original.tsx` backup file if it still exists:
+
+```bash
+rm -f src/App.original.tsx
 ```
 
-## Step 4 — Reset HomePage.module.css
+## Step 5 — Clear localStorage Config
 
-Replace the entire contents of `src/styles/HomePage.module.css` with the clean starting styles:
+Tell the designer:
 
-```css
-.page {
-  min-height: 100vh;
-  padding: var(--space-800);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-600);
-}
-
-.hero {
-  max-width: 640px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-200);
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: var(--space-400);
-  max-width: 900px;
-}
-```
-
-## Step 5 — Delete All Other Page and Style Files
-
-Run these two bash commands to delete all page files except HomePage.tsx, and all module CSS files except HomePage.module.css:
-
-Delete all files in `src/pages/` except `HomePage.tsx`, and all `*.module.css` files in `src/styles/` except `HomePage.module.css` and `App.module.css`. Use the Glob tool to find the files, then delete them individually. Do **not** delete `ErrorBoundary.tsx`, `main.tsx`, `vite-env.d.ts`, `index.css`, `fonts.css`, or `intuit.css`.
+> "To fully reset, open your browser's developer console and run: `localStorage.removeItem('ids-prototype-config')` — or just refresh the page and the onboarding flow will appear."
 
 ## Step 6 — Confirm Reset Complete
 
 Tell the designer:
 
-> "Reset complete. You're starting fresh with a clean prototype environment."
+> "Reset complete! Refresh your browser to see the onboarding flow. From there you can pick a theme, select AppShell or GenUX, and start fresh."
 
-Then remind them of the next steps: `/prototype` to build from a description, `/figma` to build from a Figma design, or `/layout` to start with a layout structure.
+Then remind them: use `/prototype` to build from a description, `/figma` to build from a Figma design, or `/layout` to start with a layout structure.

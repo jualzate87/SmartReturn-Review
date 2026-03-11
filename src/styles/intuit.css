@@ -1,5 +1,5 @@
-/* IDS Design Tokens - synced from DDMS CDN v25.32.0 */
-/* Run "npm run sync-tokens" or "npm run sync-tokens <version>" to update */
+/* IDS Design Tokens (intuit) - synced from DDMS CDN v25.32.0 */
+/* Run "npm run sync-tokens" to update */
 
 :root, [data-theme="intuit"] {
   --color-action-complementary: #6B6C72;

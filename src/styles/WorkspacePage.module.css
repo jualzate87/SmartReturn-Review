@@ -69,3 +69,14 @@
 .cardTitle {
   color: var(--color-text-accent);
 }
+
+.configBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-component-gap-medium);
+  margin-top: var(--space-row-gap-x-small);
+}
+
+.configText {
+  color: var(--color-text-secondary);
+}
