@@ -28,14 +28,13 @@ const THEMES = {
   gbsgexperimental: 'gbsgexperimental.css',
 };
 
-async function fetchTheme(version, themeName) {
+async function fetchThemeCSS(version, themeName) {
   const cssFile = THEMES[themeName];
   if (!cssFile) {
     throw new Error(`Unknown theme "${themeName}". Available: ${Object.keys(THEMES).join(', ')}`);
   }
 
   const url = `${BASE_URL}/${version}/css/${cssFile}`;
-  const outputPath = resolve(STYLES_DIR, cssFile);
 
   console.log(`  Fetching ${themeName} tokens...`);
   console.log(`    ${url}`);
@@ -46,39 +45,45 @@ async function fetchTheme(version, themeName) {
     throw new Error(`HTTP ${response.status}: ${response.statusText} for ${themeName}`);
   }
 
-  const css = await response.text();
+  let css = await response.text();
 
-  mkdirSync(dirname(outputPath), { recursive: true });
+  // Strip `:root` from selectors so themes don't collide.
+  // The CDN ships some files with `:root, [data-theme="..."]` which causes
+  // those tokens to always win. Removing `:root` ensures only the active
+  // theme's [data-theme] selector applies.
+  const selector = `[data-theme="${themeName}"]`;
+  css = css.replaceAll(`:root, ${selector}`, selector);
 
-  const header = `/* IDS Design Tokens (${themeName}) - synced from DDMS CDN v${version} */\n/* Run "npm run sync-tokens" to update */\n\n`;
-  writeFileSync(outputPath, header + css, 'utf-8');
-
-  console.log(`    Written to src/styles/${cssFile} (${(css.length / 1024).toFixed(1)} KB)`);
+  return css;
 }
 
 async function syncTokens() {
   const args = process.argv.slice(2);
-  const fetchAll = args.includes('--all');
   const positionalArgs = args.filter(a => !a.startsWith('--'));
-
   const version = positionalArgs[0] || DEFAULT_VERSION;
-  const themeName = positionalArgs[1] || 'intuit';
 
   console.log(`Fetching IDS tokens v${version} from DDMS CDN...`);
 
+  const outputPath = resolve(STYLES_DIR, 'intuit.css');
+  const chunks = [];
+
   try {
-    if (fetchAll) {
-      for (const name of Object.keys(THEMES)) {
-        try {
-          await fetchTheme(version, name);
-        } catch (err) {
-          console.warn(`    Warning: Could not fetch ${name} (${err.message}). Skipping.`);
-        }
+    for (const name of Object.keys(THEMES)) {
+      try {
+        const css = await fetchThemeCSS(version, name);
+        chunks.push(`/* --- ${name} --- */\n${css}`);
+      } catch (err) {
+        console.warn(`    Warning: Could not fetch ${name} (${err.message}). Skipping.`);
       }
-    } else {
-      await fetchTheme(version, themeName);
     }
 
+    mkdirSync(dirname(outputPath), { recursive: true });
+
+    const header = `/* IDS Design Tokens (all themes) - synced from DDMS CDN v${version} */\n/* Run "npm run sync-tokens" to update */\n\n`;
+    const combined = header + chunks.join('\n\n');
+    writeFileSync(outputPath, combined, 'utf-8');
+
+    console.log(`    Written to src/styles/intuit.css (${(combined.length / 1024).toFixed(1)} KB)`);
     console.log('Done.');
   } catch (error) {
     if (process.env.npm_lifecycle_event === 'postinstall') {

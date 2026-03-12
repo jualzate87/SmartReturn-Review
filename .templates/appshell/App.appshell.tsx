@@ -7,6 +7,7 @@ import { FUSION_CONFIG } from './navigation'
 import OnboardingPage from './pages/OnboardingPage'
 import WorkspacePage from './pages/WorkspacePage'
 import HomePage from './pages/HomePage'
+import NotFoundPage from './pages/NotFoundPage'
 
 function AppLayout() {
   return (
@@ -15,6 +16,11 @@ function AppLayout() {
     </FusionShell>
   )
 }
+
+// APP_PAGES — add new app page routes here (managed by /page skill)
+const APP_PAGES: { path: string; component: React.ComponentType }[] = [
+  // Example: { path: 'accounting/bank-transactions', component: BankTransactionsPage },
+]
 
 export default function App() {
   return (
@@ -27,7 +33,11 @@ export default function App() {
               <Route path="/" element={<Navigate to="/home" replace />} />
               <Route path="/home" element={<HomePage />} />
               <Route path="/workspace" element={<WorkspacePage />} />
-              <Route path="*" element={<WorkspacePage />} />
+              {APP_PAGES.map(({ path, component: Page }) => (
+                <Route key={path} path={`/app/${path}`} element={<Page />} />
+              ))}
+              <Route path="/app/*" element={<NotFoundPage />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>
         </FusionProvider>

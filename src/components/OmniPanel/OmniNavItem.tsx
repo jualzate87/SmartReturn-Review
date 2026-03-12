@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import styles from './FusionOmniNav.module.css'
 import AnimatedBrand from '@genux-ds/animated-brand'
+// eslint-disable-next-line no-restricted-imports
 import cx from 'classnames'
 import { B3 } from '@ids-ts/typography'
 import '@ids-ts/typography/dist/main.css'

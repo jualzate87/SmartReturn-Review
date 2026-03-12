@@ -12,59 +12,133 @@ This prototyping environment uses React Router v6 with HashRouter. Pages are acc
 - `src/App.tsx` is the router shell — skills manage it, designers don't edit it directly
 - Each page lives in `src/pages/[Name].tsx`
 - Each page has its own stylesheet at `src/styles/[Name].module.css`
-- The `PAGES` array in `App.tsx` is the single source of truth for registered routes
+- Routes are defined in `App.tsx` — either in the `APP_PAGES` array (for app pages) or as standalone `<Route>` elements (for shell-level pages like onboarding)
 
-## Adding a New Page
+## Two Types of Pages
 
-When creating a new page, do all four of these things in order:
+### Shell Pages (top-level)
+Pages outside the app navigation: `/home`, `/workspace`, `/onboarding`. These are defined as standalone `<Route>` elements in `App.tsx`.
 
-1. Create `src/pages/[Name].tsx` — the page component
-2. Create `src/styles/[Name].module.css` — the page stylesheet
-3. Add an import to `App.tsx`: `import [Name] from './pages/[Name]'`
-4. Add an entry to the `PAGES` array in `App.tsx`: `{ label: '[Label]', path: '/[path]', component: [Name] }`
+### App Pages (within AppShell navigation)
+Pages accessed through the SubNav sidebar: `/app/accounting/bank-transactions`, `/app/sales-payments/invoices`, etc. These are registered in the `APP_PAGES` array in `App.tsx` and render inside the FusionShell layout.
 
-After creating a page, always tell the designer: "Your new page is at `http://localhost:5174/#/[path]`"
+Any unmatched `/app/*` path renders a `NotFoundPage` placeholder that tells the designer how to create the page.
+
+## Adding a New App Page
+
+When a designer asks to create a page for a SubNav item (e.g., "build the Bank Transactions page"), do all four of these things in order:
+
+1. Create `src/pages/[Name]Page.tsx` — the page component
+2. Create `src/styles/[Name]Page.module.css` — the page stylesheet
+3. Add an import to `App.tsx`: `import [Name]Page from './pages/[Name]Page'`
+4. Add an entry to `APP_PAGES` in `App.tsx`: `{ path: 'section/page-name', component: [Name]Page }`
+
+The `path` value in `APP_PAGES` is relative to `/app/` — so `'accounting/bank-transactions'` maps to the URL `/app/accounting/bank-transactions`.
+
+After creating a page, always tell the designer: "Your new page is at `http://localhost:5174/#/app/[section]/[page-name]`"
+
+### App Page Path Convention
+
+App paths follow the SubNav structure defined in `src/components/FusionShell/SubNav.tsx`:
+
+```
+/app/accounting/bank-transactions
+/app/accounting/chart-of-accounts
+/app/sales-payments/invoices
+/app/expenses-bills/vendors
+/app/customer-hub/customers
+/app/team/employees
+/app/time/time-entries
+/app/projects/projects
+/app/inventory/inventory
+/app/business-tax/overview
+/app/lending/overview
+```
+
+When adding a page, match the link path from SubNav. For example, SubNav defines:
+```ts
+{ name: 'Bank Transactions', link: '/accounting/bank-transactions' }
+```
+The corresponding `APP_PAGES` entry would be:
+```ts
+{ path: 'accounting/bank-transactions', component: BankTransactionsPage }
+```
+
+## Adding a New Shell Page
+
+For pages outside the app navigation (rare — most pages should be app pages):
+
+1. Create `src/pages/[Name]Page.tsx` — the page component
+2. Create `src/styles/[Name]Page.module.css` — the page stylesheet
+3. Add an import to `App.tsx`: `import [Name]Page from './pages/[Name]Page'`
+4. Add a `<Route>` element inside the `<Route element={<AppLayout />}>` block in `App.tsx`
 
 ## Page Naming Conventions
 
-- **File names**: PascalCase with "Page" suffix — `SettingsPage.tsx`, `DashboardPage.tsx`
-- **CSS files**: match the page file — `SettingsPage.module.css`
-- **Paths**: lowercase, hyphenated — `/settings`, `/user-profile`
-- **Labels**: title case, short — `Settings`, `User Profile`
+- **File names**: PascalCase with "Page" suffix — `BankTransactionsPage.tsx`, `InvoicesPage.tsx`
+- **CSS files**: match the page file — `BankTransactionsPage.module.css`
+- **App paths**: lowercase, hyphenated, matching SubNav — `accounting/bank-transactions`
+- **Labels**: title case, short — `Bank Transactions`, `Invoices`
 
 ## CSS Import in Page Files
 
 Each page imports its own module CSS using a relative path from `src/pages/`:
 
 ```tsx
-import styles from '../styles/SettingsPage.module.css'
+import styles from '../styles/BankTransactionsPage.module.css'
 ```
 
 Note the `../styles/` prefix — page files live one level deeper than `src/`.
 
-## App.tsx Structure
+## App.tsx Structure (AppShell Mode)
 
 ```tsx
-// App.tsx — Router shell. Skills manage the imports and PAGES array.
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+// App.tsx — AppShell version with FusionShell layout.
+import { HashRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom'
+import ErrorBoundary from './ErrorBoundary'
+import { FusionProvider } from './contexts/fusion'
+import FusionShell from './components/FusionShell'
+import { FUSION_CONFIG } from './navigation'
+import OnboardingPage from './pages/OnboardingPage'
+import WorkspacePage from './pages/WorkspacePage'
 import HomePage from './pages/HomePage'
-import SettingsPage from './pages/SettingsPage'
+import NotFoundPage from './pages/NotFoundPage'
+import BankTransactionsPage from './pages/BankTransactionsPage'
 
-const PAGES = [
-  { label: 'Home', path: '/home', component: HomePage },
-  { label: 'Settings', path: '/settings', component: SettingsPage },
+function AppLayout() {
+  return (
+    <FusionShell businessName={FUSION_CONFIG.businessName}>
+      <Outlet />
+    </FusionShell>
+  )
+}
+
+// APP_PAGES — add new app page routes here (managed by /page skill)
+const APP_PAGES: { path: string; component: React.ComponentType }[] = [
+  { path: 'accounting/bank-transactions', component: BankTransactionsPage },
 ]
 
 export default function App() {
   return (
-    <HashRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/home" replace />} />
-        {PAGES.map(({ path, component: Page }) => (
-          <Route key={path} path={path} element={<Page />} />
-        ))}
-      </Routes>
-    </HashRouter>
+    <ErrorBoundary>
+      <HashRouter>
+        <FusionProvider pathPrefix={FUSION_CONFIG.pathPrefix || ''}>
+          <Routes>
+            <Route path="/onboarding" element={<OnboardingPage />} />
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<Navigate to="/home" replace />} />
+              <Route path="/home" element={<HomePage />} />
+              <Route path="/workspace" element={<WorkspacePage />} />
+              {APP_PAGES.map(({ path, component: Page }) => (
+                <Route key={path} path={`/app/${path}`} element={<Page />} />
+              ))}
+              <Route path="/app/*" element={<NotFoundPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
+          </Routes>
+        </FusionProvider>
+      </HashRouter>
+    </ErrorBoundary>
   )
 }
 ```
@@ -75,7 +149,8 @@ export default function App() {
 src/styles/
 ├── App.module.css          ← Shell-level styles (minimal, for the router shell only)
 ├── HomePage.module.css     ← Home page styles
-├── [Name].module.css       ← Per-page styles
+├── NotFoundPage.module.css ← Not-found placeholder styles
+├── [Name]Page.module.css   ← Per-page styles
 ├── index.css               ← Global styles (do not edit)
 ├── fonts.css               ← Font imports (do not edit)
 └── intuit.css              ← IDS design tokens (do not edit)
@@ -83,51 +158,22 @@ src/styles/
 
 ## Navigation Between Pages
 
-Navigation is part of the prototype, not a meta layer. There is no built-in nav shell — designers choose the right IDS navigation component for their use case and add it directly to their page components.
+The AppShell's SubNav sidebar handles all primary navigation. Clicking a SubNav item navigates to the corresponding `/app/...` path. The SubNav automatically highlights the active section and item based on the current URL.
 
-### Common Patterns
+### Programmatic Navigation
 
-**Tabs navigation** — use `@ids-ts/tabs` with React Router's `useNavigate`:
+Use `useNavigate` from React Router when you need to navigate from within a page component:
 
 ```tsx
-import { useNavigate, useLocation } from 'react-router-dom'
-// In component:
+import { useNavigate } from 'react-router-dom'
+
 const navigate = useNavigate()
-const location = useLocation()
-// Pass to Tabs: activeTab={location.pathname}, onTabChange={(path) => navigate(path)}
-```
-
-**Left sidebar navigation** — use `@ids-ts/left-navigation`:
-
-```tsx
-import { useNavigate, useLocation } from 'react-router-dom'
-// Use location.pathname to set the active item, navigate(path) on item click
-```
-
-**Simple links** — use `@ids-ts/link` with React Router's `Link` component via the `as` prop, or use `useNavigate` in an `onClick` handler on a Button:
-
-```tsx
-import { Link as RouterLink } from 'react-router-dom'
-import Link from '@ids-ts/link'
-import '@ids-ts/link/dist/main.css'
-
-// Option A: as prop
-<Link as={RouterLink} to="/settings">Go to Settings</Link>
-
-// Option B: navigate in onClick
-const navigate = useNavigate()
-<Button purpose="standard" priority="secondary" onClick={() => navigate('/settings')}>
-  Go to Settings
-</Button>
+navigate('/app/accounting/bank-transactions')
 ```
 
 ### Hash-Based URLs
 
-Since the app uses HashRouter, all URLs are hash-based: `/#/page-name`. The `path` values in the `PAGES` array in `App.tsx` are relative (e.g. `'/settings'`) and the router handles the `#` prefix automatically. Link to pages using just the path — no need to add `#` manually.
-
-### Tip for Designers
-
-When a designer asks to "link" two pages or "add navigation", the right component depends on the design. Ask which IDS navigation pattern fits their prototype: tabs, left nav, breadcrumbs, pagination, or step flow. Each has a different use case and visual weight.
+Since the app uses HashRouter, all URLs are hash-based: `/#/app/accounting/bank-transactions`. The `path` values in `APP_PAGES` are relative (e.g. `'accounting/bank-transactions'`) and the router handles the `#` prefix automatically.
 
 ## Snapshot Awareness
 

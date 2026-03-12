@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTheme } from '@design-systems/theme'
 import { D4, H5, B1, B2, B3 } from '@ids-ts/typography'
 import '@ids-ts/typography/dist/main.css'
 import { Button } from '@ids-ts/button'
@@ -15,12 +16,13 @@ import '@ids-ts/step-flow/dist/main.css'
 import { Activity } from '@ids-ts/loader'
 import '@ids-ts/loader/dist/main.css'
 import idsLogo from '../assets/ids-logo.svg'
-import { THEME_OPTIONS, LIBRARY_OPTIONS, saveConfig, applyTheme } from '../config'
+import { THEME_OPTIONS, LIBRARY_OPTIONS, saveConfig } from '../config'
 import type { PrototypeConfig } from '../config'
 import styles from '../styles/OnboardingPage.module.css'
 
 export default function OnboardingPage() {
   const navigate = useNavigate()
+  const { setTheme } = useTheme({})
   const [trowserOpen, setTrowserOpen] = useState(false)
   const [selectedTheme, setSelectedTheme] = useState('intuit')
   const [selectedLibraries, setSelectedLibraries] = useState<string[]>(['ids-core'])
@@ -35,6 +37,11 @@ export default function OnboardingPage() {
     if (!isScaffolding) setTrowserOpen(false)
   }, [isScaffolding])
 
+  function handleThemeSelect(themeId: string) {
+    setSelectedTheme(themeId)
+    setTheme(themeId)
+  }
+
   async function handleFinish() {
     const config: PrototypeConfig = {
       theme: selectedTheme,
@@ -42,9 +49,7 @@ export default function OnboardingPage() {
       completedAt: new Date().toISOString(),
     }
     saveConfig(config)
-    applyTheme(selectedTheme)
 
-    // Determine which libraries need scaffolding
     const librariesToScaffold = selectedLibraries.filter((id) => {
       const lib = LIBRARY_OPTIONS.find((l) => l.id === id)
       return lib && lib.available && !lib.required
@@ -63,7 +68,6 @@ export default function OnboardingPage() {
         if (!data.success) {
           throw new Error(data.error || 'Scaffold failed')
         }
-        // Hard navigation — App.tsx may have been replaced, React router tree is stale
         window.location.href = '/#/workspace'
       } catch (err) {
         setIsScaffolding(false)
@@ -139,11 +143,11 @@ export default function OnboardingPage() {
                     className={`${styles.themeCard} ${
                       selectedTheme === theme.id ? styles.themeCardSelected : ''
                     }`}
-                    onClick={() => setSelectedTheme(theme.id)}
+                    onClick={() => handleThemeSelect(theme.id)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
-                        setSelectedTheme(theme.id)
+                        handleThemeSelect(theme.id)
                       }
                     }}
                   >
