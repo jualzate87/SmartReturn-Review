@@ -33,7 +33,7 @@
   color: var(--color-text-accent);
   background: var(--color-container-background-info-tertiary);
   padding: var(--space-component-stack-padding-x-small) var(--space-component-inline-padding-small);
-  border-radius: var(--radius-20);
+  border-radius: var(--radius-small);
 }
 
 .cardInner {

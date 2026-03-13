@@ -1,7 +1,7 @@
 ---
 name: restore
 description: Restore a previously saved prototype snapshot. Use when the user wants to go back to a saved version.
-argument-hint: "snapshot name to restore"
+argument-hint: 'snapshot name to restore'
 user-invocable: true
 model: inherit
 ---
@@ -59,11 +59,22 @@ Read the restored page files and look for any `@ids-ts/*` imports. Check `packag
 ## 7. Handle Legacy Snapshots
 
 If the snapshot directory has no `pages/` subdirectory (old format with just `App.tsx` and `App.module.css`):
+
 - Restore `App.tsx` to `src/App.tsx`
 - Restore `App.module.css` to `src/styles/App.module.css`
 - Note to the designer: "This was a legacy single-page snapshot."
 
-## 8. Confirm
+## 8. Show What Changed
+
+After the restore is complete, run `git diff --stat` to get a summary of what changed. Present the results to the designer in plain language:
+
+- Say: "Here's what changed since your snapshot: **X files modified**, **Y lines added**, **Z lines removed**."
+- If the diff is small (fewer than 5 files changed), list the specific file names so the designer knows exactly what was affected.
+- If the diff is larger, just provide the summary counts.
+
+This gives the designer visibility into what the restore actually did without requiring them to understand git.
+
+## 9. Confirm
 
 Tell the user:
 
@@ -83,5 +94,6 @@ Tell the user:
 Follow the collaboration protocol in `.cursor/rules/collaboration.mdc`.
 
 Common scenarios:
+
 - **Snapshot is incomplete** — tell the designer what's missing and ask if they want to restore what's available or pick a different snapshot
 - **Package install fails after restore** — offer to continue without the missing package (using a placeholder) or try an alternative component
