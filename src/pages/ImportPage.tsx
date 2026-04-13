@@ -1,15 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Trowser from '@ids-ts/trowser'
 import '@ids-ts/trowser/dist/main.css'
-import StepFlow, { Step } from '@ids-ts/step-flow'
-import '@ids-ts/step-flow/dist/main.css'
+import { SteppedProgress, Step } from '@cgds/stepped-progress'
 import { Button } from '@ids-ts/button'
 import '@ids-ts/button/dist/main.css'
 
-// step index 0 = screen 4 (Upload), 1 = screen 5 (File attached),
-// 2 = screen 6 (Review personal), 3 = screen 7 (Prior year),
-// 4 = screen 8 (Creating - empty), 5 = screen 9 (Creating - active),
-// 6 = screen 10 (Success)
 const STEP_TITLES: Record<number, string> = {
   0: 'Onboard new clients with 1040 import',
   1: 'Onboard new clients with 1040 import',
@@ -20,38 +15,49 @@ const STEP_TITLES: Record<number, string> = {
   6: 'Onboard new clients with 1040 import',
 }
 
-// Maps internal step index to StepFlow activeStepIndex (0-based, 5 visual steps)
-const STEP_FLOW_INDEX: Record<number, number> = {
-  0: 0,
-  1: 0,
-  2: 1,
-  3: 2,
-  4: 5,
-  5: 5,
-  6: 5,
+// Maps internal step (0-6) to SteppedProgress current (1-based)
+const PROGRESS_CURRENT: Record<number, number> = {
+  0: 1,
+  1: 2,
+  2: 2,
+  3: 3,
+  4: 6,
+  5: 6,
+  6: 6,
+}
+
+// completed = array of 1-based step indices that are done
+const PROGRESS_COMPLETED: Record<number, number[]> = {
+  0: [],
+  1: [1],
+  2: [1],
+  3: [1, 2],
+  4: [1, 2, 3, 4, 5],
+  5: [1, 2, 3, 4, 5],
+  6: [1, 2, 3, 4, 5],
 }
 
 export default function ImportPage() {
+  const [trowserOpen, setTrowserOpen] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
 
+  useEffect(() => {
+    setTrowserOpen(true)
+  }, [])
+
   const handleNext = () => {
-    if (currentStep < 6) {
-      setCurrentStep(s => s + 1)
-    }
+    if (currentStep < 6) setCurrentStep(s => s + 1)
   }
 
   const handleClose = () => {
-    setCurrentStep(0)
+    setTrowserOpen(false)
   }
 
-  // Build footer buttons array for Trowser footerButton prop
+  // Footer buttons per step
   const footerButtons: React.ReactElement[] = []
-
   if (currentStep === 6) {
     footerButtons.push(
-      <Button key="view-profile" priority="secondary" onClick={() => {}}>View client profile</Button>
-    )
-    footerButtons.push(
+      <Button key="view-profile" priority="secondary" onClick={() => {}}>View client profile</Button>,
       <Button key="open-return" priority="primary" onClick={() => {}}>Open return</Button>
     )
   } else if (currentStep !== 4) {
@@ -60,45 +66,43 @@ export default function ImportPage() {
     )
   }
 
-  // Cancel shows on steps 2, 3, 5, 6
   const showCancel = [2, 3, 5, 6].includes(currentStep)
-  // Feedback shows on screens 4-7 and 10 (steps 0-3 and 6)
-  const showFeedback = [0, 1, 2, 3, 6].includes(currentStep)
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div style={{ minHeight: '100vh', background: '#f4f5f8' }}>
       <Trowser
-        open={true}
+        open={trowserOpen}
         title={STEP_TITLES[currentStep]}
         dismissible
         hideOverflow
-        feedback={showFeedback}
         showCancelFooterButton={showCancel}
         cancelFooterButtonLabel="Cancel"
         onClose={handleClose}
         footerButton={footerButtons.length > 0 ? footerButtons : undefined}
       >
-        <StepFlow
-          activeStepIndex={STEP_FLOW_INDEX[currentStep]}
-          progressType="indicator"
-          width="large"
-        >
-          <Step title="Upload file" hasNextButton={false} hasPreviousButton={false}>
-            <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 4 — Upload step</p>
-          </Step>
-          <Step title="General information" hasNextButton={false} hasPreviousButton={false}>
-            <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 6 — Review personal</p>
-          </Step>
-          <Step title="Other information" hasNextButton={false} hasPreviousButton={false}>
-            <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 7 — Prior year</p>
-          </Step>
-          <Step title="Client details" hasNextButton={false} hasPreviousButton={false}>
-            <p style={{ padding: '2rem', textAlign: 'center' }}>Screens 8–9 — Loading</p>
-          </Step>
-          <Step title="Create return" hasNextButton={false} hasPreviousButton={false}>
-            <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 10 — Success</p>
-          </Step>
-        </StepFlow>
+        <div style={{ padding: 'var(--space-container-padding-large) var(--space-container-padding-large) 0' }}>
+          <SteppedProgress
+            completed={PROGRESS_COMPLETED[currentStep]}
+            current={PROGRESS_CURRENT[currentStep]}
+            direction="horizontal"
+            size="small"
+          >
+            <Step>Upload file</Step>
+            <Step>General information</Step>
+            <Step>Other information</Step>
+            <Step>Client details</Step>
+            <Step>Create return</Step>
+          </SteppedProgress>
+        </div>
+
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          {currentStep <= 1 && <p>Screen 4/5 — Upload content goes here</p>}
+          {currentStep === 2 && <p>Screen 6 — Review personal info</p>}
+          {currentStep === 3 && <p>Screen 7 — Prior year info</p>}
+          {currentStep === 4 && <p>Screen 8 — Loading (empty)</p>}
+          {currentStep === 5 && <p>Screen 9 — Loading (active)</p>}
+          {currentStep === 6 && <p>Screen 10 — Success</p>}
+        </div>
       </Trowser>
     </div>
   )

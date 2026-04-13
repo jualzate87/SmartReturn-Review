@@ -449,6 +449,45 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cgds/badge@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@cgds/badge@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Fbadge%2F-%2F%40cgds%2Fbadge-10.1.0.tgz"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+    "@cgds/slots": "npm:10.1.0"
+    "@cgds/types": "npm:10.1.0"
+    "@cgds/utils": "npm:10.1.0"
+    "@design-systems/theme": "npm:^4.7.12"
+    "@design-systems/utils": "npm:^4.15.4"
+    clsx: "npm:^1.2.1"
+  peerDependencies:
+    react: ">= 17.0.2 || ^18.0"
+  checksum: 10c0/e8be3adb702550560bc205add9aba56fbac754a2cd44338001566a43fffced85646b141b61e6063c18540c41c2add7ef5f70100f274f8b282dd41dea0977f096
+  languageName: node
+  linkType: hard
+
+"@cgds/hooks@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@cgds/hooks@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Fhooks%2F-%2F%40cgds%2Fhooks-10.1.0.tgz"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+    "@cgds/styles": "npm:10.1.0"
+    "@cgds/types": "npm:10.1.0"
+    "@design-systems/utils": "npm:^4.15.4"
+    "@popperjs/core": "npm:2.11.6"
+    "@reach/auto-id": "npm:0.15.0"
+    dompurify: "npm:3.2.4"
+    fromentries: "npm:1.3.2"
+    react-fast-compare: "npm:3.2.0"
+    resize-observer-polyfill: "npm:1.5.1"
+    tabbable: "npm:5.2.1"
+  peerDependencies:
+    react: ">= 17.0.2 || ^18.0"
+    react-dom: ">= 17.0.2 || ^18.0"
+  checksum: 10c0/7d32589714f4b30733f20dbc759e071464c5a6c7d3bdb6d4538caf8b8c429f0319ed1eb128a7fdcdbf7c741cc6b6476d278867131fc9df80a602cedc3e864b33
+  languageName: node
+  linkType: hard
+
 "@cgds/hooks@npm:4.2.0":
   version: 4.2.0
   resolution: "@cgds/hooks@npm:4.2.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Fhooks%2F-%2F%40cgds%2Fhooks-4.2.0.tgz"
@@ -584,6 +623,40 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cgds/icon@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@cgds/icon@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Ficon%2F-%2F%40cgds%2Ficon-10.1.0.tgz"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+    "@cgds/hooks": "npm:10.1.0"
+    "@cgds/slots": "npm:10.1.0"
+    "@cgds/types": "npm:10.1.0"
+    "@design-systems/theme": "npm:^4.7.12"
+    "@design-systems/utils": "npm:^4.15.4"
+    clsx: "npm:^1.2.1"
+    tiny-warning: "npm:1.0.3"
+  peerDependencies:
+    react: ">= 17.0.2 || ^18.0"
+  checksum: 10c0/ce254bce1ec1b0a0708baedc4e20b1802e4639492a143069ce8a7e7dc4d7a38598414722795f2a2bec5864a00d2236c956764ceb0d0885e64edc9df563945012
+  languageName: node
+  linkType: hard
+
+"@cgds/link@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@cgds/link@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Flink%2F-%2F%40cgds%2Flink-10.1.0.tgz"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+    "@cgds/hooks": "npm:10.1.0"
+    "@cgds/icon": "npm:10.1.0"
+    "@cgds/utils": "npm:10.1.0"
+    "@design-systems/theme": "npm:^4.7.12"
+    clsx: "npm:^1.2.1"
+  peerDependencies:
+    react: ">= 17.0.2 || ^18.0"
+  checksum: 10c0/c0a3536c228fd4c16c0b7a9dbfad85163f23a61fb8908f9159ff7d9a11960e6aca3554d33f3908042b824953892a42bde72c523fd61734469c8380042ca0e9f0
+  languageName: node
+  linkType: hard
+
 "@cgds/lottie@npm:6.35.7":
   version: 6.35.7
   resolution: "@cgds/lottie@npm:6.35.7::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Flottie%2F-%2F%40cgds%2Flottie-6.35.7.tgz"
@@ -616,6 +689,20 @@ __metadata:
   peerDependencies:
     react: ">= 17.0.2 || ^18.0"
   checksum: 10c0/bd2c5f1704dd0207bf975e55f32b0a11ca464dfeb787108cd4d66dca656125932740136abbe0c453f417bf92ccb8fe5498177336d64b3a581c97cbf544e0fdf6
+  languageName: node
+  linkType: hard
+
+"@cgds/metrics@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@cgds/metrics@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Fmetrics%2F-%2F%40cgds%2Fmetrics-10.1.0.tgz"
+  dependencies:
+    "@types/ci-info": "npm:2.0.0"
+    ci-info: "npm:3.2.0"
+    pkg-up: "npm:3.1.0"
+    superagent: "npm:8.1.2"
+  bin:
+    metrics: ./src/index.js
+  checksum: 10c0/1ac595e7bbb53586df7a10332f24cb8d769913a7dd22c45197f1e514d9d92408f55a4a3251b80836cab63e440b23a74987f6b591741d7856813508ea69f1b295
   languageName: node
   linkType: hard
 
@@ -703,6 +790,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cgds/pon@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@cgds/pon@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Fpon%2F-%2F%40cgds%2Fpon-10.1.0.tgz"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+    "@cgds/hooks": "npm:10.1.0"
+    "@cgds/icon": "npm:10.1.0"
+    "@cgds/link": "npm:10.1.0"
+    "@cgds/types": "npm:10.1.0"
+    "@cgds/utils": "npm:10.1.0"
+    "@design-systems/theme": "npm:^4.7.12"
+    clsx: "npm:^1.2.1"
+  peerDependencies:
+    react: ">= 17.0.2 || ^18.0"
+  checksum: 10c0/73d0a98eb7b2c2442a7d735fe17d88fc903bee91e61538ee43d66dfd3d2eda856f13b622742c1961246af385af01fa3a6ef3fc924fd86c24a525817a1283ee05
+  languageName: node
+  linkType: hard
+
+"@cgds/slots@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@cgds/slots@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Fslots%2F-%2F%40cgds%2Fslots-10.1.0.tgz"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+    "@cgds/metrics": "npm:10.1.0"
+  checksum: 10c0/26a4ce90e5f300ee5c719551151f7a817d8f816c302613e5e0ff83cbc9428d0637ca2e2cdd2041f6c09a8ca1a595d5539e142d667461fb8f28664b22ad0c22dc
+  languageName: node
+  linkType: hard
+
 "@cgds/stack@npm:4.2.0":
   version: 4.2.0
   resolution: "@cgds/stack@npm:4.2.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Fstack%2F-%2F%40cgds%2Fstack-4.2.0.tgz"
@@ -717,6 +832,39 @@ __metadata:
   peerDependencies:
     react: ">= 16.8.6"
   checksum: 10c0/0bc7a93842b6390d2563354d7721c58e3d8966b5c27a11b87f65c06b87f1ac0aac7614e6b86e5df7c22fd45c267037c00fef3bd061f58d1cd07255c7541a645f
+  languageName: node
+  linkType: hard
+
+"@cgds/stepped-progress@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@cgds/stepped-progress@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Fstepped-progress%2F-%2F%40cgds%2Fstepped-progress-10.1.0.tgz"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+    "@cgds/hooks": "npm:10.1.0"
+    "@cgds/pon": "npm:10.1.0"
+    "@cgds/tooltip": "npm:10.1.0"
+    "@cgds/types": "npm:10.1.0"
+    "@cgds/utils": "npm:10.1.0"
+    "@cgds/validation": "npm:10.1.0"
+    "@design-systems/theme": "npm:^4.7.12"
+    "@design-systems/utils": "npm:^4.15.4"
+    "@reach/visually-hidden": "npm:0.15.0"
+    clsx: "npm:^1.2.1"
+  peerDependencies:
+    react: ">= 17.0.2 || ^18.0"
+  checksum: 10c0/b3f477b60354957a7fb02fb796754214112868b996005db6063d6394073cc3e83fee1f8bb398ac7e911baacfcbffd3518aac22ce649d81884677d5d96a03b8c2
+  languageName: node
+  linkType: hard
+
+"@cgds/styles@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@cgds/styles@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Fstyles%2F-%2F%40cgds%2Fstyles-10.1.0.tgz"
+  dependencies:
+    "@babel/core": "npm:^7.23.2"
+    "@babel/runtime": "npm:^7.23.2"
+    "@design-tokens/intuit": "npm:11.18.6"
+    "@design-tokens/turbotax": "npm:11.18.6"
+  checksum: 10c0/727a6a1172353bec15bf9e99dc70d3e3609d5af225317e7d20f9b8e695d9f1c0fc3a0e5917475582d3d5df2c91fd103296d17ef46b2215c6c4bd4263ada1d465
   languageName: node
   linkType: hard
 
@@ -794,6 +942,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cgds/tooltip@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@cgds/tooltip@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Ftooltip%2F-%2F%40cgds%2Ftooltip-10.1.0.tgz"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+    "@cgds/hooks": "npm:10.1.0"
+    "@cgds/utils": "npm:10.1.0"
+    "@design-systems/theme": "npm:^4.7.12"
+    "@design-systems/utils": "npm:^4.15.4"
+    "@popperjs/core": "npm:2.11.6"
+    "@reach/alert": "npm:0.15.0"
+    "@reach/visually-hidden": "npm:0.15.0"
+    clsx: "npm:^1.2.1"
+    react-merge-refs: "npm:^1.1.0"
+  peerDependencies:
+    react: ">= 17.0.2 || ^18.0"
+    react-dom: ">= 17.0.2 || ^18.0"
+  checksum: 10c0/3fd12c7857ab324b7758bd2a57c7ff02aaf7e036b2a57def243bfb919d9024e77e6a5de767d3a7c9c1757dd15955ad738f9c5d0a09c4854c8acf70484e298cd8
+  languageName: node
+  linkType: hard
+
+"@cgds/types@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@cgds/types@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Ftypes%2F-%2F%40cgds%2Ftypes-10.1.0.tgz"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+    "@cgds/metrics": "npm:10.1.0"
+  checksum: 10c0/df01a84d70df64749127ced6d3e35e0e4f3b8c94db2d616a2d213c730d3078c43f3a0f6108dc71430e5655d69822cf653c9875fa24743c87cf22a8446d19fe63
+  languageName: node
+  linkType: hard
+
 "@cgds/types@npm:4.2.0":
   version: 4.2.0
   resolution: "@cgds/types@npm:4.2.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Ftypes%2F-%2F%40cgds%2Ftypes-4.2.0.tgz"
@@ -851,6 +1030,24 @@ __metadata:
     "@babel/runtime": "npm:^7.23.2"
     "@cgds/metrics": "npm:9.11.3"
   checksum: 10c0/b32cf3d3ae342a941ee6639345b772e7cf76324c1cce8bcc1bc9444b73a47597265f5b61f4b131442a05a8391eb5628481b91e505b316252c77d084c35124c6e
+  languageName: node
+  linkType: hard
+
+"@cgds/utils@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@cgds/utils@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Futils%2F-%2F%40cgds%2Futils-10.1.0.tgz"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+    "@cgds/hooks": "npm:10.1.0"
+    "@design-systems/utils": "npm:^4.15.4"
+    clsx: "npm:^1.2.1"
+    focus-lock: "npm:0.9.2"
+    react-is: "npm:17.0.2"
+    react-merge-refs: "npm:^1.1.0"
+  peerDependencies:
+    react: ">= 17.0.2 || ^18.0"
+    react-dom: ">= 17.0.2 || ^18.0"
+  checksum: 10c0/e8a8ffcd5f907b5542b4beab048d813ebbc207b9fb28bd761660b4483d81cc16b9d23605f6d2e180fe453335571a0027484f0b88a80ed19aba5364a0cff7851e
   languageName: node
   linkType: hard
 
@@ -967,6 +1164,27 @@ __metadata:
     react: ">= 17.0.2 || ^18.0"
     react-dom: ">= 17.0.2 || ^18.0"
   checksum: 10c0/46f615dc17123a27da59b2b094783a73437de4f2e008e9fcfd5334842c83ba1fe39f8f6872452799aef8c8843dce57f2739b09fe669d6d890b333c398aa4b57e
+  languageName: node
+  linkType: hard
+
+"@cgds/validation@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@cgds/validation@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Fvalidation%2F-%2F%40cgds%2Fvalidation-10.1.0.tgz"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+    "@cgds/badge": "npm:10.1.0"
+    "@cgds/hooks": "npm:10.1.0"
+    "@cgds/icon": "npm:10.1.0"
+    "@cgds/types": "npm:10.1.0"
+    "@cgds/utils": "npm:10.1.0"
+    "@design-systems/theme": "npm:^4.7.12"
+    "@design-systems/utils": "npm:^4.15.4"
+    "@reach/alert": "npm:0.15.0"
+    "@reach/visually-hidden": "npm:0.15.0"
+    clsx: "npm:^1.2.1"
+  peerDependencies:
+    react: ">= 17.0.2 || ^18.0"
+  checksum: 10c0/8a4acf14067a6ec612e9e112934a4322027a9e39e97570dcab9c74606d3f2759823235524324214c2b5d88b558852fae480e510fcd974de46bfd16b05f320791
   languageName: node
   linkType: hard
 
@@ -1138,6 +1356,23 @@ __metadata:
     react: ^17.0.2
     react-dom: ^17.0.2
   checksum: 10c0/6834d89dc5a0cd310657a7edbdaf49ef13a2a317a4eff8417efe05105be5159549326b921900a3840b0d19b749774d697b26e5c6e845c0a16ac853a5c9cc7978
+  languageName: node
+  linkType: hard
+
+"@design-systems/theme@npm:^4.7.12":
+  version: 4.7.13
+  resolution: "@design-systems/theme@npm:4.7.13::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40design-systems%2Ftheme%2F-%2F%40design-systems%2Ftheme-4.7.13.tgz"
+  dependencies:
+    "@babel/runtime": "npm:^7.11.2"
+    "@design-systems/utils": "npm:^2.12.3"
+    "@design-tokens/types": "npm:12.15.0"
+    "@ids-tokens/enums": "npm:14.1.2"
+    clsx: "npm:^1.0.4"
+    lodash.debounce: "npm:4.0.8"
+  peerDependencies:
+    react: ^17.0.2
+    react-dom: ^17.0.2
+  checksum: 10c0/6a556e4605247b25fb723f73b92de9b9e41f4179f78b4ba33c3c39816ee6430ae0e8a3177eacb409da1a2a84e06c2721433c82494291b85698c848570476200b
   languageName: node
   linkType: hard
 
@@ -4763,6 +4998,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@reach/alert@npm:0.15.0":
+  version: 0.15.0
+  resolution: "@reach/alert@npm:0.15.0"
+  dependencies:
+    "@reach/utils": "npm:0.15.0"
+    "@reach/visually-hidden": "npm:0.15.0"
+    prop-types: "npm:^15.7.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    react: ^16.8.0 || 17.x
+    react-dom: ^16.8.0 || 17.x
+  checksum: 10c0/c9175034844fc3dc409ba1e7bed32ea928fe4cfab9ba5a68a6b1088d69125170e2616440f905e05fcfd267a11d0cef7c22b7cd8dc9cd481fecd3ba4018a62268
+  languageName: node
+  linkType: hard
+
 "@reach/auto-id@npm:0.15.0":
   version: 0.15.0
   resolution: "@reach/auto-id@npm:0.15.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40reach%2Fauto-id%2F-%2Fauto-id-0.15.0.tgz"
@@ -4786,6 +5036,19 @@ __metadata:
     react: ^16.8.0 || 17.x
     react-dom: ^16.8.0 || 17.x
   checksum: 10c0/0c5a495dad987655a4e9436504f255295120a10adf909e77e4496e630f8e35e3d6fbcc78d162d67eab2bb673dcec4c685c2f77ff1717637849ab615fa976cb06
+  languageName: node
+  linkType: hard
+
+"@reach/visually-hidden@npm:0.15.0":
+  version: 0.15.0
+  resolution: "@reach/visually-hidden@npm:0.15.0"
+  dependencies:
+    prop-types: "npm:^15.7.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    react: ^16.8.0 || 17.x
+    react-dom: ^16.8.0 || 17.x
+  checksum: 10c0/c1fad6275b9d90bd96f1aae6356a6e66a603987b28c38d4b8dae5c78b02b17f61a4996c674de651283eb5012e3b90fcff851b2fd0e8f95f23706518ccbb27991
   languageName: node
   linkType: hard
 
@@ -7296,6 +7559,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "ids-prototyping@workspace:."
   dependencies:
+    "@cgds/stepped-progress": "npm:10.1.0"
     "@design-systems/icons": "npm:5.20.3"
     "@eslint/js": "npm:^9.36.0"
     "@floating-ui/react": "npm:0.27.19"
@@ -8301,7 +8565,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.8.1":
+"prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -9442,6 +9706,13 @@ __metadata:
     minizlib: "npm:^3.1.0"
     yallist: "npm:^5.0.0"
   checksum: 10c0/ed905e4b33886377df6e9206e5d1bd34458c21666e27943f946799416f86348c938590d573d6a69312cb29c583b122647a64ec92782f2b7e24e68d985dd72531
+  languageName: node
+  linkType: hard
+
+"tiny-warning@npm:1.0.3":
+  version: 1.0.3
+  resolution: "tiny-warning@npm:1.0.3"
+  checksum: 10c0/ef8531f581b30342f29670cb41ca248001c6fd7975ce22122bd59b8d62b4fc84ad4207ee7faa95cde982fa3357cd8f4be650142abc22805538c3b1392d7084fa
   languageName: node
   linkType: hard
 
