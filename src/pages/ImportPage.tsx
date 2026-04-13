@@ -4,6 +4,7 @@ import '@ids-ts/trowser/dist/main.css'
 import { SteppedProgress, Step } from '@cgds/stepped-progress'
 import { Button } from '@ids-ts/button'
 import '@ids-ts/button/dist/main.css'
+import UploadStep from './import/UploadStep'
 
 const STEP_TITLES: Record<number, string> = {
   0: 'Onboard new clients with 1040 import',
@@ -95,13 +96,16 @@ export default function ImportPage() {
           </SteppedProgress>
         </div>
 
-        <div style={{ padding: '2rem', textAlign: 'center' }}>
-          {currentStep <= 1 && <p>Screen 4/5 — Upload content goes here</p>}
-          {currentStep === 2 && <p>Screen 6 — Review personal info</p>}
-          {currentStep === 3 && <p>Screen 7 — Prior year info</p>}
-          {currentStep === 4 && <p>Screen 8 — Loading (empty)</p>}
-          {currentStep === 5 && <p>Screen 9 — Loading (active)</p>}
-          {currentStep === 6 && <p>Screen 10 — Success</p>}
+        <div>
+          {currentStep === 0 && (
+            <UploadStep onFileAttached={() => setCurrentStep(1)} />
+          )}
+          {currentStep === 1 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 5 — File attached state</p>}
+          {currentStep === 2 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 6 — Review personal info</p>}
+          {currentStep === 3 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 7 — Prior year info</p>}
+          {currentStep === 4 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 8 — Loading (empty)</p>}
+          {currentStep === 5 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 9 — Loading (active)</p>}
+          {currentStep === 6 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 10 — Success</p>}
         </div>
       </Trowser>
     </div>
