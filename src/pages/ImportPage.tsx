@@ -72,11 +72,12 @@ export default function ImportPage() {
       open={true}
       title={STEP_TITLES[currentStep]}
       dismissible
+      stepFlow
+      hideOverflow
       onClose={handleClose}
     >
       <StepFlow
         {...stepFlowState}
-        activeStepIndex={STEP_FLOW_INDEX[0]}
         progressType="indicator"
         width="large"
       >
