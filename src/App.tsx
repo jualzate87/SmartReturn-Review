@@ -8,6 +8,7 @@ import FusionShell from './components/FusionShell'
 import { FUSION_CONFIG } from './navigation'
 import { getConfig, applyTheme } from './config'
 import OnboardingPage from './pages/OnboardingPage'
+import ImportPage from './pages/ImportPage'
 import WorkspacePage from './pages/WorkspacePage'
 import HomePage from './pages/HomePage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -42,6 +43,7 @@ export default function App() {
           <FusionProvider pathPrefix={FUSION_CONFIG.pathPrefix || ''}>
             <Routes>
               <Route path="/onboarding" element={<OnboardingPage />} />
+              <Route path="/import" element={<ImportPage />} />
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Navigate to="/home" replace />} />
                 <Route path="/home" element={<HomePage />} />
