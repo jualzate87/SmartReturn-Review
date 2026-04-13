@@ -5,7 +5,6 @@ import StepFlow, { Step, useStepFlow } from '@ids-ts/step-flow'
 import '@ids-ts/step-flow/dist/main.css'
 import { Button } from '@ids-ts/button'
 import '@ids-ts/button/dist/main.css'
-import styles from '../styles/ImportPage.module.css'
 
 // step index 0 = screen 4 (Upload), 1 = screen 5 (File attached),
 // 2 = screen 6 (Review personal), 3 = screen 7 (Prior year),
@@ -32,17 +31,6 @@ const STEP_FLOW_INDEX: Record<number, number> = {
   6: 5,
 }
 
-// Whether to show footer buttons per step
-const FOOTER_CONFIG: Record<number, { showCancel: boolean; showNext: boolean; showSuccess: boolean }> = {
-  0: { showCancel: false, showNext: true, showSuccess: false },
-  1: { showCancel: false, showNext: true, showSuccess: false },
-  2: { showCancel: true, showNext: true, showSuccess: false },
-  3: { showCancel: true, showNext: true, showSuccess: false },
-  4: { showCancel: false, showNext: false, showSuccess: false },
-  5: { showCancel: true, showNext: true, showSuccess: false },
-  6: { showCancel: true, showNext: false, showSuccess: true },
-}
-
 export default function ImportPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const stepFlowState = useStepFlow()
@@ -52,7 +40,6 @@ export default function ImportPage() {
       const nextStep = currentStep + 1
       const currentFlowIndex = STEP_FLOW_INDEX[currentStep]
       const nextFlowIndex = STEP_FLOW_INDEX[nextStep]
-      // Only advance the StepFlow indicator when the visual step index actually increases
       if (nextFlowIndex > currentFlowIndex) {
         stepFlowState.goToNext()
       }
@@ -65,16 +52,39 @@ export default function ImportPage() {
     stepFlowState.goToStep(0)
   }
 
-  const footer = FOOTER_CONFIG[currentStep]
+  // Build footer buttons array for Trowser footerButton prop
+  const footerButtons: React.ReactElement[] = []
+
+  if (currentStep === 6) {
+    footerButtons.push(
+      <Button key="view-profile" priority="secondary" onClick={() => {}}>View client profile</Button>
+    )
+    footerButtons.push(
+      <Button key="open-return" priority="primary" onClick={() => {}}>Open return</Button>
+    )
+  } else if (currentStep !== 4) {
+    // Show Next on all steps except loading step (4)
+    footerButtons.push(
+      <Button key="next" priority="primary" onClick={handleNext}>Next</Button>
+    )
+  }
+
+  // Cancel shows on steps 2, 3, 5, 6
+  const showCancel = [2, 3, 5, 6].includes(currentStep)
+  // Feedback shows on screens 4-7 and 10 (steps 0-3 and 6)
+  const showFeedback = [0, 1, 2, 3, 6].includes(currentStep)
 
   return (
     <Trowser
       open={true}
       title={STEP_TITLES[currentStep]}
       dismissible
-      stepFlow
       hideOverflow
+      feedback={showFeedback}
+      showCancelFooterButton={showCancel}
+      cancelFooterButtonLabel="Cancel"
       onClose={handleClose}
+      footerButton={footerButtons.length > 0 ? footerButtons : undefined}
     >
       <StepFlow
         {...stepFlowState}
@@ -82,41 +92,22 @@ export default function ImportPage() {
         width="large"
       >
         <Step title="Upload file" hasNextButton={false} hasPreviousButton={false}>
-          <div className={styles.contentArea}>
-            <p>Step {currentStep + 1} content</p>
-          </div>
+          {/* UploadStep content — Task 3 */}
+          <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 4 — Upload step</p>
         </Step>
         <Step title="General information" hasNextButton={false} hasPreviousButton={false}>
-          <div className={styles.contentArea} />
+          <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 5 — File attached</p>
         </Step>
         <Step title="Other information" hasNextButton={false} hasPreviousButton={false}>
-          <div className={styles.contentArea} />
+          <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 6 — Review personal</p>
         </Step>
         <Step title="Client details" hasNextButton={false} hasPreviousButton={false}>
-          <div className={styles.contentArea} />
+          <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 7 — Prior year</p>
         </Step>
         <Step title="Create return" hasNextButton={false} hasPreviousButton={false}>
-          <div className={styles.contentArea} />
+          <p style={{ padding: '2rem', textAlign: 'center' }}>Screens 8–10 — Loading + Success</p>
         </Step>
       </StepFlow>
-
-      <div className={styles.footer}>
-        {footer.showCancel && (
-          <Button priority="tertiary" onClick={handleClose}>Cancel</Button>
-        )}
-        {!footer.showCancel && <span />}
-        <div className={styles.footerRight}>
-          {footer.showSuccess && (
-            <>
-              <Button priority="secondary" onClick={() => {}}>View client profile</Button>
-              <Button priority="primary" onClick={() => {}}>Open return</Button>
-            </>
-          )}
-          {footer.showNext && (
-            <Button priority="primary" onClick={handleNext}>Next</Button>
-          )}
-        </div>
-      </div>
     </Trowser>
   )
 }
