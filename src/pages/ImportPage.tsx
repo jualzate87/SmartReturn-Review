@@ -3,6 +3,7 @@ import Trowser from '@ids-ts/trowser'
 import '@ids-ts/trowser/dist/main.css'
 import { SteppedProgress, Step } from '@cgds/stepped-progress'
 import UploadStep from './import/UploadStep'
+import ReviewPersonalStep from './import/ReviewPersonalStep'
 
 // Internal steps: 0 = upload, 1 = review personal, 2 = prior year,
 // 3 = loading, 4 = success
@@ -51,29 +52,42 @@ export default function ImportPage() {
         hideOverflow
         onClose={handleClose}
       >
-        <div style={{ padding: 'var(--space-container-padding-large) var(--space-container-padding-large) 0' }}>
-          <SteppedProgress
-            completed={PROGRESS_COMPLETED[currentStep]}
-            current={PROGRESS_CURRENT[currentStep]}
-            direction="horizontal"
-            size="small"
-          >
-            <Step>Upload file</Step>
-            <Step>General information</Step>
-            <Step>Other information</Step>
-            <Step>Client details</Step>
-            <Step>Create return</Step>
-          </SteppedProgress>
-        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '118px',
+            padding: '20px 0',
+            background: '#ffffff',
+            borderBottom: '1px solid var(--color-container-border-primary, #d5dee3)',
+            boxShadow: '0 1px 4px rgba(76, 85, 91, 0.2)',
+            flexShrink: 0,
+          }}>
+            <SteppedProgress
+              completed={PROGRESS_COMPLETED[currentStep]}
+              current={PROGRESS_CURRENT[currentStep]}
+              direction="horizontal"
+              size="small"
+            >
+              <Step>Upload file</Step>
+              <Step>General information</Step>
+              <Step>Other information</Step>
+              <Step>Client details</Step>
+              <Step>Create return</Step>
+            </SteppedProgress>
+          </div>
 
-        <div>
-          {currentStep === 0 && (
-            <UploadStep onFileAttached={() => setCurrentStep(1)} />
-          )}
-          {currentStep === 1 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 6 — Review personal info</p>}
-          {currentStep === 2 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 7 — Prior year info</p>}
-          {currentStep === 3 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screens 8-9 — Loading</p>}
-          {currentStep === 4 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 10 — Success</p>}
+          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            {currentStep === 0 && (
+              <UploadStep onFileAttached={() => setCurrentStep(1)} />
+            )}
+            {currentStep === 1 && <ReviewPersonalStep />}
+            {currentStep === 2 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 7 — Prior year info</p>}
+            {currentStep === 3 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screens 8-9 — Loading</p>}
+            {currentStep === 4 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 10 — Success</p>}
+          </div>
         </div>
       </Trowser>
     </div>
