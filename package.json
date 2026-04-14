@@ -24,6 +24,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@cgds/accordion": "10.1.0",
     "@cgds/stepped-progress": "10.1.0",
     "@cgds/tabs": "10.1.0",
     "@design-systems/icons": "5.20.3",

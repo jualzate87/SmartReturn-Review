@@ -7,6 +7,7 @@ import LeftPanel from './automated/LeftPanel'
 import ChatInput from './automated/ChatInput'
 import WelcomePane from './automated/WelcomePane'
 import GeneratingPane from './automated/GeneratingPane'
+import QuestionnairePane from './automated/QuestionnairePane'
 import styles from '../styles/automated/AutomatedOnboardingPage.module.css'
 
 export type ChatStep =
@@ -46,22 +47,24 @@ export default function AutomatedOnboardingPage() {
             <LeftPanel />
           </div>
           <div className={styles.rightPanel}>
-            {/* Chat pane content */}
-            {chatStep === 'welcome' && (
-              <WelcomePane onPromptClick={() => setChatStep('generating-questionnaire')} />
-            )}
-            {chatStep === 'generating-questionnaire' && (
-              <GeneratingPane
-                processingText="Creating questionnaire and checklist..."
-                actionButtonLabel="Create client questionnaire and checklist"
-                onActionClick={() => setChatStep('questionnaire')}
-              />
-            )}
-            {/* Chat input always at bottom */}
-            <ChatInput onSend={(text) => {
-              console.log('sent:', text)
-              setChatStep('generating-questionnaire')
-            }} />
+            {/* Scrollable chat content area */}
+            <div className={styles.chatScrollArea}>
+              {chatStep === 'welcome' && (
+                <WelcomePane onPromptClick={() => setChatStep('generating-questionnaire')} />
+              )}
+              {chatStep === 'generating-questionnaire' && (
+                <GeneratingPane
+                  processingText="Creating questionnaire and checklist..."
+                  actionButtonLabel="Create client questionnaire and checklist"
+                  onActionClick={() => setChatStep('questionnaire')}
+                />
+              )}
+              {(chatStep === 'questionnaire' || chatStep === 'questionnaire-checklist') && (
+                <QuestionnairePane onDraftEmail={() => setChatStep('generating-email')} />
+              )}
+            </div>
+            {/* Chat input pinned at bottom */}
+            <ChatInput onSend={() => setChatStep('generating-questionnaire')} />
           </div>
         </div>
       </Trowser>
