@@ -3,6 +3,7 @@ import Trowser from '@ids-ts/trowser'
 import '@ids-ts/trowser/dist/main.css'
 import { Button } from '@ids-ts/button'
 import '@ids-ts/button/dist/main.css'
+import LeftPanel from './automated/LeftPanel'
 import styles from '../styles/automated/AutomatedOnboardingPage.module.css'
 
 export type ChatStep =
@@ -39,7 +40,7 @@ export default function AutomatedOnboardingPage() {
         {/* Body: left panel + right panel — fills Trowser content area */}
         <div className={styles.body}>
           <div className={styles.leftPanel}>
-            <p style={{ padding: '1rem', color: '#6b6c72', fontSize: 14 }}>Left panel — PDF viewer</p>
+            <LeftPanel />
           </div>
           <div className={styles.rightPanel}>
             <p style={{ padding: '1rem', color: '#6b6c72', fontSize: 14 }}>Right panel — Chat ({chatStep})</p>
