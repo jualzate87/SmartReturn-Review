@@ -942,6 +942,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cgds/tabs@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@cgds/tabs@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Ftabs%2F-%2F%40cgds%2Ftabs-10.1.0.tgz"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+    "@cgds/hooks": "npm:10.1.0"
+    "@cgds/utils": "npm:10.1.0"
+    "@design-systems/theme": "npm:^4.7.12"
+    "@design-systems/utils": "npm:^4.15.4"
+    "@reach/rect": "npm:0.15.0"
+    "@reach/tabs": "npm:0.15.0"
+    clsx: "npm:^1.2.1"
+    react-merge-refs: "npm:^1.1.0"
+  peerDependencies:
+    react: ">= 17.0.2 || ^18.0"
+  checksum: 10c0/503bbbf2043e9868437cd04a9580e88241042411845024296537b14fbc9e864dec29f9341153d66e9711d946102bf2b1c70ac2ef029815275d81dd5ce64c04c1
+  languageName: node
+  linkType: hard
+
 "@cgds/tooltip@npm:10.1.0":
   version: 10.1.0
   resolution: "@cgds/tooltip@npm:10.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40cgds%2Ftooltip%2F-%2F%40cgds%2Ftooltip-10.1.0.tgz"
@@ -5026,6 +5045,58 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@reach/descendants@npm:0.15.0":
+  version: 0.15.0
+  resolution: "@reach/descendants@npm:0.15.0"
+  dependencies:
+    "@reach/utils": "npm:0.15.0"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    react: ^16.8.0 || 17.x
+    react-dom: ^16.8.0 || 17.x
+  checksum: 10c0/df2e73ed87cb899bb3cd17bb2bef8c6e8215e4b0f5d18ad2a6970acf4fc374b71372a1f41771b75d5a57a4b9a6eed26b2a6af4dedfa3ed30d4bb56657fc20fe8
+  languageName: node
+  linkType: hard
+
+"@reach/observe-rect@npm:1.2.0":
+  version: 1.2.0
+  resolution: "@reach/observe-rect@npm:1.2.0"
+  checksum: 10c0/e2d2b399381e466705bcf7535ba1ed29866792d7aff386a2a41ca1f5ae9d8920f21c769d67b82b38045cd14e1c2aa29dbf6f37a77f323d16d01378eb02ad2925
+  languageName: node
+  linkType: hard
+
+"@reach/rect@npm:0.15.0":
+  version: 0.15.0
+  resolution: "@reach/rect@npm:0.15.0"
+  dependencies:
+    "@reach/observe-rect": "npm:1.2.0"
+    "@reach/utils": "npm:0.15.0"
+    prop-types: "npm:^15.7.2"
+    tiny-warning: "npm:^1.0.3"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    react: ^16.8.0 || 17.x
+    react-dom: ^16.8.0 || 17.x
+  checksum: 10c0/a6c4554dce424921d4e69f0b4a0c50324ef4e81ecbcb67bf9498812ef29d2b3be0fae4a40ab456abcad31bdc6e76af69fc25160b4fffdb6b4636bb37f8971cd5
+  languageName: node
+  linkType: hard
+
+"@reach/tabs@npm:0.15.0":
+  version: 0.15.0
+  resolution: "@reach/tabs@npm:0.15.0"
+  dependencies:
+    "@reach/auto-id": "npm:0.15.0"
+    "@reach/descendants": "npm:0.15.0"
+    "@reach/utils": "npm:0.15.0"
+    prop-types: "npm:^15.7.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    react: ^16.8.0 || 17.x
+    react-dom: ^16.8.0 || 17.x
+  checksum: 10c0/aeab28f711ac2a9a7dbe2b86a2777a32f9c5a8dfc431566ad96f256495e193db5b00f540ea3485c58f1e8b4546217b7dc24c21220ce9051ef608495080cd7a71
+  languageName: node
+  linkType: hard
+
 "@reach/utils@npm:0.15.0":
   version: 0.15.0
   resolution: "@reach/utils@npm:0.15.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.intuit.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fnpm-intuit%2F%40reach%2Futils%2F-%2Futils-0.15.0.tgz"
@@ -7560,6 +7631,7 @@ __metadata:
   resolution: "ids-prototyping@workspace:."
   dependencies:
     "@cgds/stepped-progress": "npm:10.1.0"
+    "@cgds/tabs": "npm:10.1.0"
     "@design-systems/icons": "npm:5.20.3"
     "@eslint/js": "npm:^9.36.0"
     "@floating-ui/react": "npm:0.27.19"

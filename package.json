@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@cgds/stepped-progress": "10.1.0",
+    "@cgds/tabs": "10.1.0",
     "@design-systems/icons": "5.20.3",
     "@floating-ui/react": "0.27.19",
     "@genux-ds/access-point-button": "2.6.0",
