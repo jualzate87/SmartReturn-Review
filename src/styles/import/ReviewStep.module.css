@@ -288,15 +288,15 @@
   font-weight: 600;
   line-height: 24px;
   color: #ffffff;
-  background: transparent;
-  border: 1px solid #ffffff;
+  background: #393a3d;
+  border: 1px solid #6b6c72;
   border-radius: 4px;
   padding: 8px 24px;
   cursor: pointer;
 }
 
 .customFooterSecondary:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: #4a4b4e;
 }
 
 .customFooterNext {
