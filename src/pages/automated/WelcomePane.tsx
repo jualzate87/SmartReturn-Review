@@ -6,8 +6,8 @@ interface WelcomePaneProps {
 }
 
 const STARTER_PROMPTS = [
-  'Create client questionnaire and document checklist',
-  "Summarize last year's 1040",
+  'Create questionnaire and document checklist',
+  "Summarize last year's tax return",
 ]
 
 export default function WelcomePane({ onPromptClick }: WelcomePaneProps) {
@@ -20,6 +20,12 @@ export default function WelcomePane({ onPromptClick }: WelcomePaneProps) {
           alt="Intuit Assist"
           className={styles.logoGif}
         />
+      </div>
+
+      {/* Hi Amanda + How can I help you */}
+      <div className={styles.greeting}>
+        <span className={styles.greetingName}>Hi, Amanda</span>
+        <span className={styles.greetingSubtitle}>How can I help you?</span>
       </div>
 
       {/* Starter prompt chips */}

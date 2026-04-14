@@ -6,6 +6,7 @@ import '@ids-ts/button/dist/main.css'
 import LeftPanel from './automated/LeftPanel'
 import ChatInput from './automated/ChatInput'
 import WelcomePane from './automated/WelcomePane'
+import GeneratingPane from './automated/GeneratingPane'
 import styles from '../styles/automated/AutomatedOnboardingPage.module.css'
 
 export type ChatStep =
@@ -47,9 +48,15 @@ export default function AutomatedOnboardingPage() {
           <div className={styles.rightPanel}>
             {/* Chat pane content */}
             {chatStep === 'welcome' && (
-              <WelcomePane onPromptClick={(prompt) => {
-                setChatStep('generating-questionnaire')
-              }} />
+              <WelcomePane onPromptClick={() => setChatStep('generating-questionnaire')} />
+            )}
+            {chatStep === 'generating-questionnaire' && (
+              <GeneratingPane
+                userMessage="Create client questionnaire and checklist"
+                processingText="Creating questionnaire and checklist..."
+                actionButtonLabel="Create client questionnaire and checklist"
+                onActionClick={() => setChatStep('questionnaire')}
+              />
             )}
             {/* Chat input always at bottom */}
             <ChatInput onSend={(text) => {
