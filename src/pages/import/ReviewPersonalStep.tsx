@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { OverflowWeb, ZoomIn, ZoomOut } from '@design-systems/icons'
 import { Tabs } from '@cgds/tabs'
+import pdfPreview from '../../assets/1040-preview.png'
 import styles from '../../styles/import/ReviewStep.module.css'
 
 export default function ReviewPersonalStep() {
@@ -21,21 +22,11 @@ export default function ReviewPersonalStep() {
         </div>
 
         <div className={styles.pdfViewer}>
-          <div style={{
-            width: '100%',
-            maxWidth: 480,
-            height: 600,
-            background: '#ffffff',
-            border: '1px solid #d5dee3',
-            boxShadow: '0 2px 8px rgba(76,85,91,0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#8d9096',
-            fontSize: 14,
-          }}>
-            1040 form preview image goes here
-          </div>
+          <img
+            src={pdfPreview}
+            alt="1040 tax form preview"
+            className={styles.pdfImage}
+          />
         </div>
 
         <div className={styles.zoomControls}>
@@ -52,15 +43,16 @@ export default function ReviewPersonalStep() {
       <div className={styles.rightColumn}>
         <h2 className={styles.rightHeading}>Review personal information</h2>
 
-        <Tabs start={0}>
+        <Tabs start={0} alignment="left" className={styles.tabsLeftAligned}>
           <Tabs.Title>Client information</Tabs.Title>
           <Tabs.Title>Dependents</Tabs.Title>
           <Tabs.Title>Misc info/ Direct deposit</Tabs.Title>
-          <Tabs.Panel>{/* Client info content shown below */}</Tabs.Panel>
+          <Tabs.Panel><span /></Tabs.Panel>
           <Tabs.Panel><span /></Tabs.Panel>
           <Tabs.Panel><span /></Tabs.Panel>
         </Tabs>
 
+        {/* All fields / Matched fields toggle */}
         <div className={styles.toggleGroup}>
           <button
             className={`${styles.toggleBtn} ${!matchedOnly ? styles.toggleBtnActive : ''}`}
@@ -76,57 +68,70 @@ export default function ReviewPersonalStep() {
           </button>
         </div>
 
-        {/* Taxpayer section */}
-        <h3 className={styles.sectionHeader}>Taxpayer</h3>
-
-        <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>Name</span>
-          <span className={styles.fieldValue}>Testee Summary</span>
-        </div>
-        <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>SSN</span>
-          <span className={styles.fieldValue}>534-02-8622</span>
-        </div>
-        <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>Marital status</span>
-          <span className={styles.fieldValue}>Married</span>
-        </div>
-        <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>Filing status</span>
-          <span className={styles.fieldValue}>MFJ</span>
-        </div>
-        <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>Occupation</span>
-          <span className={styles.fieldValue}>Nutritionist</span>
-        </div>
-        <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>Home address</span>
-          <div className={styles.addressRow}>
-            <span className={`${styles.fieldValue} ${styles.addressStreet}`}>151 Franklin Street</span>
-            <span className={`${styles.fieldValue} ${styles.addressCity}`}>Chicago</span>
-            <span className={`${styles.fieldValue} ${styles.addressState}`}>IL</span>
-            <span className={`${styles.fieldValue} ${styles.addressZip}`}>60606</span>
+        {/* Fields content */}
+        <div className={styles.fieldsContainer}>
+          {/* Taxpayer section */}
+          <div className={styles.sectionRow}>
+            <span className={styles.sectionLabel}>Taxpayer</span>
           </div>
-        </div>
 
-        {/* Spouse information section */}
-        <h3 className={styles.sectionHeader}>Spouse information</h3>
+          <div className={styles.fieldRow}>
+            <span className={styles.fieldLabel}>Name</span>
+            <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value="Testee Summary" />
+          </div>
+          <div className={styles.fieldRow}>
+            <span className={styles.fieldLabel}>SSN</span>
+            <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value="534-02-8622" />
+          </div>
+          <div className={styles.fieldRow}>
+            <span className={styles.fieldLabel}>Marital status</span>
+            <input className={`${styles.fieldInput} ${styles.fieldInputWide}`} readOnly value="Married" />
+          </div>
+          <div className={styles.fieldRow}>
+            <span className={styles.fieldLabel}>Filing status</span>
+            <input className={`${styles.fieldInput} ${styles.fieldInputWide}`} readOnly value="MFJ" />
+          </div>
+          <div className={styles.fieldRow}>
+            <span className={styles.fieldLabel}>Occupation</span>
+            <input className={`${styles.fieldInput} ${styles.fieldInputWide}`} readOnly value="Nutritionist" />
+          </div>
+          <div className={styles.fieldRow}>
+            <span className={styles.fieldLabel}>Home address</span>
+            <div className={styles.addressRow}>
+              <input className={`${styles.fieldInput} ${styles.addressStreet}`} readOnly value="151 Franklin Street" />
+              <input className={`${styles.fieldInput} ${styles.addressCity}`} readOnly value="Chicago" />
+              <input className={`${styles.fieldInput} ${styles.addressState}`} readOnly value="IL" />
+              <input className={`${styles.fieldInput} ${styles.addressZip}`} readOnly value="60606" />
+            </div>
+          </div>
 
-        <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>Spouse name</span>
-          <span className={styles.fieldValue}>James Summaary</span>
-        </div>
-        <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>Spouse SSN</span>
-          <span className={styles.fieldValue}>872-33-9461</span>
-        </div>
-        <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>Occupation</span>
-          <span className={styles.fieldValue}>VP Controller</span>
-        </div>
-        <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>Address</span>
-          <span className={styles.fieldValue} style={{ borderBottom: '2px solid #393a3d', borderRadius: 0, border: 'none', borderBottomWidth: 2, borderBottomStyle: 'solid', borderBottomColor: '#393a3d', padding: '6px 0' }}>&nbsp;</span>
+          {/* Spouse information section */}
+          <div className={styles.sectionRow}>
+            <span className={styles.sectionLabel}>Spouse information</span>
+          </div>
+
+          <div className={styles.fieldRow}>
+            <span className={styles.fieldLabel}>Spouse name</span>
+            <input className={`${styles.fieldInput} ${styles.fieldInputWide}`} readOnly value="James Summaary" />
+          </div>
+          <div className={styles.fieldRow}>
+            <span className={styles.fieldLabel}>Spouse SSN</span>
+            <input className={`${styles.fieldInput} ${styles.fieldInputWide}`} readOnly value="872-33-9461" />
+          </div>
+          <div className={styles.fieldRow}>
+            <span className={styles.fieldLabel}>Occupation</span>
+            <input className={`${styles.fieldInput} ${styles.fieldInputWide}`} readOnly value="VP Controller" />
+          </div>
+
+          {/* Address section */}
+          <div className={styles.sectionRow}>
+            <span className={styles.sectionLabel}>Address</span>
+          </div>
+
+          <div className={styles.fieldRow}>
+            <span className={styles.fieldLabel}>Street address</span>
+            <input className={`${styles.fieldInput} ${styles.fieldInputWide}`} readOnly value="422 SPOTSWOOD GRAVEL HILL RD" />
+          </div>
         </div>
       </div>
     </div>

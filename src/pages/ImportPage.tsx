@@ -4,6 +4,7 @@ import '@ids-ts/trowser/dist/main.css'
 import { SteppedProgress, Step } from '@cgds/stepped-progress'
 import UploadStep from './import/UploadStep'
 import ReviewPersonalStep from './import/ReviewPersonalStep'
+import footerStyles from '../styles/import/ReviewStep.module.css'
 
 // Internal steps: 0 = upload, 1 = review personal, 2 = prior year,
 // 3 = loading, 4 = success
@@ -49,6 +50,7 @@ export default function ImportPage() {
         open={trowserOpen}
         title={STEP_TITLES[currentStep]}
         dismissible
+        stepFlow
         hideOverflow
         onClose={handleClose}
       >
@@ -88,6 +90,21 @@ export default function ImportPage() {
             {currentStep === 3 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screens 8-9 — Loading</p>}
             {currentStep === 4 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 10 — Success</p>}
           </div>
+
+          {/* Custom footer bar — matches Figma dark footer with Cancel + Next */}
+          {currentStep > 0 && currentStep !== 3 && (
+            <div className={footerStyles.customFooter}>
+              <button className={footerStyles.customFooterCancel} onClick={handleClose}>
+                Cancel
+              </button>
+              <button
+                className={footerStyles.customFooterNext}
+                onClick={() => { if (currentStep < 4) setCurrentStep(s => s + 1) }}
+              >
+                {currentStep === 4 ? 'Open return' : 'Next'}
+              </button>
+            </div>
+          )}
         </div>
       </Trowser>
     </div>
