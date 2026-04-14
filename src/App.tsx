@@ -9,6 +9,7 @@ import { FUSION_CONFIG } from './navigation'
 import { getConfig, applyTheme } from './config'
 import OnboardingPage from './pages/OnboardingPage'
 import ImportPage from './pages/ImportPage'
+import AutomatedOnboardingPage from './pages/AutomatedOnboardingPage'
 import WorkspacePage from './pages/WorkspacePage'
 import HomePage from './pages/HomePage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -44,6 +45,7 @@ export default function App() {
             <Routes>
               <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/import" element={<ImportPage />} />
+              <Route path="/automated-onboarding" element={<AutomatedOnboardingPage />} />
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Navigate to="/home" replace />} />
                 <Route path="/home" element={<HomePage />} />
