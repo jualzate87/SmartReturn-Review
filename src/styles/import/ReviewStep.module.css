@@ -282,6 +282,23 @@
   text-decoration: underline;
 }
 
+.customFooterSecondary {
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  color: #ffffff;
+  background: transparent;
+  border: 1px solid #ffffff;
+  border-radius: 4px;
+  padding: 8px 24px;
+  cursor: pointer;
+}
+
+.customFooterSecondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .customFooterNext {
   font-family: inherit;
   font-size: 16px;

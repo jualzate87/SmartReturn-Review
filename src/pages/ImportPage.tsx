@@ -5,6 +5,8 @@ import { SteppedProgress, Step } from '@cgds/stepped-progress'
 import UploadStep from './import/UploadStep'
 import ReviewPersonalStep from './import/ReviewPersonalStep'
 import PriorYearStep from './import/PriorYearStep'
+import CreatingReturnStep from './import/CreatingReturnStep'
+import SuccessStep from './import/SuccessStep'
 import footerStyles from '../styles/import/ReviewStep.module.css'
 
 // Internal steps: 0 = upload, 1 = review personal, 2 = prior year,
@@ -88,22 +90,29 @@ export default function ImportPage() {
             )}
             {currentStep === 1 && <ReviewPersonalStep />}
             {currentStep === 2 && <PriorYearStep />}
-            {currentStep === 3 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screens 8-9 — Loading</p>}
-            {currentStep === 4 && <p style={{ padding: '2rem', textAlign: 'center' }}>Screen 10 — Success</p>}
+            {currentStep === 3 && <CreatingReturnStep onComplete={() => setCurrentStep(4)} />}
+            {currentStep === 4 && <SuccessStep />}
           </div>
 
-          {/* Custom footer bar — matches Figma dark footer with Cancel + Next */}
+          {/* Custom footer bar */}
           {currentStep > 0 && currentStep !== 3 && (
             <div className={footerStyles.customFooter}>
               <button className={footerStyles.customFooterCancel} onClick={handleClose}>
                 Cancel
               </button>
-              <button
-                className={footerStyles.customFooterNext}
-                onClick={() => { if (currentStep < 4) setCurrentStep(s => s + 1) }}
-              >
-                {currentStep === 4 ? 'Open return' : 'Next'}
-              </button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {currentStep === 4 && (
+                  <button className={footerStyles.customFooterSecondary} onClick={() => {}}>
+                    View client profile
+                  </button>
+                )}
+                <button
+                  className={footerStyles.customFooterNext}
+                  onClick={() => { if (currentStep < 4) setCurrentStep(s => s + 1) }}
+                >
+                  {currentStep === 4 ? 'Open return' : 'Next'}
+                </button>
+              </div>
             </div>
           )}
         </div>
