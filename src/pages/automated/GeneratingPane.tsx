@@ -2,14 +2,12 @@ import intuitAssistGif from '../../assets/intuit-assist-animation.gif'
 import styles from '../../styles/automated/GeneratingPane.module.css'
 
 interface GeneratingPaneProps {
-  userMessage: string
   processingText: string
   actionButtonLabel: string
   onActionClick: () => void
 }
 
 export default function GeneratingPane({
-  userMessage,
   processingText,
   actionButtonLabel,
   onActionClick,
@@ -23,30 +21,20 @@ export default function GeneratingPane({
         </button>
       </div>
 
-      <div className={styles.chatContent}>
-        {/* User message bubble */}
-        <div className={styles.userMessageRow}>
-          <div className={styles.userBubble}>
-            {userMessage}
-          </div>
-        </div>
-
-        {/* Agent processing */}
-        <div className={styles.processingRow}>
-          <div className={styles.processingInner}>
-            <div className={styles.processingContent}>
-              {/* Intuit Assist icon — 20px */}
-              <div className={styles.assistIconWrapper}>
-                <div className={styles.assistIcon}>
-                  <img
-                    src={intuitAssistGif}
-                    alt="Intuit Assist"
-                    className={styles.assistIconGif}
-                  />
-                </div>
+      {/* Agent processing */}
+      <div className={styles.processingRow}>
+        <div className={styles.processingInner}>
+          <div className={styles.processingContent}>
+            <div className={styles.assistIconWrapper}>
+              <div className={styles.assistIcon}>
+                <img
+                  src={intuitAssistGif}
+                  alt="Intuit Assist"
+                  className={styles.assistIconGif}
+                />
               </div>
-              <span className={styles.processingText}>{processingText}</span>
             </div>
+            <span className={styles.processingText}>{processingText}</span>
           </div>
         </div>
       </div>

@@ -55,7 +55,7 @@
   font-size: var(--font-size-action-medium, 16px);
   font-weight: 600;
   color: #ffffff;
-  background: #0077c5;
+  background: #205EA3;
   border: none;
   border-radius: var(--radius-action, 4px);
   padding: var(--space-component-stack-padding-medium, 6px) var(--space-component-inline-padding-medium, 8px);
@@ -65,5 +65,5 @@
 }
 
 .footerOpenReturn:hover {
-  background: #006bb3;
+  background: #1a4f8e;
 }

@@ -52,7 +52,6 @@ export default function AutomatedOnboardingPage() {
             )}
             {chatStep === 'generating-questionnaire' && (
               <GeneratingPane
-                userMessage="Create client questionnaire and checklist"
                 processingText="Creating questionnaire and checklist..."
                 actionButtonLabel="Create client questionnaire and checklist"
                 onActionClick={() => setChatStep('questionnaire')}
