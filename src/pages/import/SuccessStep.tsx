@@ -1,4 +1,5 @@
-import { CircleCheckFill, AiSparkles } from '@design-systems/icons'
+import { CircleCheckFill } from '@design-systems/icons'
+import aiSparkleIcon from '../../assets/icons/ai-sparkle-blue.svg'
 import styles from '../../styles/import/SuccessStep.module.css'
 
 export default function SuccessStep() {
@@ -10,7 +11,7 @@ export default function SuccessStep() {
         Jordan Wells' 1040 return for Tax Year 2025 is set up and ready to go.
       </p>
       <button className={styles.ctaButton}>
-        <AiSparkles size="small" className={styles.ctaIcon} />
+        <img src={aiSparkleIcon} alt="" className={styles.ctaIcon} />
         Start automated onboarding
       </button>
       <p className={styles.subCopy}>
