@@ -115,9 +115,13 @@
 }
 
 /* Override CGDS Tabs centering — force left alignment */
-.tabsLeftAligned {
-  margin: 0;
-  max-width: none;
+.tabsLeftAligned :global(.Tabs-tabs-6f63915) {
+  margin: 0 !important;
+  max-width: none !important;
+}
+
+.tabsLeftAligned :global(.Tabs-tabList-6f63915) {
+  justify-content: flex-start !important;
 }
 
 /* Toggle: All fields / Matched fields — CGDS Tab Intrapage style */

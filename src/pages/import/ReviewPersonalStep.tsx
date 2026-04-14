@@ -43,7 +43,8 @@ export default function ReviewPersonalStep() {
       <div className={styles.rightColumn}>
         <h2 className={styles.rightHeading}>Review personal information</h2>
 
-        <Tabs start={0} alignment="left" className={styles.tabsLeftAligned}>
+        <div className={styles.tabsLeftAligned}>
+        <Tabs start={0} alignment="left">
           <Tabs.Title>Client information</Tabs.Title>
           <Tabs.Title>Dependents</Tabs.Title>
           <Tabs.Title>Misc info/ Direct deposit</Tabs.Title>
@@ -51,6 +52,7 @@ export default function ReviewPersonalStep() {
           <Tabs.Panel><span /></Tabs.Panel>
           <Tabs.Panel><span /></Tabs.Panel>
         </Tabs>
+        </div>
 
         {/* All fields / Matched fields toggle */}
         <div className={styles.toggleGroup}>
