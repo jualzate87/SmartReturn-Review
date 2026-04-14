@@ -4,6 +4,7 @@ import '@ids-ts/trowser/dist/main.css'
 import { Button } from '@ids-ts/button'
 import '@ids-ts/button/dist/main.css'
 import LeftPanel from './automated/LeftPanel'
+import ChatInput from './automated/ChatInput'
 import styles from '../styles/automated/AutomatedOnboardingPage.module.css'
 
 export type ChatStep =
@@ -43,7 +44,13 @@ export default function AutomatedOnboardingPage() {
             <LeftPanel />
           </div>
           <div className={styles.rightPanel}>
-            <p style={{ padding: '1rem', color: '#6b6c72', fontSize: 14 }}>Right panel — Chat ({chatStep})</p>
+            {/* Chat pane content — Steps 4–8 */}
+            <div style={{ flex: 1, overflow: 'hidden' }} />
+            {/* Chat input always at bottom */}
+            <ChatInput onSend={(text) => {
+              console.log('sent:', text)
+              setChatStep('generating-questionnaire')
+            }} />
           </div>
         </div>
       </Trowser>
