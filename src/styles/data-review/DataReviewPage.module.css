@@ -100,12 +100,12 @@
   overflow: hidden;
 }
 
-/* Left panel */
+/* Left panel — width controlled by drag state */
 .leftPanel {
-  width: 50%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 /* Right panel — flex column, each section has controlled height */

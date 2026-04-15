@@ -1,16 +1,14 @@
-/* Document preview — source document image, fixed height, scrollable */
+/* Document preview — fills parent container, scrollable */
 .container {
   background: var(--color-container-background-primary, #ffffff);
-  border-bottom: 1px solid #adbac2;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 20px 10px;
   overflow-y: auto;
-  height: 40%;
-  min-height: 200px;
-  flex-shrink: 0;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .documentImage {
