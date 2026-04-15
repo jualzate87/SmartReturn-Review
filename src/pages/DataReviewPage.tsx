@@ -1,5 +1,6 @@
 import { ArrowLeft } from '@design-systems/icons'
 import intuitAssistIcon from '../assets/icons/intuit-assist.svg'
+import LeftPanel1040 from './data-review/LeftPanel1040'
 import styles from '../styles/data-review/DataReviewPage.module.css'
 
 export default function DataReviewPage() {
@@ -25,7 +26,7 @@ export default function DataReviewPage() {
       {/* Body — left panel + right panel */}
       <div className={styles.body}>
         <div className={styles.leftPanel}>
-          <p style={{ padding: '1rem', color: '#6b6c72', fontSize: 14 }}>Left panel — 1040 form</p>
+          <LeftPanel1040 />
         </div>
         <div className={styles.rightPanel}>
           <p style={{ padding: '1rem', color: '#6b6c72', fontSize: 14 }}>Right panel — Review details</p>

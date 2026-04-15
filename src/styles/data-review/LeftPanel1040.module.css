@@ -1,0 +1,216 @@
+/* Left panel — 1040 form viewer with toolbar and status badges */
+.leftPanel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Toolbar — bg #e2e9ed, height 45px */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 45px;
+  padding: 4px 10px;
+  background: #e2e9ed;
+  flex-shrink: 0;
+}
+
+.toolbarControls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.zoomLevel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #21262a;
+  border-radius: 4px;
+  padding: 0 8px;
+  height: 24px;
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 16px;
+  color: #21262a;
+  white-space: nowrap;
+}
+
+.toolbarBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #21262a;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+}
+
+.toolbarBtn:hover {
+  opacity: 0.7;
+}
+
+.toolbarDivider {
+  width: 1px;
+  height: 24px;
+  background: #21262a;
+  flex-shrink: 0;
+}
+
+.pageControls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pageLabel {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 16px;
+  color: #21262a;
+}
+
+.pageNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #21262a;
+  border-radius: 4px;
+  padding: 0 8px;
+  height: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 16px;
+  color: #21262a;
+}
+
+.pageTotal {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 16px;
+  color: #21262a;
+  width: 26px;
+  text-align: center;
+}
+
+.pageNavBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #21262a;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+}
+
+/* Document viewer — white bg, scales to fill available space */
+.documentViewer {
+  flex: 1;
+  background: #ffffff;
+  padding: 12px;
+  overflow-y: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.documentWrapper {
+  position: relative;
+  width: 100%;
+  height: fit-content;
+  box-shadow: 0 1px 4px rgba(76, 85, 91, 0.2);
+}
+
+.documentImage {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Colored highlight bars — positioned on the 1040 form, 40% opacity */
+/* These are approximate positions based on the Figma metadata */
+.highlightRed {
+  position: absolute;
+  left: 81%;
+  top: 51.2%;
+  width: 14%;
+  height: 1.4%;
+  background: #f25a52;
+  opacity: 0.4;
+}
+
+.highlightOrange {
+  position: absolute;
+  left: 81%;
+  top: 68.2%;
+  width: 14%;
+  height: 1.4%;
+  background: #fca354;
+  opacity: 0.4;
+}
+
+.highlightBlue {
+  position: absolute;
+  left: 81%;
+  top: 86.2%;
+  width: 14%;
+  height: 1.4%;
+  background: #7cbcff;
+  opacity: 0.4;
+}
+
+/* Status badges — float at right edge of the form */
+.badgeRed {
+  position: absolute;
+  right: -4px;
+  top: 51%;
+  background: #d52b1e;
+  color: #ffffff;
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  text-transform: uppercase;
+  padding: 2px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.badgeOrange {
+  position: absolute;
+  right: -4px;
+  top: 68%;
+  background: #bf4e12;
+  color: #ffffff;
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  text-transform: uppercase;
+  padding: 2px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.badgeBlue {
+  position: absolute;
+  right: -4px;
+  top: 86%;
+  background: #0077c5;
+  color: #ffffff;
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  text-transform: uppercase;
+  padding: 2px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
