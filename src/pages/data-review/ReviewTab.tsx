@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { DotsSix } from '@design-systems/icons'
+import { PopOut } from '@design-systems/icons'
 import sparklesIcon from '../../assets/icons/sparkles.svg'
 import styles from '../../styles/data-review/ReviewTab.module.css'
 
@@ -39,9 +39,19 @@ export default function ReviewTab({ onTabChange }: ReviewTabProps) {
         ))}
       </div>
 
-      {/* Drag handle / pop-out button */}
-      <button className={styles.popOutBtn} aria-label="Drag to rearrange">
-        <DotsSix size="medium" />
+      {/* Pop-out button — opens right panel in new tab */}
+      <button
+        className={styles.popOutBtn}
+        aria-label="Pop out to new window"
+        onClick={() => {
+          window.open(
+            `${window.location.origin}${window.location.pathname}#/data-review-popout`,
+            '_blank',
+            'width=800,height=900'
+          )
+        }}
+      >
+        <PopOut size="medium" />
       </button>
     </div>
   )

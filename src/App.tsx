@@ -11,6 +11,7 @@ import OnboardingPage from './pages/OnboardingPage'
 import ImportPage from './pages/ImportPage'
 import AutomatedOnboardingPage from './pages/AutomatedOnboardingPage'
 import DataReviewPage from './pages/DataReviewPage'
+import DataReviewPopout from './pages/DataReviewPopout'
 import WorkspacePage from './pages/WorkspacePage'
 import HomePage from './pages/HomePage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -48,6 +49,7 @@ export default function App() {
               <Route path="/import" element={<ImportPage />} />
               <Route path="/automated-onboarding" element={<AutomatedOnboardingPage />} />
               <Route path="/data-review" element={<DataReviewPage />} />
+              <Route path="/data-review-popout" element={<DataReviewPopout />} />
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Navigate to="/home" replace />} />
                 <Route path="/home" element={<HomePage />} />
