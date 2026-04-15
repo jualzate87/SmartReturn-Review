@@ -2,6 +2,8 @@ import { ArrowLeft } from '@design-systems/icons'
 import intuitAssistIcon from '../assets/icons/intuit-assist.svg'
 import LeftPanel1040 from './data-review/LeftPanel1040'
 import ReviewTab from './data-review/ReviewTab'
+import DocumentPreview from './data-review/DocumentPreview'
+import w2BingEquipment from '../assets/w2-bing-equipment.png'
 import styles from '../styles/data-review/DataReviewPage.module.css'
 
 export default function DataReviewPage() {
@@ -31,9 +33,10 @@ export default function DataReviewPage() {
         </div>
         <div className={styles.rightPanel}>
           <ReviewTab />
-          {/* Document preview + detail fields go here (Steps 4-5) */}
-          <div style={{ flex: 1, padding: '1rem', color: '#6b6c72', fontSize: 14 }}>
-            Document preview + fields
+          <DocumentPreview imageSrc={w2BingEquipment} alt="W-2 Bing Equipment" />
+          {/* Detail fields go here (Step 5) */}
+          <div style={{ flex: 1, padding: '1rem', color: '#6b6c72', fontSize: 14, overflowY: 'auto' }}>
+            Detail fields placeholder
           </div>
         </div>
       </div>
