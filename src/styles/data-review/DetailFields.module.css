@@ -1,0 +1,271 @@
+/* Detail fields — editable input section, scrollable independently */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  padding-bottom: 20px;
+  background: #ffffff;
+  flex: 1;
+  overflow-y: auto;
+  width: 100%;
+  min-height: 0;
+}
+
+/* Page header — title + sub-tabs */
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.title {
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+  color: #21262a;
+  padding: 20px 20px 0;
+  margin: 0;
+}
+
+/* Sub-tab bar */
+.subTabBar {
+  display: flex;
+  align-items: flex-start;
+  padding: 0 20px;
+  width: 100%;
+}
+
+.subTabMenu {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  color: #5D686F;
+  display: flex;
+  align-items: center;
+}
+
+.subTab {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  border-bottom: 2px solid #c3ced5;
+}
+
+.subTabActive {
+  border-bottom-color: #205ea3;
+}
+
+.subTabContent {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0;
+}
+
+.subTabLabel {
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.subTabLabelActive {
+  color: #21262a;
+}
+
+.subTabLabelInactive {
+  color: #5d686f;
+}
+
+.subTabClose {
+  width: 18px;
+  height: 18px;
+  color: inherit;
+  cursor: pointer;
+}
+
+.subTabBorderFill {
+  border-bottom: 2px solid #c3ced5;
+  flex-shrink: 0;
+  width: 32px;
+  align-self: stretch;
+}
+
+.subTabActions {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  padding-bottom: 4px;
+}
+
+.subTabAddBtn {
+  border: 2px solid #c3ced5;
+  background: none;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #21262a;
+  border-radius: 0;
+  width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+}
+
+.subTabAddBtn:hover {
+  background: #f4f5f8;
+}
+
+.subTabViewAll {
+  border: 2px solid #c3ced5;
+  background: none;
+  border-radius: 4px;
+  padding: 6px 4px 6px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  color: #21262a;
+  height: 36px;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.subTabViewAll:hover {
+  background: #f4f5f8;
+}
+
+/* Input container */
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Section header — grey bg */
+.sectionHeader {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 20px;
+  margin: 0 20px;
+  background: #f0f4f6;
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #21262a;
+}
+
+/* Spacer */
+.spacer {
+  height: 20px;
+  width: 100%;
+  background: #ffffff;
+}
+
+/* Field row */
+.fieldRow {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding: 8px 0;
+  margin: 0 20px;
+  border-bottom: 1px solid #c3ced5;
+}
+
+/* Field label — 300px, left side */
+.fieldLabel {
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: #000000;
+  width: 300px;
+  flex-shrink: 0;
+  max-width: 268px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Input field — 300px, 36px height, border #859299 */
+.fieldInput {
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #21262a;
+  background: #ffffff;
+  border: 1px solid #859299;
+  border-radius: 4px;
+  padding: 6px 8px;
+  height: 36px;
+  width: 300px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.fieldInput:focus {
+  border-color: #0077c5;
+}
+
+/* Highlighted field — blue bg + blue border */
+.fieldInputHighlighted {
+  background: #f4f9ff;
+  border-color: #a0cfff;
+}
+
+/* Refresh icon button */
+.refreshBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #21262a;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* Multi-field row (City / State / ZIP) */
+.multiFieldRow {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding: 8px 0;
+  margin: 0 20px;
+  border-bottom: 1px solid #c3ced5;
+}
+
+.multiFieldInputs {
+  display: flex;
+  gap: 8px;
+}
+
+.fieldInputCity {
+  width: 140px;
+}
+
+.fieldInputState {
+  width: 74px;
+}
+
+.fieldInputZip {
+  width: 116px;
+}

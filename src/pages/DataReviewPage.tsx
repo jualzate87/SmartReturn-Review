@@ -3,6 +3,7 @@ import intuitAssistIcon from '../assets/icons/intuit-assist.svg'
 import LeftPanel1040 from './data-review/LeftPanel1040'
 import ReviewTab from './data-review/ReviewTab'
 import DocumentPreview from './data-review/DocumentPreview'
+import DetailFields from './data-review/DetailFields'
 import w2BingEquipment from '../assets/w2-bing-equipment.png'
 import styles from '../styles/data-review/DataReviewPage.module.css'
 
@@ -34,10 +35,13 @@ export default function DataReviewPage() {
         <div className={styles.rightPanel}>
           <ReviewTab />
           <DocumentPreview imageSrc={w2BingEquipment} alt="W-2 Bing Equipment" />
-          {/* Detail fields go here (Step 5) */}
-          <div style={{ flex: 1, padding: '1rem', color: '#6b6c72', fontSize: 14, overflowY: 'auto' }}>
-            Detail fields placeholder
-          </div>
+          <DetailFields
+            formTitle="Details: Wages, Salaries, Tips (W-2)"
+            tabs={[
+              { label: 'Bing Equipment', active: true },
+              { label: 'Tech circle', active: false },
+            ]}
+          />
         </div>
       </div>
     </div>
