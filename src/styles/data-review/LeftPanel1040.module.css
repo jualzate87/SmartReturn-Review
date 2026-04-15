@@ -110,11 +110,11 @@
   height: 20px;
 }
 
-/* Document viewer — white bg, form fits within available space */
+/* Document viewer — white bg, form scales to fit available space */
 .documentViewer {
   flex: 1;
   background: #ffffff;
-  padding: 12px;
+  padding: 8px;
   overflow-y: auto;
   display: flex;
   align-items: flex-start;
@@ -123,8 +123,7 @@
 
 .documentWrapper {
   position: relative;
-  width: 80%;
-  max-width: 550px;
+  width: 92%;
   height: fit-content;
   box-shadow: 0 1px 4px rgba(76, 85, 91, 0.2);
 }
