@@ -1,6 +1,7 @@
 import { ArrowLeft } from '@design-systems/icons'
 import intuitAssistIcon from '../assets/icons/intuit-assist.svg'
 import LeftPanel1040 from './data-review/LeftPanel1040'
+import ReviewTab from './data-review/ReviewTab'
 import styles from '../styles/data-review/DataReviewPage.module.css'
 
 export default function DataReviewPage() {
@@ -29,7 +30,11 @@ export default function DataReviewPage() {
           <LeftPanel1040 />
         </div>
         <div className={styles.rightPanel}>
-          <p style={{ padding: '1rem', color: '#6b6c72', fontSize: 14 }}>Right panel — Review details</p>
+          <ReviewTab />
+          {/* Document preview + detail fields go here (Steps 4-5) */}
+          <div style={{ flex: 1, padding: '1rem', color: '#6b6c72', fontSize: 14 }}>
+            Document preview + fields
+          </div>
         </div>
       </div>
     </div>
