@@ -7,9 +7,10 @@ const TABS = ['W-2s', '1099-DIVs', '1099-INTs', 'Schedule K-1']
 
 interface ReviewTabProps {
   onTabChange?: (tab: string) => void
+  onPopOut?: () => void
 }
 
-export default function ReviewTab({ onTabChange }: ReviewTabProps) {
+export default function ReviewTab({ onTabChange, onPopOut }: ReviewTabProps) {
   const [activeTab, setActiveTab] = useState(0)
 
   const handleTabClick = (index: number) => {
@@ -43,13 +44,7 @@ export default function ReviewTab({ onTabChange }: ReviewTabProps) {
       <button
         className={styles.popOutBtn}
         aria-label="Pop out to new window"
-        onClick={() => {
-          window.open(
-            `${window.location.origin}${window.location.pathname}#/data-review-popout`,
-            '_blank',
-            'width=800,height=900'
-          )
-        }}
+        onClick={onPopOut}
       >
         <PopOut size="medium" />
       </button>
