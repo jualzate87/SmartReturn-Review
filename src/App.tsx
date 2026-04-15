@@ -10,6 +10,7 @@ import { getConfig, applyTheme } from './config'
 import OnboardingPage from './pages/OnboardingPage'
 import ImportPage from './pages/ImportPage'
 import AutomatedOnboardingPage from './pages/AutomatedOnboardingPage'
+import DataReviewPage from './pages/DataReviewPage'
 import WorkspacePage from './pages/WorkspacePage'
 import HomePage from './pages/HomePage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -46,6 +47,7 @@ export default function App() {
               <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/import" element={<ImportPage />} />
               <Route path="/automated-onboarding" element={<AutomatedOnboardingPage />} />
+              <Route path="/data-review" element={<DataReviewPage />} />
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Navigate to="/home" replace />} />
                 <Route path="/home" element={<HomePage />} />
