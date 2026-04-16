@@ -6,16 +6,18 @@ import styles from '../../styles/data-review/LeftPanel1040.module.css'
 
 interface LeftPanel1040Props {
   selectedField?: string | null
+  total1a?: number
 }
 
-const W2_SOURCES = [
-  { label: 'Bing equipment W2', value: '$60,000' },
-  { label: 'Tech Circle W2', value: '$64,265' },
-]
-
-export default function LeftPanel1040({ selectedField }: LeftPanel1040Props) {
+export default function LeftPanel1040({ selectedField, total1a = 124304 }: LeftPanel1040Props) {
   const [toastVisible, setToastVisible] = useState(false)
   const showWagesHighlight = selectedField === 'wages'
+
+  // Sources toast shows live wages from both W-2s
+  const W2_SOURCES = [
+    { label: 'Bing equipment W2', value: `$${(total1a - 64304).toLocaleString()}` },
+    { label: 'Tech Circle W2', value: `$${(64304).toLocaleString()}` },
+  ]
 
   return (
     <div className={styles.leftPanel}>
@@ -38,7 +40,7 @@ export default function LeftPanel1040({ selectedField }: LeftPanel1040Props) {
         </div>
       </div>
 
-      {/* Document viewer — 1040 form with conditional highlight */}
+      {/* Document viewer — 1040 form with conditional highlight + dynamic overlay */}
       <div className={styles.documentViewer}>
         <div className={styles.documentWrapper}>
           <img
@@ -46,6 +48,23 @@ export default function LeftPanel1040({ selectedField }: LeftPanel1040Props) {
             alt="Form 1040 - 2024"
             className={styles.documentImage}
           />
+
+          {/* Dynamic 1040 Line 1a overlay — shows live total wages */}
+          <span style={{
+            position: 'absolute',
+            left: '82%',
+            top: '35.48%',
+            width: '13%',
+            textAlign: 'right',
+            fontSize: '1.3%',
+            fontFamily: 'Arial, sans-serif',
+            color: '#000000',
+            pointerEvents: 'none',
+            lineHeight: 1,
+            paddingRight: '0.5%',
+          }}>
+            {total1a.toLocaleString()}
+          </span>
 
           {/* 1040 wages line highlight — shown when wages field is selected */}
           {showWagesHighlight && (

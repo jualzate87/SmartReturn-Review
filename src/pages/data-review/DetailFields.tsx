@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Refresh } from '@design-systems/icons'
 import SubTab from './SubTab'
 import styles from '../../styles/data-review/DetailFields.module.css'
@@ -8,37 +7,52 @@ interface DetailFieldsProps {
   tabs: { label: string; active: boolean }[]
   selectedField?: string | null
   onFieldSelect?: (field: string | null) => void
+  activeSubTab?: 'bingEquipment' | 'techCircle'
+  onSubTabChange?: (tab: string) => void
+  wages?: { bingEquipment: number; techCircle: number }
+  onWageChange?: (employer: string, value: number) => void
 }
 
-const W2_FIELDS = {
-  employer: [
-    { label: '(b) Employer identification number', value: '12-3456789', hasRefresh: true },
-    { label: '(c) Name of employer', value: 'Bing Equipment' },
-    { label: 'Street address', value: '3833 Soundtech Ct SE' },
-  ],
-  wages: [
-    { label: '(1) Wages, tips, etc.', value: '60,000', highlighted: true },
-    { label: '(2) Federal income tax withheld', value: '10,000' },
-    { label: '(3) Social security wages', value: '60,000' },
-    { label: '(4) Social security tax withheld', value: '3,720' },
-    { label: '(5) Medicare wages and tips', value: '60,000' },
-    { label: '(6) Medicare tax withheld', value: '870' },
-    { label: '(7) Social security tips', value: '25' },
-    { label: '(8) Allocated tips', value: '0' },
-    { label: '(10) Dependent care benefits', value: '25' },
-    { label: '(11) Nonqualified plans', value: '39' },
-  ],
+// Static non-wages fields per employer
+const EMPLOYER_DATA = {
+  bingEquipment: {
+    id: '12-3456789',
+    name: 'Bing Equipment',
+    street: '3833 Soundtech Ct SE',
+    city: 'Kentwood', state: 'CA', zip: '93004',
+    federalTax: '10,000',
+    ssTax: '3,720', medicareTax: '870',
+    ssTips: '25', allocatedTips: '0',
+    dependentCare: '25', nonqualified: '39',
+  },
+  techCircle: {
+    id: '12-3456789',
+    name: 'Tech circle',
+    street: '321 Main Orchard Dr',
+    city: 'Reno', state: 'NV', zip: '95010',
+    federalTax: '5,987',
+    ssTax: '3,720', medicareTax: '1000',
+    ssTips: '25', allocatedTips: '0',
+    dependentCare: '25', nonqualified: '39',
+  },
 }
 
-export default function DetailFields({ formTitle, tabs, selectedField, onFieldSelect }: DetailFieldsProps) {
-  const [fields, setFields] = useState(W2_FIELDS)
-  const [activeTab, setActiveTab] = useState(0)
+export default function DetailFields({
+  formTitle,
+  tabs,
+  selectedField,
+  onFieldSelect,
+  activeSubTab = 'bingEquipment',
+  onSubTabChange,
+  wages = { bingEquipment: 60000, techCircle: 64304 },
+  onWageChange,
+}: DetailFieldsProps) {
+  const employer = EMPLOYER_DATA[activeSubTab]
+  const currentWages = wages[activeSubTab]
 
-  const handleFieldChange = (section: 'employer' | 'wages', index: number, value: string) => {
-    setFields(prev => ({
-      ...prev,
-      [section]: prev[section].map((f, i) => i === index ? { ...f, value } : f),
-    }))
+  const handleWagesChange = (value: string) => {
+    const num = parseFloat(value.replace(/,/g, '')) || 0
+    onWageChange?.(activeSubTab, num)
   }
 
   return (
@@ -46,76 +60,99 @@ export default function DetailFields({ formTitle, tabs, selectedField, onFieldSe
       {/* Page header */}
       <div className={styles.pageHeader}>
         <h2 className={styles.title}>{formTitle}</h2>
-
-        {/* Sub-tab bar — rebuilt from Figma */}
         <SubTab
           tabs={tabs.map(t => ({ label: t.label }))}
-          onTabChange={setActiveTab}
+          activeIndex={tabs.findIndex(t => t.active)}
+          onTabChange={(i) => {
+            const tab = tabs[i]
+            if (tab) onSubTabChange?.(i === 0 ? 'bingEquipment' : 'techCircle')
+          }}
         />
       </div>
 
-      {/* Input fields */}
+      {/* Scrollable input fields */}
       <div className={styles.inputContainer}>
         {/* Employer Information section */}
         <div className={styles.sectionHeader}>
           Employer Information (MANDATORY for e-file)
         </div>
 
-        {fields.employer.map((field, i) => (
-          <div key={field.label} className={styles.fieldRow}>
-            <span className={styles.fieldLabel}>{field.label}</span>
-            <input
-              className={styles.fieldInput}
-              value={field.value}
-              onChange={e => handleFieldChange('employer', i, e.target.value)}
-            />
-            {field.hasRefresh && (
-              <button className={styles.refreshBtn} aria-label="Refresh">
-                <Refresh size="medium" />
-              </button>
-            )}
-          </div>
-        ))}
-
-        {/* City / State / ZIP row */}
-        <div className={styles.multiFieldRow}>
+        <div className={styles.fieldRow}>
+          <span className={styles.fieldLabel}>(b) Employer identification number</span>
+          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value={employer.id} />
+          <button className={styles.refreshBtn} aria-label="Refresh"><Refresh size="medium" /></button>
+        </div>
+        <div className={styles.fieldRow}>
+          <span className={styles.fieldLabel}>(c) Name of employer</span>
+          <input className={`${styles.fieldInput} ${styles.fieldInputWide}`} readOnly value={employer.name} />
+        </div>
+        <div className={styles.fieldRow}>
+          <span className={styles.fieldLabel}>Street address</span>
+          <input className={`${styles.fieldInput} ${styles.fieldInputWide}`} readOnly value={employer.street} />
+        </div>
+        <div className={styles.fieldRow}>
           <span className={styles.fieldLabel}>City / State / ZIP code</span>
-          <div className={styles.multiFieldInputs}>
-            <input className={`${styles.fieldInput} ${styles.fieldInputCity}`} defaultValue="Kentwood" />
-            <input className={`${styles.fieldInput} ${styles.fieldInputState}`} defaultValue="CA" />
-            <input className={`${styles.fieldInput} ${styles.fieldInputZip}`} defaultValue="93004" />
+          <div className={styles.addressRow}>
+            <input className={`${styles.fieldInput} ${styles.addressCity}`} readOnly value={employer.city} />
+            <input className={`${styles.fieldInput} ${styles.addressState}`} readOnly value={employer.state} />
+            <input className={`${styles.fieldInput} ${styles.addressZip}`} readOnly value={employer.zip} />
           </div>
         </div>
-
-        <div className={styles.spacer} />
 
         {/* Wages section */}
-        <div className={styles.sectionHeader}>
-          Wages
+        <div className={styles.sectionRow}><span className={styles.sectionLabel}>Wages</span></div>
+
+        {/* (1) Wages — editable, drives 1040 line 1a */}
+        <div
+          className={styles.fieldRow}
+          onClick={() => onFieldSelect?.('wages')}
+          style={{ cursor: 'pointer' }}
+        >
+          <span className={styles.fieldLabel}>(1) Wages, tips, etc.</span>
+          <input
+            className={`${styles.fieldInput} ${styles.fieldInputSmall} ${selectedField === 'wages' ? styles.fieldInputHighlighted : ''}`}
+            value={currentWages.toLocaleString()}
+            onChange={e => handleWagesChange(e.target.value)}
+            onClick={e => e.stopPropagation()}
+          />
         </div>
 
-        <div className={styles.spacer} />
-
-        {fields.wages.map((field, i) => {
-          const isWagesField = i === 0 // "(1) Wages, tips, etc."
-          const isHighlighted = isWagesField && selectedField === 'wages'
-          return (
-            <div
-              key={field.label}
-              className={styles.fieldRow}
-              onClick={() => isWagesField ? onFieldSelect?.('wages') : onFieldSelect?.(null)}
-              style={{ cursor: isWagesField ? 'pointer' : 'default' }}
-            >
-              <span className={styles.fieldLabel}>{field.label}</span>
-              <input
-                className={`${styles.fieldInput} ${isHighlighted ? styles.fieldInputHighlighted : ''}`}
-                value={field.value}
-                onChange={e => handleFieldChange('wages', i, e.target.value)}
-                onClick={e => e.stopPropagation()}
-              />
-            </div>
-          )
-        })}
+        <div className={styles.fieldRow}>
+          <span className={styles.fieldLabel}>(2) Federal income tax withheld</span>
+          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value={employer.federalTax} />
+        </div>
+        <div className={styles.fieldRow}>
+          <span className={styles.fieldLabel}>(3) Social security wages</span>
+          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value={currentWages.toLocaleString()} />
+        </div>
+        <div className={styles.fieldRow}>
+          <span className={styles.fieldLabel}>(4) Social security tax withheld</span>
+          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value={employer.ssTax} />
+        </div>
+        <div className={styles.fieldRow}>
+          <span className={styles.fieldLabel}>(5) Medicare wages and tips</span>
+          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value={currentWages.toLocaleString()} />
+        </div>
+        <div className={styles.fieldRow}>
+          <span className={styles.fieldLabel}>(6) Medicare tax withheld</span>
+          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value={employer.medicareTax} />
+        </div>
+        <div className={styles.fieldRow}>
+          <span className={styles.fieldLabel}>(7) Social security tips</span>
+          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value={employer.ssTips} />
+        </div>
+        <div className={styles.fieldRow}>
+          <span className={styles.fieldLabel}>(8) Allocated tips</span>
+          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value={employer.allocatedTips} />
+        </div>
+        <div className={styles.fieldRow}>
+          <span className={styles.fieldLabel}>(10) Dependent care benefits</span>
+          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value={employer.dependentCare} />
+        </div>
+        <div className={styles.fieldRow}>
+          <span className={styles.fieldLabel}>(11) Nonqualified plans</span>
+          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value={employer.nonqualified} />
+        </div>
       </div>
     </div>
   )

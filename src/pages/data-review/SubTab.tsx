@@ -8,14 +8,16 @@ interface SubTabItem {
 
 interface SubTabProps {
   tabs: SubTabItem[]
+  activeIndex?: number
   onTabChange?: (index: number) => void
 }
 
-export default function SubTab({ tabs, onTabChange }: SubTabProps) {
-  const [activeTab, setActiveTab] = useState(0)
+export default function SubTab({ tabs, activeIndex, onTabChange }: SubTabProps) {
+  const [internalTab, setInternalTab] = useState(0)
+  const activeTab = activeIndex !== undefined ? activeIndex : internalTab
 
   const handleTabClick = (index: number) => {
-    setActiveTab(index)
+    setInternalTab(index)
     onTabChange?.(index)
   }
 
