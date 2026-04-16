@@ -10,10 +10,14 @@ import styles from '../styles/data-review/DataReviewPage.module.css'
 import dragStyles from '../styles/data-review/DragHandle.module.css'
 
 export default function DataReviewPage() {
+  // Selected field for cross-document highlighting
+  const [selectedField, setSelectedField] = useState<string | null>(null)
   // Left/right panel width ratio (0-1, where value = left panel percentage)
   const [leftWidth, setLeftWidth] = useState(50)
   // Top/bottom section height ratio in right panel (0-100, where value = preview percentage)
   const [previewHeight, setPreviewHeight] = useState(40)
+  // Whether right panel is popped out
+  const [poppedOut, setPoppedOut] = useState(false)
 
   const bodyRef = useRef<HTMLDivElement>(null)
   const rightRef = useRef<HTMLDivElement>(null)
@@ -97,37 +101,59 @@ export default function DataReviewPage() {
 
       {/* Body — left panel + drag handle + right panel */}
       <div className={styles.body} ref={bodyRef}>
-        <div className={styles.leftPanel} style={{ width: `${leftWidth}%` }}>
-          <LeftPanel1040 />
+        <div className={styles.leftPanel} style={{ width: poppedOut ? '100%' : `${leftWidth}%` }}>
+          <LeftPanel1040 selectedField={selectedField} />
         </div>
 
-        {/* Left/right drag handle */}
-        <div className={dragStyles.handleVertical} onMouseDown={handleHorizontalDrag}>
-          <OverflowIos size="small" className={dragStyles.handleIcon} />
-        </div>
+        {!poppedOut && (
+          <>
+            {/* Left/right drag handle */}
+            <div className={dragStyles.handleVertical} onMouseDown={handleHorizontalDrag}>
+              <OverflowIos size="small" className={dragStyles.handleIcon} />
+            </div>
 
-        <div className={styles.rightPanel} ref={rightRef} style={{ flex: 1 }}>
-          <ReviewTab />
+            <div className={styles.rightPanel} ref={rightRef} style={{ flex: 1 }}>
+              <ReviewTab onPopOut={() => {
+                setPoppedOut(true)
+                const popoutWindow = window.open(
+                  `${window.location.origin}${window.location.pathname}#/data-review-popout`,
+                  '_blank',
+                  'width=800,height=900'
+                )
+                // Listen for the popout window closing to restore the right panel
+                if (popoutWindow) {
+                  const checkClosed = setInterval(() => {
+                    if (popoutWindow.closed) {
+                      clearInterval(checkClosed)
+                      setPoppedOut(false)
+                    }
+                  }, 500)
+                }
+              }} />
 
-          {/* Document preview — resizable height */}
-          <div style={{ height: `${previewHeight}%`, flexShrink: 0, overflow: 'hidden' }}>
-            <DocumentPreview imageSrc={w2BingEquipment} alt="W-2 Bing Equipment" />
-          </div>
+              {/* Document preview — resizable height */}
+              <div style={{ height: `${previewHeight}%`, flexShrink: 0, overflow: 'hidden' }}>
+                <DocumentPreview imageSrc={w2BingEquipment} alt="W-2 Bing Equipment" selectedField={selectedField} />
+              </div>
 
-          {/* Up/down drag handle */}
-          <div className={dragStyles.handleHorizontal} onMouseDown={handleVerticalDrag}>
-            <DotsSix size="small" className={`${dragStyles.handleIcon} ${dragStyles.rotated90}`} />
-          </div>
+              {/* Up/down drag handle */}
+              <div className={dragStyles.handleHorizontal} onMouseDown={handleVerticalDrag}>
+                <DotsSix size="small" className={`${dragStyles.handleIcon} ${dragStyles.rotated90}`} />
+              </div>
 
-          {/* Detail fields — takes remaining space */}
-          <DetailFields
-            formTitle="Details: Wages, Salaries, Tips (W-2)"
-            tabs={[
-              { label: 'Bing Equipment', active: true },
-              { label: 'Tech circle', active: false },
-            ]}
-          />
-        </div>
+              {/* Detail fields — takes remaining space */}
+              <DetailFields
+                formTitle="Details: Wages, Salaries, Tips (W-2)"
+                tabs={[
+                  { label: 'Bing Equipment', active: true },
+                  { label: 'Tech circle', active: false },
+                ]}
+                selectedField={selectedField}
+                onFieldSelect={setSelectedField}
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

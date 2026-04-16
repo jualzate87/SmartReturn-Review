@@ -124,7 +124,7 @@
 .documentWrapper {
   position: relative;
   width: 92%;
-  height: fit-content;
+  line-height: 0;
   box-shadow: 0 1px 4px rgba(76, 85, 91, 0.2);
 }
 
@@ -134,83 +134,16 @@
   display: block;
 }
 
-/* Colored highlight bars — positioned on the 1040 form, 40% opacity */
-/* These are approximate positions based on the Figma metadata */
-.highlightRed {
+/* 1040 Line 1a — pixel-detected from image row scan
+   Row borders found at 35.48% and 36.79%, value in right column 82-95% */
+.wagesHighlight1040 {
   position: absolute;
-  left: 81%;
-  top: 51.2%;
-  width: 14%;
-  height: 1.4%;
-  background: #f25a52;
-  opacity: 0.4;
-}
-
-.highlightOrange {
-  position: absolute;
-  left: 81%;
-  top: 68.2%;
-  width: 14%;
-  height: 1.4%;
-  background: #fca354;
-  opacity: 0.4;
-}
-
-.highlightBlue {
-  position: absolute;
-  left: 81%;
-  top: 86.2%;
-  width: 14%;
-  height: 1.4%;
-  background: #7cbcff;
-  opacity: 0.4;
-}
-
-/* Status badges — float at right edge of the form */
-.badgeRed {
-  position: absolute;
-  right: -4px;
-  top: 51%;
-  background: #d52b1e;
-  color: #ffffff;
-  font-family: var(--font-name-body, sans-serif);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 16px;
-  text-transform: uppercase;
-  padding: 2px 4px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
-.badgeOrange {
-  position: absolute;
-  right: -4px;
-  top: 68%;
-  background: #bf4e12;
-  color: #ffffff;
-  font-family: var(--font-name-body, sans-serif);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 16px;
-  text-transform: uppercase;
-  padding: 2px 4px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
-.badgeBlue {
-  position: absolute;
-  right: -4px;
-  top: 86%;
-  background: #0077c5;
-  color: #ffffff;
-  font-family: var(--font-name-body, sans-serif);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 16px;
-  text-transform: uppercase;
-  padding: 2px 4px;
-  border-radius: 4px;
-  white-space: nowrap;
+  left: 82%;
+  top: 35.48%;
+  width: 13%;
+  height: 1.31%;
+  border: 2.5px solid #3492ef;
+  border-radius: 1px;
+  cursor: pointer;
+  z-index: 2;
 }
