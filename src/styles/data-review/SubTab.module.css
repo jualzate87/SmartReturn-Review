@@ -1,0 +1,167 @@
+/* Secondary Tab — exact from Figma node 540:4623 */
+
+/* Container: display:flex, align-items:flex-start, full width, no padding */
+.container {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Menu icon button — p-6px, no border */
+.menuBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #21262a;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* Each tab — border-b-2 #c3ced5, flex-col gap-2px, px-16px */
+.tab {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  padding: 0 16px;
+  border-bottom: 2px solid #c3ced5;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Tab content row: gap-8px, py-6px */
+.tabContent {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0;
+}
+
+/* Tab label — 14px Demi */
+.tabLabelActive {
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #21262a;
+  white-space: nowrap;
+}
+
+.tabLabelInactive {
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #5d686f;
+  white-space: nowrap;
+}
+
+/* Close icon — 18px */
+.closeIcon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Bottom stroke: active tab overrides the grey border with blue */
+.strokeActive {
+  height: 2px;
+  width: 100%;
+  background: #205ea3;
+  flex-shrink: 0;
+  margin-bottom: -2px; /* sit over the grey border */
+  position: relative;
+  z-index: 1;
+}
+
+.strokeInactive {
+  height: 2px;
+  width: 100%;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+/* Border + Button group — flex-[1_0_0], aligns buttons to end */
+.borderAndButtons {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  align-items: flex-end;
+}
+
+/* Border fill — flex-[1_0_0], border-b-2 #c3ced5 */
+.borderFill {
+  flex: 1;
+  min-width: 0;
+  height: 37px;
+  border-bottom: 2px solid #c3ced5;
+}
+
+/* Button group — gap-4px, at the end */
+.buttonGroup {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* + button — border-2 #c3ced5, p-6px */
+.addBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: 2px solid #c3ced5;
+  background: none;
+  cursor: pointer;
+  color: #21262a;
+  box-sizing: border-box;
+}
+
+.addBtn:hover {
+  background: #f4f5f8;
+}
+
+/* View All button — border-2 #c3ced5, border-radius 4px, px-8px py-6px + chevron pr-4px */
+.viewAllBtn {
+  display: flex;
+  align-items: center;
+  border: 2px solid #c3ced5;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.viewAllBtn:hover {
+  background: #f4f5f8;
+}
+
+.viewAllLabel {
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  color: #21262a;
+  white-space: nowrap;
+  padding: 6px 8px;
+}
+
+.viewAllChevron {
+  display: flex;
+  align-items: center;
+  padding-right: 4px;
+  color: #21262a;
+}

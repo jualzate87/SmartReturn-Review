@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import { Close, Plus, ChevronDown, Refresh } from '@design-systems/icons'
+import { Refresh } from '@design-systems/icons'
+import SubTab from './SubTab'
 import styles from '../../styles/data-review/DetailFields.module.css'
-
-// Menu icon (hamburger) — check if exists
-// Using a simple ≡ for now, will verify
 
 interface DetailFieldsProps {
   formTitle: string
   tabs: { label: string; active: boolean }[]
+  selectedField?: string | null
+  onFieldSelect?: (field: string | null) => void
 }
 
 const W2_FIELDS = {
@@ -30,7 +30,7 @@ const W2_FIELDS = {
   ],
 }
 
-export default function DetailFields({ formTitle, tabs }: DetailFieldsProps) {
+export default function DetailFields({ formTitle, tabs, selectedField, onFieldSelect }: DetailFieldsProps) {
   const [fields, setFields] = useState(W2_FIELDS)
   const [activeTab, setActiveTab] = useState(0)
 
@@ -47,40 +47,11 @@ export default function DetailFields({ formTitle, tabs }: DetailFieldsProps) {
       <div className={styles.pageHeader}>
         <h2 className={styles.title}>{formTitle}</h2>
 
-        {/* Sub-tab bar */}
-        <div className={styles.subTabBar}>
-          <button className={styles.subTabMenu} aria-label="Menu">
-            <span style={{ fontSize: 20, lineHeight: '24px' }}>☰</span>
-          </button>
-
-          {tabs.map((tab, i) => (
-            <div
-              key={tab.label}
-              className={`${styles.subTab} ${i === activeTab ? styles.subTabActive : ''}`}
-              onClick={() => setActiveTab(i)}
-              style={{ cursor: 'pointer' }}
-            >
-              <div className={styles.subTabContent}>
-                <span className={`${styles.subTabLabel} ${i === activeTab ? styles.subTabLabelActive : styles.subTabLabelInactive}`}>
-                  {tab.label}
-                </span>
-                <Close size="xsmall" className={styles.subTabClose} />
-              </div>
-            </div>
-          ))}
-
-          <div className={styles.subTabBorderFill} />
-
-          <div className={styles.subTabActions}>
-            <button className={styles.subTabAddBtn} aria-label="Add">
-              <Plus size="small" />
-            </button>
-            <button className={styles.subTabViewAll}>
-              View All
-              <ChevronDown size="medium" />
-            </button>
-          </div>
-        </div>
+        {/* Sub-tab bar — rebuilt from Figma */}
+        <SubTab
+          tabs={tabs.map(t => ({ label: t.label }))}
+          onTabChange={setActiveTab}
+        />
       </div>
 
       {/* Input fields */}
@@ -125,16 +96,26 @@ export default function DetailFields({ formTitle, tabs }: DetailFieldsProps) {
 
         <div className={styles.spacer} />
 
-        {fields.wages.map((field, i) => (
-          <div key={field.label} className={styles.fieldRow}>
-            <span className={styles.fieldLabel}>{field.label}</span>
-            <input
-              className={`${styles.fieldInput} ${field.highlighted ? styles.fieldInputHighlighted : ''}`}
-              value={field.value}
-              onChange={e => handleFieldChange('wages', i, e.target.value)}
-            />
-          </div>
-        ))}
+        {fields.wages.map((field, i) => {
+          const isWagesField = i === 0 // "(1) Wages, tips, etc."
+          const isHighlighted = isWagesField && selectedField === 'wages'
+          return (
+            <div
+              key={field.label}
+              className={styles.fieldRow}
+              onClick={() => isWagesField ? onFieldSelect?.('wages') : onFieldSelect?.(null)}
+              style={{ cursor: isWagesField ? 'pointer' : 'default' }}
+            >
+              <span className={styles.fieldLabel}>{field.label}</span>
+              <input
+                className={`${styles.fieldInput} ${isHighlighted ? styles.fieldInputHighlighted : ''}`}
+                value={field.value}
+                onChange={e => handleFieldChange('wages', i, e.target.value)}
+                onClick={e => e.stopPropagation()}
+              />
+            </div>
+          )
+        })}
       </div>
     </div>
   )

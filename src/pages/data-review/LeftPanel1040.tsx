@@ -1,11 +1,25 @@
+import { useState } from 'react'
 import { ZoomOut, ZoomIn, FitToWidth, NewWindow, ArrowUp, ArrowDown } from '@design-systems/icons'
 import form1040 from '../../assets/1040-2024-preview.png'
+import SourcesToast from './SourcesToast'
 import styles from '../../styles/data-review/LeftPanel1040.module.css'
 
-export default function LeftPanel1040() {
+interface LeftPanel1040Props {
+  selectedField?: string | null
+}
+
+const W2_SOURCES = [
+  { label: 'Bing equipment W2', value: '$60,000' },
+  { label: 'Tech Circle W2', value: '$64,265' },
+]
+
+export default function LeftPanel1040({ selectedField }: LeftPanel1040Props) {
+  const [toastVisible, setToastVisible] = useState(false)
+  const showWagesHighlight = selectedField === 'wages'
+
   return (
     <div className={styles.leftPanel}>
-      {/* Toolbar — same pattern as screens 11-18 */}
+      {/* Toolbar */}
       <div className={styles.toolbar}>
         <div className={styles.toolbarControls}>
           <span className={styles.zoomLevel}>100%</span>
@@ -24,7 +38,7 @@ export default function LeftPanel1040() {
         </div>
       </div>
 
-      {/* Document viewer with 1040 form + status badges */}
+      {/* Document viewer — 1040 form with conditional highlight */}
       <div className={styles.documentViewer}>
         <div className={styles.documentWrapper}>
           <img
@@ -33,15 +47,23 @@ export default function LeftPanel1040() {
             className={styles.documentImage}
           />
 
-          {/* Colored highlight bars — 40% opacity */}
-          <div className={styles.highlightRed} />
-          <div className={styles.highlightOrange} />
-          <div className={styles.highlightBlue} />
+          {/* 1040 wages line highlight — shown when wages field is selected */}
+          {showWagesHighlight && (
+            <div
+              className={styles.wagesHighlight1040}
+              onMouseEnter={() => setToastVisible(true)}
+              onMouseLeave={() => setToastVisible(false)}
+            />
+          )}
 
-          {/* Status badges */}
-          <div className={styles.badgeRed}>-15%</div>
-          <div className={styles.badgeOrange}>+20%</div>
-          <div className={styles.badgeBlue}>-5%</div>
+          {/* Sources toast — shown on hover over 1040 highlight */}
+          {showWagesHighlight && toastVisible && (
+            <SourcesToast
+              sources={W2_SOURCES}
+              style={{ left: '45.45%', top: '34.37%' }}
+              onClose={() => setToastVisible(false)}
+            />
+          )}
         </div>
       </div>
     </div>

@@ -10,6 +10,8 @@ import styles from '../styles/data-review/DataReviewPage.module.css'
 import dragStyles from '../styles/data-review/DragHandle.module.css'
 
 export default function DataReviewPage() {
+  // Selected field for cross-document highlighting
+  const [selectedField, setSelectedField] = useState<string | null>(null)
   // Left/right panel width ratio (0-1, where value = left panel percentage)
   const [leftWidth, setLeftWidth] = useState(50)
   // Top/bottom section height ratio in right panel (0-100, where value = preview percentage)
@@ -100,7 +102,7 @@ export default function DataReviewPage() {
       {/* Body — left panel + drag handle + right panel */}
       <div className={styles.body} ref={bodyRef}>
         <div className={styles.leftPanel} style={{ width: poppedOut ? '100%' : `${leftWidth}%` }}>
-          <LeftPanel1040 />
+          <LeftPanel1040 selectedField={selectedField} />
         </div>
 
         {!poppedOut && (
@@ -131,7 +133,7 @@ export default function DataReviewPage() {
 
               {/* Document preview — resizable height */}
               <div style={{ height: `${previewHeight}%`, flexShrink: 0, overflow: 'hidden' }}>
-                <DocumentPreview imageSrc={w2BingEquipment} alt="W-2 Bing Equipment" />
+                <DocumentPreview imageSrc={w2BingEquipment} alt="W-2 Bing Equipment" selectedField={selectedField} />
               </div>
 
               {/* Up/down drag handle */}
@@ -146,6 +148,8 @@ export default function DataReviewPage() {
                   { label: 'Bing Equipment', active: true },
                   { label: 'Tech circle', active: false },
                 ]}
+                selectedField={selectedField}
+                onFieldSelect={setSelectedField}
               />
             </div>
           </>
