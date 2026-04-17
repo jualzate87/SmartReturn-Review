@@ -11,7 +11,7 @@ interface DocumentPreviewProps {
 const ZOOM_LEVELS = [50, 75, 100, 125, 150, 200]
 
 export default function DocumentPreview({ imageSrc, alt, selectedField }: DocumentPreviewProps) {
-  const [zoomIndex, setZoomIndex] = useState(2) // default 100%
+  const [zoomIndex, setZoomIndex] = useState(0) // default 50%
   const zoom = ZOOM_LEVELS[zoomIndex]
   const showWagesHighlight = selectedField === 'wages'
 

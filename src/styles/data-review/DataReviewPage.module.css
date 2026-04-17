@@ -105,12 +105,13 @@
   overflow: hidden;
 }
 
-/* Left panel — width controlled by drag state */
+/* Left panel — width controlled by drag state, smooth transition */
 .leftPanel {
   display: flex;
   flex-direction: column;
   overflow: hidden;
   flex-shrink: 0;
+  transition: width var(--duration-transform-fast, 350ms) var(--ease-transform, cubic-bezier(0.35, 0, 0.25, 1));
 }
 
 /* Right panel — flex column, each section has controlled height */
@@ -121,4 +122,25 @@
   overflow: hidden;
   border-left: 1px solid #D5DEE3;
   min-height: 0;
+}
+
+@keyframes rightPanelSlideFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-60px);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.15);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    box-shadow: none;
+  }
+}
+
+.rightPanelFadeIn {
+  animation: rightPanelSlideFromLeft var(--duration-appear-emphasize-fast, 500ms) var(--ease-appear-emphasize, cubic-bezier(0.15, 1.4, 0.25, 1));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rightPanelFadeIn { animation: none; }
 }

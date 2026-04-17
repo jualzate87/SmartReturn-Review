@@ -10,6 +10,7 @@ interface AgentReportPaneProps {
   onClose?: () => void
   onYoyToggle?: (expanded: boolean) => void
   onViewW2?: () => void
+  closing?: boolean
 }
 
 // Report card icons from Figma — imgReport, imgReport1, imgReport2, imgReport3
@@ -75,7 +76,7 @@ function MenuIcon() {
   )
 }
 
-export default function AgentReportPane({ onClose, onYoyToggle, onViewW2 }: AgentReportPaneProps) {
+export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, closing = false }: AgentReportPaneProps) {
   const [inputValue, setInputValue] = useState('')
   const [yoyExpanded, setYoyExpanded] = useState(false)
 
@@ -86,7 +87,7 @@ export default function AgentReportPane({ onClose, onYoyToggle, onViewW2 }: Agen
   }
 
   return (
-    <div className={styles.panel}>
+    <div className={`${styles.panel} ${closing ? styles.panelClosing : ''}`}>
 
       {/* ── Header ── */}
       <div className={styles.header}>

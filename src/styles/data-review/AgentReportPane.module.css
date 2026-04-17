@@ -3,6 +3,16 @@
    node-id: 29575:20109  w=384  max-w=575  min-w=384
 ───────────────────────────────────────────── */
 
+@keyframes panelSlideIn {
+  from { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes panelSlideOut {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(100%); }
+}
+
 .panel {
   display: flex;
   flex-direction: column;
@@ -12,6 +22,11 @@
   background: var(--color-container-background-primary, #ffffff);
   border-left: 1px solid var(--color-divider-tertiary, #d4d7dc);
   overflow: hidden;
+  animation: panelSlideIn var(--duration-appear-moderate, 300ms) var(--ease-appear, cubic-bezier(0, 0, 0.25, 1));
+}
+
+.panelClosing {
+  animation: panelSlideOut var(--duration-transform-fast, 350ms) var(--ease-transform, cubic-bezier(0.35, 0, 0.25, 1)) forwards;
 }
 
 /* ── Header — 60px ── */
@@ -295,19 +310,31 @@
 /* Active card state */
 .cardActive {
   background: #f5f7f9;
+  transition: background var(--duration-fade-moderate, 200ms) var(--ease-fade, cubic-bezier(0.35, 0, 0.5, 1));
 }
 
 /* Chevron on cards */
 .chevron {
   color: #393a3d;
   flex-shrink: 0;
-  transition: transform 0.2s ease;
+  transition: transform var(--duration-transform-fast, 350ms) var(--ease-transform, cubic-bezier(0.35, 0, 0.25, 1));
 }
 .chevronUp {
   transform: rotate(180deg);
 }
 
-/* Finding card — shown when YoY expanded */
+/* Finding card entrance — slide down + fade in */
+@keyframes findingCardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .findingCard {
   background: #fff8f8;
   border: 1px solid #c3ced5;
@@ -316,6 +343,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  animation: findingCardAppear var(--duration-appear-moderate, 300ms) var(--ease-appear, cubic-bezier(0, 0, 0.25, 1));
 }
 
 .findingHeader {
@@ -532,4 +560,11 @@
   color: var(--color-link-text, #0365ac);
   text-align: center;
   cursor: pointer;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .panel, .panelClosing, .findingCard { animation: none; }
+  .chevron { transition: none; }
+  .cardActive { transition: none; }
 }

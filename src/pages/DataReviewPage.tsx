@@ -32,10 +32,15 @@ export default function DataReviewPage() {
   const [previewHeight, setPreviewHeight] = useState(40)
   // Whether right panel is popped out
   const [poppedOut, setPoppedOut] = useState(false)
-  // Agent panel view state: idle → loading (screen 2.5) → report (screen 3)
-  const [agentView, setAgentView] = useState<'idle' | 'loading' | 'report'>('idle')
+  // Agent panel view state: idle → loading → report → closing → idle
+  const [agentView, setAgentView] = useState<'idle' | 'loading' | 'report' | 'closing'>('idle')
   // Whether YoY analysis is expanded (screen 4) — drives -15% badge on 1040
   const [yoyExpanded, setYoyExpanded] = useState(false)
+
+  // Reset field selection on mount
+  useEffect(() => {
+    setSelectedField(null)
+  }, [])
 
   // Auto-open agent panel when launched from SmartReturn via ?agent=true
   useEffect(() => {
@@ -50,6 +55,7 @@ export default function DataReviewPage() {
   }, [])
 
   const handleAgentOpen = () => {
+    setSelectedField(null)
     const alreadyLoaded = sessionStorage.getItem('agentLoaded')
     if (alreadyLoaded) {
       setAgentView('report')
@@ -63,8 +69,10 @@ export default function DataReviewPage() {
   }
 
   const handleAgentClose = () => {
-    setAgentView('idle')
+    setAgentView('closing')
     setYoyExpanded(false)
+    setSelectedField(null)
+    setTimeout(() => setAgentView('idle'), 350)
   }
 
   const bodyRef = useRef<HTMLDivElement>(null)
@@ -153,7 +161,7 @@ export default function DataReviewPage() {
 
       {/* Body — left panel + drag handle + right panel + agent panel */}
       <div className={styles.body} ref={bodyRef}>
-        <div className={styles.leftPanel} style={{ width: poppedOut ? '100%' : agentView !== 'idle' ? '80%' : `${leftWidth}%` }}>
+        <div className={styles.leftPanel} style={{ width: poppedOut ? '100%' : (agentView === 'loading' || agentView === 'report' || agentView === 'closing') ? '80%' : `${leftWidth}%` }}>
           <LeftPanel1040 selectedField={selectedField} total1a={total1a} wages={wages} yoyExpanded={yoyExpanded} />
         </div>
 
@@ -166,7 +174,7 @@ export default function DataReviewPage() {
               </div>
             )}
 
-            <div className={styles.rightPanel} ref={rightRef} style={{ flex: 1, display: agentView !== 'idle' ? 'none' : 'flex' }}>
+            <div className={`${styles.rightPanel} ${agentView === 'closing' ? styles.rightPanelFadeIn : ''}`} ref={rightRef} style={{ flex: 1, display: (agentView === 'loading' || agentView === 'report') ? 'none' : 'flex' }}>
               <ReviewTab
                 activeTopTab={activeTopTab}
                 onTopTabChange={setActiveTopTab}
@@ -230,14 +238,15 @@ export default function DataReviewPage() {
               {activeTopTab === 'k1' && <DetailFieldsK1 />}
             </div>
 
-            {/* Loading pane — screen 2.5, shows once per session */}
+            {/* Loading pane — screen 2.5 */}
             {agentView === 'loading' && (
               <AgentLoadingPane onClose={handleAgentClose} />
             )}
 
-            {/* Agent report panel — screen 3 */}
-            {agentView === 'report' && (
+            {/* Agent report panel — screen 3 & 4 */}
+            {(agentView === 'report' || agentView === 'closing') && (
               <AgentReportPane
+                closing={agentView === 'closing'}
                 onClose={handleAgentClose}
                 onYoyToggle={setYoyExpanded}
                 onViewW2={() => {
