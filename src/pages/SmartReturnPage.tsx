@@ -35,7 +35,7 @@ export default function SmartReturnPage() {
     <div className={styles.page} data-theme="intuit">
 
       {/* ── Header (Figma node 29815-48823) ── */}
-      <SmartReturnHeader />
+      <SmartReturnHeader activeTab="smartreturn" />
 
       {/* ── Body ── */}
       <div className={styles.body}>

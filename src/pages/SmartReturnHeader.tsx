@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import {
   Question, Notification, Settings, Lock, PersonThree,
   CircleInfo, ChevronDown, List, Lightning, Edit, Checklist,
@@ -7,7 +8,12 @@ import { Button } from '@ids-ts/button'
 import '@ids-ts/button/dist/main.css'
 import styles from '../styles/SmartReturnHeader.module.css'
 
-export default function SmartReturnHeader() {
+interface SmartReturnHeaderProps {
+  activeTab?: 'smartreturn' | 'checkreturns'
+}
+
+export default function SmartReturnHeader({ activeTab = 'smartreturn' }: SmartReturnHeaderProps) {
+  const navigate = useNavigate()
   return (
     <div className={styles.header}>
 
@@ -92,13 +98,19 @@ export default function SmartReturnHeader() {
           <button className={styles.tab}>
             <List size="small" /> Profile
           </button>
-          <button className={`${styles.tab} ${styles.tabActive}`}>
+          <button
+            className={`${styles.tab} ${activeTab === 'smartreturn' ? styles.tabActive : ''}`}
+            onClick={() => navigate('/smart-return')}
+          >
             <Lightning size="small" /> SmartReturn
           </button>
           <button className={styles.tab}>
             <Edit size="small" /> Input return
           </button>
-          <button className={styles.tab}>
+          <button
+            className={`${styles.tab} ${activeTab === 'checkreturns' ? styles.tabActive : ''}`}
+            onClick={() => navigate('/check-return')}
+          >
             <Checklist size="small" /> Check return
           </button>
           <button className={styles.tab}>
