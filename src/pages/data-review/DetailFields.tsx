@@ -21,7 +21,8 @@ const EMPLOYER_DATA = {
     street: '3833 Soundtech Ct SE',
     city: 'Kentwood', state: 'CA', zip: '93004',
     federalTax: '10,000',
-    ssTax: '3,720', medicareTax: '870',
+    socialSecurityWages: '60,000', ssTax: '3,720',
+    medicareWages: '60,000', medicareTax: '870',
     ssTips: '25', allocatedTips: '0',
     dependentCare: '25', nonqualified: '39',
   },
@@ -31,7 +32,8 @@ const EMPLOYER_DATA = {
     street: '321 Main Orchard Dr',
     city: 'Reno', state: 'NV', zip: '95010',
     federalTax: '5,987',
-    ssTax: '3,720', medicareTax: '1000',
+    socialSecurityWages: '64,304', ssTax: '3,720',
+    medicareWages: '64,304', medicareTax: '1000',
     ssTips: '25', allocatedTips: '0',
     dependentCare: '25', nonqualified: '39',
   },
@@ -99,20 +101,24 @@ export default function DetailFields({
           </div>
         </div>
 
-        {/* Wages section */}
-        <div className={styles.sectionRow}><span className={styles.sectionLabel}>Wages</span></div>
+        {/* Wages section — same grey header as Employer Information */}
+        <div className={styles.sectionHeader}>Wages</div>
 
         {/* (1) Wages — editable, drives 1040 line 1a */}
         <div
           className={styles.fieldRow}
-          onClick={() => onFieldSelect?.('wages')}
+          onClick={() => onFieldSelect?.(selectedField === 'wages' ? null : 'wages')}
           style={{ cursor: 'pointer' }}
         >
           <span className={styles.fieldLabel}>(1) Wages, tips, etc.</span>
           <input
             className={`${styles.fieldInput} ${styles.fieldInputSmall} ${selectedField === 'wages' ? styles.fieldInputHighlighted : ''}`}
-            value={currentWages.toLocaleString()}
-            onChange={e => handleWagesChange(e.target.value)}
+            value={currentWages}
+            onChange={e => {
+              const raw = e.target.value.replace(/,/g, '')
+              const num = parseFloat(raw) || 0
+              onWageChange?.(activeSubTab, num)
+            }}
             onClick={e => e.stopPropagation()}
           />
         </div>
@@ -123,7 +129,7 @@ export default function DetailFields({
         </div>
         <div className={styles.fieldRow}>
           <span className={styles.fieldLabel}>(3) Social security wages</span>
-          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value={currentWages.toLocaleString()} />
+          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value={employer.socialSecurityWages} />
         </div>
         <div className={styles.fieldRow}>
           <span className={styles.fieldLabel}>(4) Social security tax withheld</span>
@@ -131,7 +137,7 @@ export default function DetailFields({
         </div>
         <div className={styles.fieldRow}>
           <span className={styles.fieldLabel}>(5) Medicare wages and tips</span>
-          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value={currentWages.toLocaleString()} />
+          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value={employer.medicareWages} />
         </div>
         <div className={styles.fieldRow}>
           <span className={styles.fieldLabel}>(6) Medicare tax withheld</span>

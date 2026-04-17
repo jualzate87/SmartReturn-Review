@@ -1,12 +1,12 @@
 /* Sources toast — floating card on 1040, shown on hover */
 .toast {
-  position: absolute;
-  width: 335px;
+  position: absolute; /* overridden to fixed via inline style when needed */
+  width: 260px;
   background: #ffffff;
   border: 2px solid #236cff;
   border-radius: 12px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
-  z-index: 10;
+  z-index: 1000;
   pointer-events: auto;
 }
 

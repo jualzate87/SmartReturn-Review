@@ -23,7 +23,7 @@ export default function DetailFields1099() {
 
         <div className={styles.fieldRow}>
           <span className={styles.fieldLabel}>Banks, savings &amp; loans, credit unions, etc.</span>
-          <input className={`${styles.fieldInput} ${styles.fieldInputSmall} ${styles.fieldInputHighlighted}`} readOnly value="3,500" />
+          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value="3,500" />
         </div>
         <div className={styles.fieldRow}>
           <span className={styles.fieldLabel}>U.S. bonds, T-bills, etc. (nontaxable to state)</span>

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { ArrowLeft, DotsSix, OverflowIos } from '@design-systems/icons'
 import intuitAssistIcon from '../assets/icons/intuit-assist.svg'
 import LeftPanel1040 from './data-review/LeftPanel1040'
@@ -7,6 +7,8 @@ import DocumentPreview from './data-review/DocumentPreview'
 import DetailFields from './data-review/DetailFields'
 import DetailFields1099 from './data-review/DetailFields1099'
 import DetailFieldsK1 from './data-review/DetailFieldsK1'
+import AgentReportPane from './data-review/AgentReportPane'
+import AgentLoadingPane from './data-review/AgentLoadingPane'
 import w2BingEquipment from '../assets/w2-bing-equipment.png'
 import w2TechCircle from '../assets/w2-tech-circle.png'
 import img1099Int from '../assets/1099-int-megabank.png'
@@ -24,12 +26,46 @@ export default function DataReviewPage() {
   // W-2 wages — drives 1040 line 1a dynamically
   const [wages, setWages] = useState({ bingEquipment: 60000, techCircle: 64304 })
   const total1a = wages.bingEquipment + wages.techCircle
-  // Left/right panel width ratio (0-1, where value = left panel percentage)
+  // Left/right panel width ratio — 80% when agent open, 50% otherwise
   const [leftWidth, setLeftWidth] = useState(50)
   // Top/bottom section height ratio in right panel (0-100, where value = preview percentage)
   const [previewHeight, setPreviewHeight] = useState(40)
   // Whether right panel is popped out
   const [poppedOut, setPoppedOut] = useState(false)
+  // Agent panel view state: idle → loading (screen 2.5) → report (screen 3)
+  const [agentView, setAgentView] = useState<'idle' | 'loading' | 'report'>('idle')
+  // Whether YoY analysis is expanded (screen 4) — drives -15% badge on 1040
+  const [yoyExpanded, setYoyExpanded] = useState(false)
+
+  // Auto-open agent panel when launched from SmartReturn via ?agent=true
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.hash.split('?')[1] || '')
+    if (params.get('agent') === 'true') {
+      setAgentView('loading')
+      setTimeout(() => {
+        setAgentView('report')
+        sessionStorage.setItem('agentLoaded', '1')
+      }, 5000)
+    }
+  }, [])
+
+  const handleAgentOpen = () => {
+    const alreadyLoaded = sessionStorage.getItem('agentLoaded')
+    if (alreadyLoaded) {
+      setAgentView('report')
+    } else {
+      setAgentView('loading')
+      setTimeout(() => {
+        setAgentView('report')
+        sessionStorage.setItem('agentLoaded', '1')
+      }, 5000)
+    }
+  }
+
+  const handleAgentClose = () => {
+    setAgentView('idle')
+    setYoyExpanded(false)
+  }
 
   const bodyRef = useRef<HTMLDivElement>(null)
   const rightRef = useRef<HTMLDivElement>(null)
@@ -105,26 +141,32 @@ export default function DataReviewPage() {
           <span className={styles.headerTitle}>Data Review - Form 1040</span>
         </div>
         <div className={styles.headerRight}>
-          <button className={styles.intuitIntelBtn} aria-label="Intuit Intelligence">
+          <button
+            className={`${styles.intuitIntelBtn} ${agentView !== 'idle' ? styles.intuitIntelBtnActive : ''}`}
+            aria-label="Intuit Intelligence"
+            onClick={handleAgentOpen}
+          >
             <img src={intuitAssistIcon} alt="" className={styles.intuitIntelIcon} />
           </button>
         </div>
       </div>
 
-      {/* Body — left panel + drag handle + right panel */}
+      {/* Body — left panel + drag handle + right panel + agent panel */}
       <div className={styles.body} ref={bodyRef}>
-        <div className={styles.leftPanel} style={{ width: poppedOut ? '100%' : `${leftWidth}%` }}>
-          <LeftPanel1040 selectedField={selectedField} total1a={total1a} />
+        <div className={styles.leftPanel} style={{ width: poppedOut ? '100%' : agentView !== 'idle' ? '80%' : `${leftWidth}%` }}>
+          <LeftPanel1040 selectedField={selectedField} total1a={total1a} wages={wages} yoyExpanded={yoyExpanded} />
         </div>
 
         {!poppedOut && (
           <>
-            {/* Left/right drag handle */}
-            <div className={dragStyles.handleVertical} onMouseDown={handleHorizontalDrag}>
-              <OverflowIos size="small" className={dragStyles.handleIcon} />
-            </div>
+            {/* Left/right drag handle — hidden when agent panel is open */}
+            {agentView === 'idle' && (
+              <div className={dragStyles.handleVertical} onMouseDown={handleHorizontalDrag}>
+                <OverflowIos size="small" className={dragStyles.handleIcon} />
+              </div>
+            )}
 
-            <div className={styles.rightPanel} ref={rightRef} style={{ flex: 1 }}>
+            <div className={styles.rightPanel} ref={rightRef} style={{ flex: 1, display: agentView !== 'idle' ? 'none' : 'flex' }}>
               <ReviewTab
                 activeTopTab={activeTopTab}
                 onTopTabChange={setActiveTopTab}
@@ -187,6 +229,24 @@ export default function DataReviewPage() {
               {activeTopTab === '1099-ints' && <DetailFields1099 />}
               {activeTopTab === 'k1' && <DetailFieldsK1 />}
             </div>
+
+            {/* Loading pane — screen 2.5, shows once per session */}
+            {agentView === 'loading' && (
+              <AgentLoadingPane onClose={handleAgentClose} />
+            )}
+
+            {/* Agent report panel — screen 3 */}
+            {agentView === 'report' && (
+              <AgentReportPane
+                onClose={handleAgentClose}
+                onYoyToggle={setYoyExpanded}
+                onViewW2={() => {
+                  handleAgentClose()
+                  setActiveTopTab('w2s')
+                  setSelectedField('wages')
+                }}
+              />
+            )}
           </>
         )}
       </div>

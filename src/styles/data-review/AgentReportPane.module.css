@@ -1,0 +1,535 @@
+/* ─────────────────────────────────────────────
+   Agent Report Panel  — exact Figma values
+   node-id: 29575:20109  w=384  max-w=575  min-w=384
+───────────────────────────────────────────── */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  background: var(--color-container-background-primary, #ffffff);
+  border-left: 1px solid var(--color-divider-tertiary, #d4d7dc);
+  overflow: hidden;
+}
+
+/* ── Header — 60px ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  padding: 0 16px;
+  background: var(--color-container-background-primary, #ffffff);
+  border-bottom: 1px solid var(--color-container-border-primary, #d4d7dc);
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 80px;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 20px;
+}
+
+.assistIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.titleText {
+  font-family: var(--font-name-component, sans-serif);
+  font-size: var(--font-size-component-medium, 16px);
+  font-weight: var(--font-weight-component-bold, 600);
+  line-height: 1.3;
+  color: var(--color-text-primary, #393a3d);
+  white-space: nowrap;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 80px;
+}
+
+/* ── Shared icon button ── */
+.iconBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: #393a3d;
+  flex-shrink: 0;
+}
+.iconBtn:hover {
+  background: rgba(57, 58, 61, 0.06);
+}
+
+/* ── Scrollable pane ── */
+.pane {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 15px;
+  flex: 1;
+  width: 100%;
+}
+
+/* ── Show thinking ── */
+.showThinking {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  min-height: 24px;
+  align-self: stretch;
+}
+.showThinkingLabel {
+  font-family: var(--font-name-component, sans-serif);
+  font-size: var(--font-size-component-medium, 16px);
+  font-weight: var(--font-weight-component-semibold, 500);
+  line-height: 1.3;
+  color: var(--color-text-secondary, #6b6c72);
+}
+
+/* ── Agent message ── */
+.agentMessage {
+  font-family: var(--font-name-body, sans-serif);
+  font-size: var(--font-size-body-2, 16px);
+  font-weight: var(--font-weight-body, 400);
+  line-height: 1.5;
+  color: var(--color-message-text-received, #393a3d);
+  margin: 0;
+  border-radius: 0 12px 12px 12px;
+  width: fit-content;
+  max-width: 352px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* ── ScoreCard — border-radius: 24px, padding: 17px ── */
+.scoreCard {
+  background: #ffffff;
+  border: 1px solid #c3ced5;
+  border-radius: 24px;
+  padding: 17px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 352px;
+}
+
+.scoreTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 24px;
+}
+
+.scoreTitle {
+  font-family: var(--font-name-component, sans-serif);
+  font-size: var(--font-size-component-medium, 16px);
+  font-weight: var(--font-weight-component-bold, 600);
+  line-height: 1.3;
+  color: #21262a;
+  white-space: nowrap;
+}
+
+.scoreAmount {
+  font-family: var(--font-name-component, sans-serif);
+  font-size: var(--font-size-component-x-large, 24px);
+  font-weight: var(--font-weight-component-bold, 600);
+  line-height: 1.3;
+  color: #21262a;
+}
+
+/* 12px gap between metric rows, handled by scoreCard gap */
+.metricRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.metricHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 24px;
+}
+
+.metricLabel {
+  font-family: 'AvenirNext forINTUIT', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #21262a;
+  white-space: nowrap;
+}
+
+.metricValue {
+  font-family: 'AvenirNext forINTUIT', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  color: #21262a;
+}
+
+/* Track: bg #c3ced5, h=12px, border-radius=100px */
+.progressTrack {
+  height: 12px;
+  background: #c3ced5;
+  border-radius: 100px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 100px;
+}
+
+/* ── Expandable card bundle ── */
+.cardBundle {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 352px;
+}
+
+/* All cards share border, overlap by 1px */
+.card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--container\/background\/primary, #ffffff);
+  border: 1px solid #c3ced5;
+  margin-bottom: -1px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+.card:hover {
+  background: #f5f7f9;
+}
+
+.card_first  { border-radius: 24px 24px 0 0; }
+.card_middle { border-radius: 0; }
+.card_last   { border-radius: 0 0 24px 24px; margin-bottom: 0; }
+
+.cardIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.cardContent {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+}
+
+.cardLabel {
+  font-family: 'AvenirNext forINTUIT', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  color: #21262a;
+  flex: 1;
+  text-align: left;
+}
+
+/* 02 - Text Status Badge: px-4px py-2px, border-radius: 4px, 12px Demi allcaps white */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: 'AvenirNext forINTUIT', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: #ffffff;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.badgeRed  { background: #db334d; }
+.badgeBlue { background: #205ea3; }
+
+/* Active card state */
+.cardActive {
+  background: #f5f7f9;
+}
+
+/* Chevron on cards */
+.chevron {
+  color: #393a3d;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.chevronUp {
+  transform: rotate(180deg);
+}
+
+/* Finding card — shown when YoY expanded */
+.findingCard {
+  background: #fff8f8;
+  border: 1px solid #c3ced5;
+  border-top: none;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.findingHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.findingBadge {
+  background: #d52b1e;
+  color: #ffffff;
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  text-transform: uppercase;
+  padding: 2px 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.findingTitle {
+  font-family: var(--font-name-component, sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #21262a;
+}
+
+.findingBody {
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #393a3d;
+  margin: 0;
+}
+
+.findingFields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid #d4d7dc;
+  padding-top: 12px;
+}
+
+.findingField {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.findingFieldLabel {
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 14px;
+  font-weight: 400;
+  color: #6b6c72;
+}
+
+.findingFieldValue {
+  font-family: var(--font-name-component, sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  color: #21262a;
+}
+
+/* ── Feedback bar ── */
+.feedbackBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+}
+
+/* ── Suggestion chips — right-aligned, indent from left ── */
+.chips {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  padding-left: 15%;
+  align-self: stretch;
+}
+
+.chip {
+  background: transparent;
+  border: 2px solid var(--color-action-standard, #0077c5);
+  border-radius: 24px;
+  padding: 12px 16px;
+  min-height: 44px;
+  width: 100%;
+  font-family: var(--font-name-component, sans-serif);
+  font-size: 16px;
+  font-weight: var(--font-weight-component-semibold, 500);
+  line-height: 1.3;
+  color: var(--color-action-standard, #0077c5);
+  cursor: pointer;
+  text-align: left;
+}
+.chip:hover {
+  background: rgba(0, 119, 197, 0.05);
+}
+
+/* ── Input area ── */
+.inputArea {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px 8px;
+  background: #ffffff;
+  position: relative;
+}
+
+/* Fade gradient above input */
+.inputFade {
+  position: absolute;
+  top: -16px;
+  left: 0;
+  right: 0;
+  height: 16px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), #ffffff);
+  pointer-events: none;
+}
+
+/* border-radius: 32px, border: 1px solid #d4d7dc, shadow: 0 2px 8px rgba(0,0,0,0.1) */
+.inputBox {
+  background: var(--color-input-background-primary, #ffffff);
+  border: 1px solid var(--color-container-border-primary, #d4d7dc);
+  border-radius: 32px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.inputTextField {
+  padding: 0 4px;
+  min-height: 21px;
+  overflow: hidden;
+}
+
+.textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: var(--font-name-component, sans-serif);
+  font-size: var(--font-size-component-medium, 16px);
+  font-weight: var(--font-weight-component, 400);
+  line-height: 1.3;
+  color: var(--color-text-primary, #393a3d);
+  background: transparent;
+  min-height: 21px;
+}
+.textarea::placeholder {
+  color: var(--color-input-placeholder, #babec5);
+}
+
+.inputActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.inputActionsLeft  { display: flex; align-items: center; gap: 12px; }
+.inputActionsRight { display: flex; align-items: center; gap: 12px; }
+
+/* Attach button: bg #393a3d at 5% opacity, pill shape, h=36px */
+.attachBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 6px;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(57, 58, 61, 0.05);
+  cursor: pointer;
+  color: #393a3d;
+  position: relative;
+}
+
+/* Send button: circle, disabled = #e3e5e8 bg */
+.sendBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  border: none;
+  background: #e3e5e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  flex-shrink: 0;
+}
+.sendBtnActive {
+  background: #393a3d;
+  cursor: pointer;
+}
+
+.sendIcon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Legal/Disclaimer — #0365ac, 12px, body font, centered */
+.legal {
+  font-family: var(--font-name-body, sans-serif);
+  font-size: var(--font-size-body-4, 12px);
+  font-weight: var(--font-weight-body, 400);
+  line-height: 1.5;
+  color: var(--color-link-text, #0365ac);
+  text-align: center;
+  cursor: pointer;
+}

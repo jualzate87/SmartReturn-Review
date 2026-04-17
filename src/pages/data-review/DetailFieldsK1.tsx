@@ -21,7 +21,7 @@ export default function DetailFieldsK1() {
         </div>
         <div className={styles.fieldRow}>
           <span className={styles.fieldLabel}>(5) Interest income: banks, savings &amp; loan, credit unions, etc.</span>
-          <input className={`${styles.fieldInput} ${styles.fieldInputSmall} ${styles.fieldInputHighlighted}`} readOnly value="1,000" />
+          <input className={`${styles.fieldInput} ${styles.fieldInputSmall}`} readOnly value="1,000" />
         </div>
         <div className={styles.fieldRow}>
           <span className={styles.fieldLabel}>(6A) Ordinary dividends</span>

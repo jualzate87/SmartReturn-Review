@@ -29,8 +29,7 @@ export default function DocumentPreview({ imageSrc, alt, selectedField }: Docume
             className={styles.documentImage}
           />
 
-          {/* W-2 Box 1 "Wages, tips" — pixel-detected: row bottom at 19.98%
-              Row spans 12.5-19.98%, value column 55-75% */}
+          {/* W-2 Box 1 wages — pink highlight when field selected */}
           {showWagesHighlight && (
             <div
               style={{
@@ -39,9 +38,11 @@ export default function DocumentPreview({ imageSrc, alt, selectedField }: Docume
                 top: '12.5%',
                 width: '20%',
                 height: '7.48%',
-                border: '1.5px solid #3492ef',
-                borderRadius: '1px',
+                background: 'rgba(255,136,236,0.2)',
+                border: '1px solid #c9007a',
+                borderRadius: '2px',
                 pointerEvents: 'none',
+                zIndex: 3,
               }}
             />
           )}

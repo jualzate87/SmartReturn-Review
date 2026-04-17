@@ -123,9 +123,9 @@
 
 .documentWrapper {
   position: relative;
-  width: 92%;
   line-height: 0;
   box-shadow: 0 1px 4px rgba(76, 85, 91, 0.2);
+  container-type: inline-size;
 }
 
 .documentImage {
@@ -134,16 +134,16 @@
   display: block;
 }
 
-/* 1040 Line 1a — pixel-detected from image row scan
-   Row borders found at 35.48% and 36.79%, value in right column 82-95% */
+/* 1040 Line 1a pink highlight — shown only when wages field is selected */
 .wagesHighlight1040 {
   position: absolute;
-  left: 82%;
-  top: 35.48%;
-  width: 13%;
-  height: 1.31%;
-  border: 2.5px solid #3492ef;
-  border-radius: 1px;
+  left: 82.4%;
+  top: 56.9%;
+  width: 11.6%;
+  height: 1.4%;
+  background: rgba(255, 136, 236, 0.2);
+  border: 1px solid #c9007a;
+  border-radius: 2px;
   cursor: pointer;
-  z-index: 2;
+  z-index: 3;
 }

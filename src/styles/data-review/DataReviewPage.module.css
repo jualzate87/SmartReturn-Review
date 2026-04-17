@@ -87,6 +87,11 @@
   background: #f4f5f8;
 }
 
+.intuitIntelBtnActive {
+  background: #e0edff;
+  border-color: #103661;
+}
+
 .intuitIntelIcon {
   width: 24px;
   height: 24px;
