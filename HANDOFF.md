@@ -1,5 +1,15 @@
 # SmartReturn Prototype — Handoff Doc
 
+> ⚠️ **WORKING DIRECTORY RULE — READ THIS FIRST**
+>
+> Always work in:  `/Users/agupta69/Desktop/ClaudeXFigma/SMARTRETURN/`
+> NEVER work in:   `/Users/agupta69/Desktop/ClaudeXFigma/ids-starter/`
+>
+> `ids-starter` = IDS component template only. Do not touch.
+> `SMARTRETURN`  = the SmartReturn prototype. All new work goes here.
+
+---
+
 > **Start every new session by reading this file.** Then read the specific page files listed in each screen entry before touching anything.
 
 ---
@@ -12,7 +22,7 @@
 **Dev server:** `http://localhost:5174` (run `npm run dev`)  
 **Router:** HashRouter → routes are `/#/path`  
 **Repo:** `github.intuit.com/agupta69/SmartReturn-prototype` (branch: `main`)  
-**Project root:** `/Users/agupta69/Desktop/ClaudeXFigma/ids-starter/`
+**Project root:** `/Users/agupta69/Desktop/ClaudeXFigma/SMARTRETURN/`
 
 ---
 
