@@ -33,14 +33,18 @@
 | 1 | SmartReturn (ready for review) | `/#/smart-return` | `SmartReturnPage.tsx`, `SmartReturnPage.module.css` | ✅ Done |
 | 2 | Data Review (1040 + W-2 panel) | `/#/data-review` | `DataReviewPage.tsx`, `LeftPanel1040.tsx`, `ReviewTab.tsx`, `DocumentPreview.tsx`, `DetailFields.tsx` | ✅ Done |
 | 2.5 | Agent Loading | (state inside DataReviewPage) | `AgentLoadingPane.tsx` | ✅ Done |
-| 3 | Tax Prep Agent Report | (state inside DataReviewPage) | `AgentReportPane.tsx` | ✅ Done |
-| 4 | YoY Analysis expanded | (state inside DataReviewPage, `yoyExpanded=true`) | `AgentReportPane.tsx`, `LeftPanel1040.tsx` | ✅ Done |
-| 5 | W-2 Detail + cross-highlight | (state inside DataReviewPage, `selectedField='wages'`) | `DetailFields.tsx`, `LeftPanel1040.tsx`, `SourcesToast.tsx` | ✅ Done |
+| 3 | Tax Prep Agent Report (redesigned) | (state inside DataReviewPage) | `AgentReportPane.tsx` | ✅ Done |
+| 3.5 | Imported Documents expanded | (state inside AgentReportPane, `importedDocsExpanded=true`) | `AgentReportPane.tsx` | ✅ Done |
+| 4 | YoY Analysis expanded (new design) | (state inside DataReviewPage, `yoyExpanded=true`) | `AgentReportPane.tsx`, `LeftPanel1040.tsx` | ✅ Done |
+| 4.5 | YoY Detail pane (More info) | (overlay inside AgentReportPane, `yoyDetailOpen=true`) | `YoYDetailPane.tsx`, `YoYDetailPane.module.css` | ✅ Done |
+| 5 | W-2 Detail (default state) | (state inside DataReviewPage, W-2 tab) | `DetailFields.tsx`, `LeftPanel1040.tsx` | ✅ Done |
 | 6–8 | W-2 / 1099-INT / K-1 tabs | `/#/data-review` (tab switching) | `DetailFields1099.tsx`, `DetailFieldsK1.tsx`, `DocumentPreview.tsx` | ✅ Done |
 | 33 | Check Return | `/#/check-return` | `CheckReturnPage.tsx`, `CheckReturnPage.module.css` | ✅ Done |
 | 34 | Return Insights | `/#/check-return/insights` | `ReturnInsightsPage.tsx`, `ReturnInsightsPage.module.css` | ✅ Done |
 
-**Popout route:** `/#/data-review-popout` → `DataReviewPopout.tsx` (standalone W-2/doc viewer in new window)
+**Popout route:** `/#/data-review-popout` → `DataReviewPopout.tsx` (W-2 doc + detail fields side by side in new window)
+
+**Experiment branch:** `experiment/side-by-side-w2` — triple-column view (1040 | W-2 | Agent) triggered by "Review source and input" in YoY detail pane
 
 ---
 
@@ -55,13 +59,42 @@
 agentView: 'idle' → 'loading' → 'report' → 'closing' → 'idle'
 ```
 - `idle`: normal 2-panel layout (left=1040, right=W2 preview+fields), width ratio controlled by drag handle
-- `loading`: left panel expands to 80%, `AgentLoadingPane` fills right (Intuit Assist GIF, 5s timer)
-- `report`: left 80%, `AgentReportPane` fills right (slide-in from right)
-- `closing`: right panel slides out (350ms), then snaps back to `idle`
+- `loading`: left panel expands to `agentLeftWidth`%, `AgentLoadingPane` fills right (Intuit Assist GIF, 5s timer)
+- `report`: left `agentLeftWidth`% (draggable, min-width 400px for agent), `AgentReportPane` fills right
+- `closing`: agent panel slides out (350ms), then snaps back to `idle`
 - `yoyExpanded`: boolean — when true, pink highlight + CGDS "-15%" badge appear on 1040 line 1a
 - `selectedField`: string | null — drives cross-document highlight between 1040 overlay and W-2 detail
+- `agentLeftWidth`: number (default 62) — draggable split between 1040 and agent panel
 
 **Entry via URL param:** `/#/data-review?agent=true` auto-triggers `agentView='loading'` on mount (used by SmartReturn "Review the return" button which opens this URL in a new tab).
+
+### AgentReportPane sub-state
+- `importedDocsExpanded`: boolean — expands the "Imported documents" card to show W-2/1099/K-1 doc list
+- Clicking W-2s in imported docs → calls `onViewW2()` which closes agent and goes to W-2 tab
+- `yoyDetailOpen` / `yoyDetailClosing`: boolean — shows `YoYDetailPane` overlay (slides in from right over agent)
+- "More info" in YoY finding → opens `YoYDetailPane`
+- "Back to overview" in YoYDetailPane → closes detail, returns to AgentReportPane
+
+### YoYDetailPane (new)
+- Absolute overlay inside `.panel`, slides in from right at 350ms
+- Shows: finding title, tax impact banner, root cause, details table, suggested action, action buttons
+- "Review source and input" → calls `onReviewSource()` (on experiment branch: triggers triple-view)
+- "Mark as reviewed" → no-op (prototype only)
+
+### Panel button behaviour
+- Highlighted (`intuitIntelBtnActive`) when `activeTopTab === 'w2s'` AND `agentView === 'idle'`
+- Click when agent open → closes agent; click when idle → opens agent
+
+### Popout (DataReviewPopout)
+- Route: `/#/data-review-popout`
+- Layout: **side by side** — W-2 document preview (left 50%) + detail fields (right 50%)
+- Window size: `900×1000` (from triple-view), `800×900` (from ReviewTab popout button)
+
+### Experiment branch: triple-view (`experiment/side-by-side-w2`)
+- Triggered by "Review source and input" in YoYDetailPane → `tripleView=true`
+- Layout: 1040 (28%) | W-2 panel (draggable ~35%) | Agent panel (min 400px)
+- Center panel popout button → opens W-2 in new window
+- Close agent (✕) → exits triple-view, returns to 2-column idle state
 
 ### Cross-document highlighting
 - `selectedField='wages'` → pink highlight appears on 1040 at `left:82.4%, top:56.9%`
@@ -195,7 +228,8 @@ src/
 │       ├── DetailFields1099.tsx     ← 1099-INT field rows
 │       ├── DetailFieldsK1.tsx       ← K-1 field rows
 │       ├── AgentLoadingPane.tsx     ← Loading screen (Intuit Assist GIF)
-│       ├── AgentReportPane.tsx      ← Tax Prep Agent report panel
+│       ├── AgentReportPane.tsx      ← Tax Prep Agent report panel (redesigned)
+│       ├── YoYDetailPane.tsx        ← YoY detail overlay (More info screen)
 │       ├── SourcesToast.tsx         ← Hover toast on 1040 pink highlight
 │       └── SubTab.tsx               ← Bing Equipment / Tech Circle sub-tabs
 ├── styles/
@@ -205,6 +239,7 @@ src/
 │   └── data-review/
 │       ├── DataReviewPage.module.css
 │       ├── AgentReportPane.module.css
+│       ├── YoYDetailPane.module.css ← NEW
 │       ├── AgentLoadingPane.module.css
 │       ├── LeftPanel1040.module.css
 │       ├── DocumentPreview.module.css
@@ -226,14 +261,24 @@ src/
 
 ## What's Left / Potential Next Steps
 
-Based on where we stopped, these are possible next screens:
+### Figma assets that expire in 7 days
+- `AgentReportPane.tsx` — Figma icon assets for YoY/Scanner/FedTaxes/Credits/AutoFill/ViewSources. Re-fetch from node `29113:62676` if broken.
+- `YoYDetailPane.tsx` — dot asset from node `29985:91127`.
+- `LeftNavPTO.tsx` — nav icons from Figma node.
 
-- **Screen 9+** — More data review sub-flows (after W-2 review, moving to 1099/K-1 deeper review)
-- **Data Review continued** — Any remaining screens in the Tax Prep Agent flow that weren't built
-- **Check Return deeper** — The Check Navigation items (Federal Tax Summary rows expandable, California Tax Summary, etc.)
-- **Return Insights scroll** — Figma image already in place; may need to verify image is current (7-day expiry on Figma asset URL in ReturnInsightsPage.tsx)
+### Possible next screens
+- **Scan quality & inputs** — expand that card in the agent panel (Figma node exists, not yet built)
+- **IRS Compliance / Credits & deductions** — expand those cards similarly
+- **"Mark as reviewed" flow** — what happens after marking YoY as reviewed
+- **Check Return deeper** — Federal Tax Summary rows expandable, California Tax Summary
+- **Return Insights scroll** — verify Figma asset URL is current (7-day expiry)
+- **Triple-view experiment** — merge `experiment/side-by-side-w2` into main if approved
 
 **Ask the user** what screen to build next and get the Figma URL before starting anything.
+
+### Branch status
+- `main` — stable, all agent pane redesign committed
+- `experiment/side-by-side-w2` — triple-column layout experiment (1040 | W-2 | Agent)
 
 ---
 

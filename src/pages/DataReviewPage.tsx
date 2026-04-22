@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { ArrowLeft, DotsSix, OverflowIos } from '@design-systems/icons'
+import { ArrowLeft, DotsSix, OverflowIos, Panel } from '@design-systems/icons'
 import intuitAssistIcon from '../assets/icons/intuit-assist.svg'
 import LeftPanel1040 from './data-review/LeftPanel1040'
 import ReviewTab from './data-review/ReviewTab'
@@ -26,8 +26,10 @@ export default function DataReviewPage() {
   // W-2 wages — drives 1040 line 1a dynamically
   const [wages, setWages] = useState({ bingEquipment: 60000, techCircle: 64304 })
   const total1a = wages.bingEquipment + wages.techCircle
-  // Left/right panel width ratio — 80% when agent open, 50% otherwise
+  // Left/right panel width ratio — 50% when idle
   const [leftWidth, setLeftWidth] = useState(50)
+  // Left panel width when agent panel is open (draggable)
+  const [agentLeftWidth, setAgentLeftWidth] = useState(62)
   // Top/bottom section height ratio in right panel (0-100, where value = preview percentage)
   const [previewHeight, setPreviewHeight] = useState(40)
   // Whether right panel is popped out
@@ -107,6 +109,32 @@ export default function DataReviewPage() {
     document.addEventListener('mouseup', onMouseUp)
   }, [leftWidth])
 
+  // Horizontal drag between left panel and agent panel
+  const handleAgentDrag = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    const body = bodyRef.current
+    if (!body) return
+    const startX = e.clientX
+    const startWidth = agentLeftWidth
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const delta = moveEvent.clientX - startX
+      const bodyWidth = body.getBoundingClientRect().width
+      const minLeftPct = ((bodyWidth - 400) / bodyWidth) * 100
+      const newWidth = startWidth + (delta / bodyWidth) * 100
+      setAgentLeftWidth(Math.max(20, Math.min(minLeftPct, newWidth)))
+    }
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup', onMouseUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
+  }, [agentLeftWidth])
+
   // Vertical drag (up/down resize within right panel)
   const handleVerticalDrag = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
@@ -150,6 +178,13 @@ export default function DataReviewPage() {
         </div>
         <div className={styles.headerRight}>
           <button
+            className={`${styles.intuitIntelBtn} ${activeTopTab === 'w2s' && agentView === 'idle' ? styles.intuitIntelBtnActive : ''}`}
+            aria-label="Toggle panel"
+            onClick={agentView !== 'idle' ? handleAgentClose : handleAgentOpen}
+          >
+            <Panel size="medium" />
+          </button>
+          <button
             className={`${styles.intuitIntelBtn} ${agentView !== 'idle' ? styles.intuitIntelBtnActive : ''}`}
             aria-label="Intuit Intelligence"
             onClick={handleAgentOpen}
@@ -161,7 +196,7 @@ export default function DataReviewPage() {
 
       {/* Body — left panel + drag handle + right panel + agent panel */}
       <div className={styles.body} ref={bodyRef}>
-        <div className={styles.leftPanel} style={{ width: poppedOut ? '100%' : (agentView === 'loading' || agentView === 'report' || agentView === 'closing') ? '80%' : `${leftWidth}%` }}>
+        <div className={styles.leftPanel} style={{ width: poppedOut ? '100%' : (agentView === 'loading' || agentView === 'report' || agentView === 'closing') ? `${agentLeftWidth}%` : `${leftWidth}%` }}>
           <LeftPanel1040 selectedField={selectedField} total1a={total1a} wages={wages} yoyExpanded={yoyExpanded} />
         </div>
 
@@ -243,6 +278,13 @@ export default function DataReviewPage() {
               <AgentLoadingPane onClose={handleAgentClose} />
             )}
 
+            {/* Drag handle between left panel and agent panel */}
+            {(agentView === 'report' || agentView === 'closing') && (
+              <div className={dragStyles.handleVertical} onMouseDown={handleAgentDrag}>
+                <OverflowIos size="small" className={dragStyles.handleIcon} />
+              </div>
+            )}
+
             {/* Agent report panel — screen 3 & 4 */}
             {(agentView === 'report' || agentView === 'closing') && (
               <AgentReportPane
@@ -252,7 +294,6 @@ export default function DataReviewPage() {
                 onViewW2={() => {
                   handleAgentClose()
                   setActiveTopTab('w2s')
-                  setSelectedField('wages')
                 }}
               />
             )}

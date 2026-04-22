@@ -1,7 +1,10 @@
 import { useState } from 'react'
-import { CommentPencil, Close, Copy, ThumbUp, ThumbDown, Plus, ChevronDown } from '@design-systems/icons'
+import YoYDetailPane from './YoYDetailPane'
+import { Close, Plus, ChevronDown, ChevronRight } from '@design-systems/icons'
 import { Button } from '@ids-ts/button'
 import '@ids-ts/button/dist/main.css'
+import { Badge } from '@cgds/badge'
+import '@cgds/badge/dist/index.css'
 import intuitAssistIcon from '../../assets/icons/intuit-assist.svg'
 import sendArrow from '../../assets/send-arrow.svg'
 import styles from '../../styles/data-review/AgentReportPane.module.css'
@@ -10,6 +13,7 @@ interface AgentReportPaneProps {
   onClose?: () => void
   onYoyToggle?: (expanded: boolean) => void
   onViewW2?: () => void
+  onReviewSource?: () => void
   closing?: boolean
 }
 
@@ -28,57 +32,34 @@ const CHIPS = [
   'Explain the IRS compliance issue',
 ]
 
-// Inline SVGs matching the Figma icon names
-function CompareOthersIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 6h18M3 12h12M3 18h8M17 15l2 2 4-4" stroke="#393A3D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
-function ScannerIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M4 7V5a2 2 0 012-2h2M16 3h2a2 2 0 012 2v2M20 17v2a2 2 0 01-2 2h-2M8 21H6a2 2 0 01-2-2v-2" stroke="#393A3D" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M6 12h12" stroke="#393A3D" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  )
-}
-function FederalTaxesIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 10.5L12 3l9 7.5V21H15v-6H9v6H3V10.5z" stroke="#393A3D" strokeWidth="1.5" strokeLinejoin="round"/>
-    </svg>
-  )
-}
-function TaxesCreditsIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="9" stroke="#393A3D" strokeWidth="1.5"/>
-      <path d="M12 7v5l3 3" stroke="#393A3D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
+// Figma asset icons (exact matches from Figma design node 29113:62676)
+const imgViewSources = 'https://www.figma.com/api/mcp/asset/8a1a6892-eb92-449b-9b09-404ef1adce23'
+const imgAutoFill    = 'https://www.figma.com/api/mcp/asset/bf8c2ff8-a1ed-4b44-b4e6-e9eeaf4a5353'
+const imgYoY         = 'https://www.figma.com/api/mcp/asset/3cf68bcc-c790-44c0-90e8-cf559f600dbf'
+const imgScanner     = 'https://www.figma.com/api/mcp/asset/428263f5-cebe-4316-a7a7-0115d1b38186'
+const imgFedTaxes    = 'https://www.figma.com/api/mcp/asset/f2c52cb3-da41-4090-a976-38f15c4dda86'
+const imgTaxCredits  = 'https://www.figma.com/api/mcp/asset/6160fe4d-e0fc-46b4-b151-d4ac7dbf5c9b'
 
 const CARD_ICONS = [
-  <CompareOthersIcon />,
-  <ScannerIcon />,
-  <FederalTaxesIcon />,
-  <TaxesCreditsIcon />,
+  <img src={imgYoY}        alt="" width={20} height={20} />,
+  <img src={imgScanner}    alt="" width={20} height={20} />,
+  <img src={imgFedTaxes}   alt="" width={20} height={20} />,
+  <img src={imgTaxCredits} alt="" width={20} height={20} />,
 ]
 
-// Menu icon (hamburger) — not in @design-systems/icons for this use
-function MenuIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <path d="M3 5h14M3 10h14M3 15h14" stroke="#393A3D" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  )
-}
 
-export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, closing = false }: AgentReportPaneProps) {
+export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, onReviewSource, closing = false }: AgentReportPaneProps) {
   const [inputValue, setInputValue] = useState('')
   const [yoyExpanded, setYoyExpanded] = useState(false)
+  const [importedDocsExpanded, setImportedDocsExpanded] = useState(false)
+  const [yoyDetailOpen, setYoyDetailOpen] = useState(false)
+  const [yoyDetailClosing, setYoyDetailClosing] = useState(false)
+
+  const handleOpenYoyDetail = () => setYoyDetailOpen(true)
+  const handleCloseYoyDetail = () => {
+    setYoyDetailClosing(true)
+    setTimeout(() => { setYoyDetailOpen(false); setYoyDetailClosing(false) }, 200)
+  }
 
   const handleYoyClick = () => {
     const next = !yoyExpanded
@@ -91,11 +72,7 @@ export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, closin
 
       {/* ── Header ── */}
       <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <button className={styles.iconBtn} aria-label="Menu">
-            <MenuIcon />
-          </button>
-        </div>
+        <div className={styles.headerLeft} />
 
         <div className={styles.headerTitle}>
           <img src={intuitAssistIcon} alt="" className={styles.assistIcon} />
@@ -103,9 +80,6 @@ export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, closin
         </div>
 
         <div className={styles.headerRight}>
-          <button className={styles.iconBtn} aria-label="New chat">
-            <CommentPencil size="small" />
-          </button>
           <button className={styles.iconBtn} aria-label="Close" onClick={onClose}>
             <Close size="small" />
           </button>
@@ -116,55 +90,88 @@ export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, closin
       <div className={styles.pane}>
         <div className={styles.chat}>
 
-          {/* Show thinking */}
-          <button className={styles.showThinking}>
-            <span className={styles.showThinkingLabel}>Show thinking</span>
-            <ChevronDown size="small" />
-          </button>
-
           {/* Agent message */}
           <p className={styles.agentMessage}>
-            Here's your full report. Feel free to ask any questions.
+            Here's a summary of imported documents and issues found.
           </p>
 
-          {/* ScoreCard */}
+          {/* Imported Documents card */}
+          <div className={styles.importedDocsCard}>
+            <button
+              className={styles.importedDocsHeader}
+              onClick={() => setImportedDocsExpanded(v => !v)}
+              aria-expanded={importedDocsExpanded}
+            >
+              <img src={imgAutoFill} alt="" width={20} height={20} />
+              <div className={styles.importedDocsContent}>
+                <span className={styles.importedDocsLabel}>Imported documents</span>
+                <Badge status="info" shape="rect">4</Badge>
+              </div>
+              <ChevronDown size="small" className={importedDocsExpanded ? styles.chevronUp : styles.chevron} />
+            </button>
+
+            {importedDocsExpanded && (
+              <div className={styles.docList}>
+                {/* W-2s group */}
+                <div className={styles.docGroup}>
+                  <button className={styles.docGroupHeader} onClick={onViewW2}>
+                    <div className={styles.docFab} data-type="W-2"><img src={imgAutoFill} alt="" width={20} height={20} /></div>
+                    <span className={styles.docGroupLabel}>W-2s</span>
+                  </button>
+                  <div className={styles.docGroupChildren}>
+                    {[
+                      { name: 'Bing Equipment', sub: 'Wages 2024' },
+                      { name: 'Tech Circle', sub: 'Wages 2024' },
+                    ].map(doc => (
+                      <button key={doc.name} className={styles.docChildItem} onClick={onViewW2}>
+                        <div className={styles.docChildLine} />
+                        <div className={styles.docMeta}>
+                          <span className={styles.docName}>{doc.name}</span>
+                          <span className={styles.docSub}>{doc.sub}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 1099-DIVs */}
+                <div className={styles.docItem}>
+                  <div className={styles.docFab} data-type="1099"><img src={imgScanner} alt="" width={20} height={20} /></div>
+                  <div className={styles.docMeta}>
+                    <span className={styles.docName}>1099-DIVs</span>
+                    <span className={styles.docSub}>Dividends 2024</span>
+                  </div>
+                </div>
+
+                {/* 1099-INTs */}
+                <div className={styles.docItem}>
+                  <div className={styles.docFab} data-type="1099"><img src={imgScanner} alt="" width={20} height={20} /></div>
+                  <div className={styles.docMeta}>
+                    <span className={styles.docName}>1099-INTs</span>
+                    <span className={styles.docSub}>Interest 2024</span>
+                  </div>
+                </div>
+
+                {/* Schedule K-1 */}
+                <div className={styles.docItem}>
+                  <div className={styles.docFab} data-type="SCH"><img src={imgFedTaxes} alt="" width={20} height={20} /></div>
+                  <div className={styles.docMeta}>
+                    <span className={styles.docName}>Schedule K-1</span>
+                    <span className={styles.docSub}>Easy Money Ltd</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Items to review scorecard */}
           <div className={styles.scoreCard}>
             <div className={styles.scoreTopRow}>
-              <span className={styles.scoreTitle}>Review Score</span>
+              <span className={styles.scoreTitle}>Items to review</span>
+              <span className={styles.scoreRemaining}><strong>8</strong> items remaining</span>
             </div>
-            <span className={styles.scoreAmount}>88%</span>
-
-            {/* Accuracy — green, 94% */}
-            <div className={styles.metricRow}>
-              <div className={styles.metricHeader}>
-                <span className={styles.metricLabel}>Accuracy</span>
-                <span className={styles.metricValue}>94%</span>
-              </div>
-              <div className={styles.progressTrack}>
-                <div className={styles.progressFill} style={{ width: '94%', background: '#00856d' }} />
-              </div>
-            </div>
-
-            {/* Completeness — orange, 88% (≈ right-1/4 from end = 75% filled in Figma, but value says 88%) */}
-            <div className={styles.metricRow}>
-              <div className={styles.metricHeader}>
-                <span className={styles.metricLabel}>Completeness</span>
-                <span className={styles.metricValue}>88%</span>
-              </div>
-              <div className={styles.progressTrack}>
-                <div className={styles.progressFill} style={{ width: '75%', background: '#ff9331' }} />
-              </div>
-            </div>
-
-            {/* Risk — orange, 82% */}
-            <div className={styles.metricRow}>
-              <div className={styles.metricHeader}>
-                <span className={styles.metricLabel}>Risk</span>
-                <span className={styles.metricValue}>82%</span>
-              </div>
-              <div className={styles.progressTrack}>
-                <div className={styles.progressFill} style={{ width: '75%', background: '#ff9331' }} />
-              </div>
+            <div className={styles.progressTrack}>
+              <div className={styles.progressFill} style={{ width: '30%', background: '#00856d' }} />
             </div>
           </div>
 
@@ -186,45 +193,34 @@ export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, closin
                   <ChevronDown size="small" className={`${styles.chevron} ${card.label === 'YoY analysis' && yoyExpanded ? styles.chevronUp : ''}`} />
                 </button>
 
-                {/* Significant income drop finding — shown when YoY is expanded */}
+                {/* YoY finding — shown when expanded */}
                 {card.label === 'YoY analysis' && yoyExpanded && (
                   <div className={styles.findingCard}>
-                    <div className={styles.findingHeader}>
-                      <span className={styles.findingBadge}>-15%</span>
-                      <span className={styles.findingTitle}>Significant income drop</span>
-                    </div>
-                    <p className={styles.findingBody}>
-                      Wages reported on line 1a dropped from $146,227 (2023) to $124,304 (2024) — a 15% decrease. Verify with client if this is expected.
-                    </p>
-                    <div className={styles.findingFields}>
-                      <div className={styles.findingField}>
-                        <span className={styles.findingFieldLabel}>Form 1040 line 1a</span>
-                        <span className={styles.findingFieldValue}>$124,304</span>
+                    <div className={styles.findingInner}>
+                      <div className={styles.findingTitleRow}>
+                        <span className={styles.findingDot} />
+                        <span className={styles.findingTitle}>Significant income drop</span>
                       </div>
-                      <div className={styles.findingField}>
-                        <span className={styles.findingFieldLabel}>Prior year (2023)</span>
-                        <span className={styles.findingFieldValue}>$146,227</span>
+                      <p className={styles.findingBody}>
+                        Wages dropped by $21.5k (-15%) vs Prior Year.
+                      </p>
+                      <div className={styles.findingActions}>
+                        <button className={styles.viewSourcesBtn}>
+                          <img src={imgViewSources} alt="" width={16} height={16} />
+                          View sources
+                        </button>
+                        <Button priority="tertiary" size="small" onClick={handleOpenYoyDetail}>More info <ChevronRight size="small" /></Button>
                       </div>
                     </div>
-                    <Button priority="tertiary" onClick={onViewW2}>View</Button>
                   </div>
                 )}
               </div>
             ))}
           </div>
 
-          {/* Feedback bar */}
-          <div className={styles.feedbackBar}>
-            <button className={styles.iconBtn} aria-label="Copy"><Copy size="small" /></button>
-            <button className={styles.iconBtn} aria-label="Like"><ThumbUp size="small" /></button>
-            <button className={styles.iconBtn} aria-label="Dislike"><ThumbDown size="small" /></button>
-          </div>
-
-          {/* Suggestion chips — right-aligned, pl-48px on container */}
-          <div className={styles.chips}>
-            {CHIPS.map(chip => (
-              <button key={chip} className={styles.chip}>{chip}</button>
-            ))}
+          {/* Start guided review */}
+          <div className={styles.guidedReviewRow}>
+            <Button priority="primary">Start guided review <ChevronRight size="small" /></Button>
           </div>
 
         </div>
@@ -262,6 +258,17 @@ export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, closin
         </div>
         <span className={styles.legal}>Important information about how we use generative AI</span>
       </div>
+
+      {/* YoY detail pane — overlays from right */}
+      {(yoyDetailOpen || yoyDetailClosing) && (
+        <YoYDetailPane
+          closing={yoyDetailClosing}
+          onClose={() => { handleCloseYoyDetail(); onClose?.() }}
+          onBack={handleCloseYoyDetail}
+          onViewW2={onViewW2}
+          onReviewSource={onReviewSource ? () => { handleCloseYoyDetail(); onReviewSource() } : undefined}
+        />
+      )}
 
     </div>
   )

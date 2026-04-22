@@ -35,7 +35,7 @@ export default function ReviewTab({ activeTopTab = 'w2s', onTopTabChange, onTabC
             onClick={() => handleTabClick(tab.key, tab.label)}
           >
             <div className={styles.tabContent}>
-              <img src={sparklesIcon} alt="" className={styles.tabIcon} />
+              <img src={sparklesIcon} alt="" className={`${styles.tabIcon} ${tab.key !== activeTopTab ? styles.tabIconInactive : ''}`} />
               <span className={`${styles.tabLabel} ${tab.key === activeTopTab ? styles.tabLabelActive : styles.tabLabelInactive}`}>
                 {tab.label}
               </span>
