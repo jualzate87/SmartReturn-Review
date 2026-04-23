@@ -1,160 +1,446 @@
-/* Left panel — 1040 form viewer with toolbar and status badges */
+/* ── Left panel — HTML table 1040 ── */
+
 .leftPanel {
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  background: #ffffff;
 }
 
-/* Toolbar — bg #e2e9ed, height 45px */
-.toolbar {
+/* Scrollable viewer */
+.documentViewer {
+  flex: 1;
+  background: #ffffff;
+  overflow-y: auto;
+  overflow-x: auto;
   display: flex;
-  align-items: center;
   justify-content: center;
-  height: 45px;
-  padding: 4px 10px;
-  background: #e2e9ed;
-  flex-shrink: 0;
+  padding: 20px;
 }
 
-.toolbarControls {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.zoomLevel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #21262a;
+/* Form document — reduced ~20% in font scale + padding */
+.formDoc {
+  width: 100%;
+  max-width: 688px;        /* was ~860px → ×0.8 */
+  background: #ffffff;
+  border: 1px solid #d4d7dc;
   border-radius: 4px;
-  padding: 0 8px;
-  height: 24px;
-  font-family: var(--font-name-body, sans-serif);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 16px;
-  color: #21262a;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  font-family: 'Arial', sans-serif;
+  font-size: 80%;          /* scales all relative units down */
+  flex-shrink: 0;
+  padding-bottom: 24px;   /* breathing room at bottom so last row isn't clipped */
+  overflow: hidden;        /* clips table rows to the card border */
+}
+
+/* ── IRS Header ── */
+.irsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 6px;
+  border-bottom: 2px solid #000;
+  background: #eef3f7;
+}
+
+.irsLeft  { display: flex; flex-direction: column; gap: 2px; }
+.irsDept  { font-size: 9px; color: #444; line-height: 1.3; }
+.irsTitle { font-size: 13px; color: #1a1a1a; line-height: 1.4; }
+.irsTitle strong { font-weight: 800; font-size: 18px; }
+
+.irsRight  { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.irsYear   { font-size: 28px; font-weight: 800; color: #1a1a1a; letter-spacing: -1px; line-height: 1; }
+.irsOmb    { font-size: 9px; color: #666; }
+
+/* ── Taxpayer info grid ── */
+.infoGrid { border-bottom: 1px solid #d4d7dc; }
+
+.infoRow {
+  display: flex;
+  border-bottom: 1px solid #e8eaed;
+}
+.infoRow:last-child { border-bottom: none; }
+
+.infoField {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 8px;
+  border-right: 1px solid #e8eaed;
+  min-width: 0;
+}
+.infoField:last-child { border-right: none; }
+
+.infoLabel {
+  font-size: 8px;
+  color: #888;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.infoValue {
+  font-size: 11px;
+  color: #1a1a1a;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* ── Filing status ── */
+.filingStatus {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 5px 10px;
+  border-bottom: 1px solid #e8eaed;
+  flex-wrap: wrap;
+}
+
+.filingLabel {
+  font-size: 9px;
+  font-weight: 700;
+  color: #393a3d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   white-space: nowrap;
 }
 
-.toolbarBtn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #21262a;
-  padding: 0;
+.filingOption {
   display: flex;
   align-items: center;
-  width: 24px;
-  height: 24px;
+  gap: 4px;
+  font-size: 10px;
+  color: #393a3d;
+  cursor: default;
 }
 
-.toolbarBtn:hover {
-  opacity: 0.7;
-}
-
-.toolbarDivider {
-  width: 1px;
-  height: 24px;
-  background: #21262a;
+.filingOption input[type="radio"] {
+  accent-color: #205ea3;
+  width: 11px;
+  height: 11px;
   flex-shrink: 0;
 }
 
-.pageControls {
+
+/* ── Field type legend ── */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 10px 4px;
+  background: #f7f9fb;
+  border-bottom: 1px solid #e8eaed;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  color: #5d686f;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.legendSwatch {
+  display: inline-block;
+  width: 20px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Source swatch — mirrors .valueBoxSource */
+.legendSwatchSource {
+  background: #f0f6ff;
+  border: 1px solid #93c5fd;
+}
+
+/* Calc swatch — mirrors .valueBoxCalc */
+.legendSwatchCalc {
+  background: #f7f9fb;
+  border: 1px dashed #adb9c2;
+}
+
+/* ── Divider row ── */
+.dividerRow td { padding: 0; }
+.dividerLine {
+  height: 2px;
+  background: #c8d3da;
+  margin: 1px 0;
+}
+
+/* ── Column headers ── */
+.colHeaders {
+  display: grid;
+  grid-template-columns: 28px 1fr 28px 110px;
+  padding: 3px 0;
+  background: #f7f9fb;
+  border-bottom: 1px solid #d4d7dc;
+}
+
+.colLine, .colLineR {
+  font-size: 8px;
+  color: #aaa;
+  text-align: center;
+  padding: 2px 4px;
+}
+
+.colDesc {
+  font-size: 8px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+}
+
+.colVal {
+  font-size: 8px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  text-align: right;
+}
+
+/* ── Main table ── */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* ── Rows ── */
+.row {
+  border-bottom: 1px solid #eef0f2;
+  transition: background 100ms ease;
+}
+
+.rowClickable { cursor: pointer; }
+.rowClickable:hover { background: #f4f7fb; }
+
+.rowBold .cellLabel { font-weight: 700; color: #1a1a1a; }
+
+.rowShaded { background: #f7f9fb; }
+
+.rowSubdued { opacity: 0.45; }
+.rowSubdued .valueBox { border-color: #e8eaed; }
+
+.rowIndent .cellLabel { padding-left: 22px !important; }
+
+/* Selected row — orange left accent (issue field) */
+.rowSelected {
+  background: rgba(201, 80, 15, 0.03) !important;
+  box-shadow: inset 3px 0 0 #c9500f;
+}
+
+/* Selected row — blue left accent (generic field click / popover) */
+.rowSelectedBlue {
+  background: rgba(32, 94, 163, 0.03) !important;
+  box-shadow: inset 3px 0 0 #205ea3;
+}
+
+/* Reviewed row — green left accent */
+.rowReviewed {
+  box-shadow: inset 3px 0 0 #1a8254;
+}
+
+/* "Amount you owe" — final result row, subtle accent (still part of the form) */
+.rowOwe {
+  background: #f7f9fb;
+  border-top: 2px solid #c8d3da;
+}
+.rowOwe .cellLabel {
+  color: #1a1a1a;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.rowOwe .cellLine,
+.rowOwe .cellLineRight,
+.rowOwe .cellValue {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* Divider above the owe row — single solid rule, clean */
+.oweDividerRow td {
+  padding: 0;
+  height: 3px;
+  background: #c8d3da;
+}
+
+/* Section header */
+.sectionHeader td { padding: 8px 10px 3px; }
+.sectionTitle {
+  font-size: 9px;
+  font-weight: 700;
+  color: #5d686f;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+/* ── Cells ── */
+.cellLine {
+  width: 28px;
+  font-size: 9px;
+  color: #aaa;
+  text-align: center;
+  padding: 5px 4px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.cellLineRight {
+  width: 28px;
+  font-size: 9px;
+  color: #aaa;
+  text-align: center;
+  padding: 5px 4px;
+  vertical-align: middle;
+}
+
+.cellLabel {
+  font-size: 10.5px;
+  color: #393a3d;
+  padding: 5px 8px;
+  vertical-align: middle;
+  line-height: 1.35;
+}
+
+/* Inner wrapper handles the flex — td itself must remain table-cell */
+.cellLabelInner {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.pageLabel {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 16px;
-  color: #21262a;
+.cellValue {
+  width: 110px;
+  padding: 4px 6px 4px 0;
+  vertical-align: middle;
 }
 
-.pageNumber {
+/* ── Value box — always visible container, color-coded by kind ── */
+.valueBox {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border: 1px solid #21262a;
-  border-radius: 4px;
-  padding: 0 8px;
-  height: 24px;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 16px;
-  color: #21262a;
-}
-
-.pageTotal {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 16px;
-  color: #21262a;
-  width: 26px;
-  text-align: center;
-}
-
-.pageNavBtn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #21262a;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  width: 20px;
-  height: 20px;
-}
-
-/* Document viewer — white bg, form scales to fit available space */
-.documentViewer {
-  flex: 1;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  min-height: 22px;
+  min-width: 80px;
+  border: 1px solid #e0e4e8;   /* default: plain outline for any non-empty field */
   background: #ffffff;
-  padding: 8px;
-  overflow-y: auto;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
+  transition: border-color 100ms ease, background 100ms ease;
+  box-sizing: border-box;
 }
 
-.documentWrapper {
-  position: relative;
-  line-height: 0;
-  box-shadow: 0 1px 4px rgba(76, 85, 91, 0.2);
-  container-type: inline-size;
+/* Empty box — dashed ghost so user sees it's a fillable field */
+.valueBoxEmpty {
+  border: 1px dashed #d4d7dc;
+  background: transparent;
+  min-width: 60px;
 }
 
-.documentImage {
-  width: 100%;
-  height: auto;
-  display: block;
+/*
+ * SOURCE fields — value imported from documents (W-2, 1099, etc.)
+ * Blue tint + solid blue border → "this came from a document"
+ */
+/* Source — blue tint + solid blue border */
+.valueBoxSource {
+  background: #f0f6ff;
+  border: 1px solid #93c5fd;
 }
 
-@keyframes highlightAppear {
-  from { opacity: 0; transform: scaleX(0.8); }
-  to   { opacity: 1; transform: scaleX(1); }
+/* Calc — neutral grey + dashed border */
+.valueBoxCalc {
+  background: #f7f9fb;
+  border: 1px dashed #adb9c2;
 }
 
-/* 1040 Line 1a pink highlight — shown only when wages field is selected */
-.wagesHighlight1040 {
-  position: absolute;
-  left: 82.4%;
-  top: 56.9%;
-  width: 11.6%;
-  height: 1.4%;
-  background: rgba(255, 136, 236, 0.2);
-  border: 1px solid #c9007a;
-  border-radius: 2px;
-  cursor: pointer;
-  z-index: 3;
-  transform-origin: left center;
-  animation: highlightAppear var(--duration-appear-fast, 250ms) var(--ease-appear, cubic-bezier(0, 0, 0.25, 1));
+/* Selected — orange override regardless of kind (issue field) */
+.valueBoxSelected {
+  background: rgba(201, 80, 15, 0.06) !important;
+  border: 2px solid #c9500f !important;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .wagesHighlight1040 { animation: none; }
+/* Selected — blue override (generic field click / popover) */
+.valueBoxSelectedBlue {
+  background: rgba(32, 94, 163, 0.06) !important;
+  border: 2px solid #205ea3 !important;
+}
+
+.valueNum {
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  color: #393a3d;   /* default for rows with no kind */
+}
+
+/* Source: bold blue — came from a document */
+.valueNumSource {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+/* Calc: muted grey italic — derived on-form */
+.valueNumCalc {
+  color: #5d686f;
+  font-style: italic;
+}
+
+/* Selected: orange (issue field) */
+.valueNumSelected {
+  color: #c9500f !important;
+  font-style: normal !important;
+}
+
+/* Selected: blue (generic field click) */
+.valueNumSelectedBlue {
+  color: #205ea3 !important;
+  font-style: normal !important;
+}
+
+/* Reviewed: green value number */
+.valueNumReviewed {
+  color: #1a8254;
+}
+
+
+/* ── YoY badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 5px;
+  border-radius: 100px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.badgeGrey   { background: #8a9ba5; }
+.badgeOrange { background: #E5A14E; }
+.badgeRed    { background: #b3261e; }
+
+/* ── Reviewed state ── */
+.reviewedIcon {
+  display: inline-flex;
+  color: #1a8254;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* Reviewed value box override — green border */
+.valueBoxReviewed {
+  border-color: #1a8254 !important;
+  background: #f0faf4 !important;
 }

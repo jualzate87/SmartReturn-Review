@@ -1,16 +1,16 @@
 /* ─────────────────────────────────────────────
-   YoY Detail Pane — slides in from right over AgentReportPane
+   YoY Detail Pane — slides in from right (page-navigate feel)
    Figma node: 29985:91127
 ───────────────────────────────────────────── */
 
 @keyframes slideInFromRight {
-  from { opacity: 0; transform: translateX(100%); }
+  from { opacity: 0; transform: translateX(40px); }
   to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slideOutToRight {
   from { opacity: 1; transform: translateX(0); }
-  to   { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 0; transform: translateX(24px); }
 }
 
 .panel {
@@ -22,11 +22,11 @@
   border-left: 1px solid var(--color-divider-tertiary, #d4d7dc);
   overflow: hidden;
   z-index: 10;
-  animation: slideInFromRight var(--duration-transform-fast, 350ms) var(--ease-appear, cubic-bezier(0, 0, 0.25, 1));
+  animation: slideInFromRight 280ms cubic-bezier(0.2, 0, 0.25, 1) both;
 }
 
 .panelClosing {
-  animation: slideOutToRight var(--duration-disappear-fast, 200ms) var(--ease-disappear, cubic-bezier(0.35, 0, 1, 1)) forwards;
+  animation: slideOutToRight 200ms cubic-bezier(0.35, 0, 0.25, 1) forwards;
 }
 
 /* ── Header — same as AgentReportPane ── */
@@ -131,6 +131,24 @@
   font-weight: 400;
   line-height: 16px;
   color: var(--text\/secondary, #5d686f);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.counterNum {
+  font-weight: 600;
+  color: #21262a;
+}
+
+/* Inline progress bar + label — sits on the right of the nav row */
+.navProgress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+  justify-content: flex-end;
+  max-width: 180px;
 }
 
 /* ── Issue title row ── */
@@ -282,12 +300,64 @@
   flex-shrink: 0;
 }
 
+/* ── Mini progress tracker ── */
+.miniProgress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.miniProgressTrack {
+  flex: 1;
+  height: 4px;
+  background: #e3e5e8;
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.miniProgressFill {
+  height: 100%;
+  background: #00856d;
+  border-radius: 100px;
+  transition: width 400ms ease;
+  min-width: 0;
+}
+
+.miniProgressLabel {
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--text\/secondary, #5d686f);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* ── Action buttons ── */
 .actionButtons {
   display: flex;
   align-items: center;
   gap: 15px;
   flex-wrap: wrap;
+}
+
+/* Reviewed state button — green filled, replaces "Mark as reviewed" */
+.reviewedBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid #1a8254;
+  border-radius: 4px;
+  background: #e6f6ef;
+  color: #1a8254;
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: default;
+  flex-shrink: 0;
 }
 
 /* ── Input area — identical to AgentReportPane ── */
@@ -394,5 +464,6 @@
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .panel, .panelClosing { animation: none; }
+  .panel { animation: none; opacity: 1; transform: none; }
+  .panelClosing { animation: none; opacity: 0; }
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import YoYDetailPane from './YoYDetailPane'
-import { Close, Plus, ChevronDown, ChevronRight } from '@design-systems/icons'
+import { Close, Plus, ChevronDown, ChevronRight, Document, CircleCheck } from '@design-systems/icons'
 import { Button } from '@ids-ts/button'
 import '@ids-ts/button/dist/main.css'
 import { Badge } from '@cgds/badge'
@@ -9,12 +9,23 @@ import intuitAssistIcon from '../../assets/icons/intuit-assist.svg'
 import sendArrow from '../../assets/send-arrow.svg'
 import styles from '../../styles/data-review/AgentReportPane.module.css'
 
+const TOTAL_REVIEW_ITEMS = 8
+
 interface AgentReportPaneProps {
   onClose?: () => void
   onYoyToggle?: (expanded: boolean) => void
-  onViewW2?: () => void
+  /** Called with the current subview name before navigating away to sources */
+  onViewW2?: (fromSubView?: 'overview' | 'yoyDetail') => void
   onReviewSource?: () => void
+  onMarkReviewed?: (fieldName: string) => void
+  reviewedFields?: Set<string>
   closing?: boolean
+  /** If set, the pane will open directly to this subview (used for back-to-exact-state) */
+  initialSubView?: 'overview' | 'yoyDetail'
+  /** Called when subview changes — e.g. overview ↔ yoyDetail */
+  onSubViewChange?: (subView: 'overview' | 'yoyDetail') => void
+  /** When true: hides header and suppresses slide-in animation (rendered inside AgentLoadingPane body) */
+  embedded?: boolean
 }
 
 // Report card icons from Figma — imgReport, imgReport1, imgReport2, imgReport3
@@ -48,16 +59,22 @@ const CARD_ICONS = [
 ]
 
 
-export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, onReviewSource, closing = false }: AgentReportPaneProps) {
+export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, onReviewSource, onMarkReviewed, reviewedFields = new Set(), closing = false, initialSubView, onSubViewChange, embedded = false }: AgentReportPaneProps) {
+  const reviewedCount = reviewedFields.size
+  const progressPct = Math.round((reviewedCount / TOTAL_REVIEW_ITEMS) * 100)
   const [inputValue, setInputValue] = useState('')
-  const [yoyExpanded, setYoyExpanded] = useState(false)
+  const [yoyExpanded, setYoyExpanded] = useState(initialSubView === 'yoyDetail' ? true : false)
   const [importedDocsExpanded, setImportedDocsExpanded] = useState(false)
-  const [yoyDetailOpen, setYoyDetailOpen] = useState(false)
+  const [yoyDetailOpen, setYoyDetailOpen] = useState(initialSubView === 'yoyDetail')
   const [yoyDetailClosing, setYoyDetailClosing] = useState(false)
 
-  const handleOpenYoyDetail = () => setYoyDetailOpen(true)
+  const handleOpenYoyDetail = () => {
+    setYoyDetailOpen(true)
+    onSubViewChange?.('yoyDetail')
+  }
   const handleCloseYoyDetail = () => {
     setYoyDetailClosing(true)
+    onSubViewChange?.('overview')
     setTimeout(() => { setYoyDetailOpen(false); setYoyDetailClosing(false) }, 200)
   }
 
@@ -68,23 +85,25 @@ export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, onRevi
   }
 
   return (
-    <div className={`${styles.panel} ${closing ? styles.panelClosing : ''}`}>
+    <div className={`${embedded ? styles.panelEmbedded : styles.panel} ${closing && !embedded ? styles.panelClosing : ''}`}>
 
-      {/* ── Header ── */}
-      <div className={styles.header}>
-        <div className={styles.headerLeft} />
+      {/* ── Header — hidden when embedded inside AgentLoadingPane ── */}
+      {!embedded && (
+        <div className={styles.header}>
+          <div className={styles.headerLeft} />
 
-        <div className={styles.headerTitle}>
-          <img src={intuitAssistIcon} alt="" className={styles.assistIcon} />
-          <span className={styles.titleText}>Tax Prep Agent</span>
+          <div className={styles.headerTitle}>
+            <img src={intuitAssistIcon} alt="" className={styles.assistIcon} />
+            <span className={styles.titleText}>Tax Prep Agent</span>
+          </div>
+
+          <div className={styles.headerRight}>
+            <button className={styles.iconBtn} aria-label="Close" onClick={onClose}>
+              <Close size="small" />
+            </button>
+          </div>
         </div>
-
-        <div className={styles.headerRight}>
-          <button className={styles.iconBtn} aria-label="Close" onClick={onClose}>
-            <Close size="small" />
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* ── Scrollable pane ── */}
       <div className={styles.pane}>
@@ -112,54 +131,70 @@ export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, onRevi
 
             {importedDocsExpanded && (
               <div className={styles.docList}>
-                {/* W-2s group */}
-                <div className={styles.docGroup}>
-                  <button className={styles.docGroupHeader} onClick={onViewW2}>
-                    <div className={styles.docFab} data-type="W-2"><img src={imgAutoFill} alt="" width={20} height={20} /></div>
-                    <span className={styles.docGroupLabel}>W-2s</span>
-                  </button>
-                  <div className={styles.docGroupChildren}>
-                    {[
-                      { name: 'Bing Equipment', sub: 'Wages 2024' },
-                      { name: 'Tech Circle', sub: 'Wages 2024' },
-                    ].map(doc => (
-                      <button key={doc.name} className={styles.docChildItem} onClick={onViewW2}>
-                        <div className={styles.docChildLine} />
-                        <div className={styles.docMeta}>
-                          <span className={styles.docName}>{doc.name}</span>
-                          <span className={styles.docSub}>{doc.sub}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                {/* Column headers */}
+                <div className={styles.docTableHeader}>
+                  <span className={styles.docColDocument}>Document</span>
+                  <span className={styles.docColConfidence}>
+                    Confidence
+                    <span className={styles.docConfidenceInfo} title="OCR scan confidence score">ⓘ</span>
+                  </span>
                 </div>
 
-                {/* 1099-DIVs */}
-                <div className={styles.docItem}>
-                  <div className={styles.docFab} data-type="1099"><img src={imgScanner} alt="" width={20} height={20} /></div>
-                  <div className={styles.docMeta}>
-                    <span className={styles.docName}>1099-DIVs</span>
-                    <span className={styles.docSub}>Dividends 2024</span>
+                {/* W2-Bing.pdf — 72% low confidence */}
+                <button className={styles.docRow} onClick={onViewW2}>
+                  <div className={styles.docRowLeft}>
+                    <div className={styles.docFileIcon}>
+                      <Document size="medium" />
+                    </div>
+                    <div className={styles.docMeta}>
+                      <span className={styles.docName}>W2-Bing.pdf</span>
+                      <span className={styles.docSub}>W-2 · 2 pages</span>
+                    </div>
                   </div>
-                </div>
+                  <span className={styles.confidenceBadge} data-level="low">72%</span>
+                </button>
 
-                {/* 1099-INTs */}
-                <div className={styles.docItem}>
-                  <div className={styles.docFab} data-type="1099"><img src={imgScanner} alt="" width={20} height={20} /></div>
-                  <div className={styles.docMeta}>
-                    <span className={styles.docName}>1099-INTs</span>
-                    <span className={styles.docSub}>Interest 2024</span>
+                {/* W2-Techcircle — 96% high confidence */}
+                <button className={styles.docRow} onClick={onViewW2}>
+                  <div className={styles.docRowLeft}>
+                    <div className={styles.docFileIcon}>
+                      <Document size="medium" />
+                    </div>
+                    <div className={styles.docMeta}>
+                      <span className={styles.docName}>W2-Techcircle</span>
+                      <span className={styles.docSub}>W-2 · 1 page</span>
+                    </div>
                   </div>
-                </div>
+                  <span className={styles.confidenceBadge} data-level="high">96%</span>
+                </button>
 
-                {/* Schedule K-1 */}
-                <div className={styles.docItem}>
-                  <div className={styles.docFab} data-type="SCH"><img src={imgFedTaxes} alt="" width={20} height={20} /></div>
-                  <div className={styles.docMeta}>
-                    <span className={styles.docName}>Schedule K-1</span>
-                    <span className={styles.docSub}>Easy Money Ltd</span>
+                {/* Form1099-DIV — 94% high confidence */}
+                <button className={styles.docRow}>
+                  <div className={styles.docRowLeft}>
+                    <div className={styles.docFileIcon}>
+                      <Document size="medium" />
+                    </div>
+                    <div className={styles.docMeta}>
+                      <span className={styles.docName}>Form1099-DIV</span>
+                      <span className={styles.docSub}>1099-DIV · 1 page</span>
+                    </div>
                   </div>
-                </div>
+                  <span className={styles.confidenceBadge} data-level="high">94%</span>
+                </button>
+
+                {/* Form1099-INT — 91% high confidence */}
+                <button className={styles.docRow}>
+                  <div className={styles.docRowLeft}>
+                    <div className={styles.docFileIcon}>
+                      <Document size="medium" />
+                    </div>
+                    <div className={styles.docMeta}>
+                      <span className={styles.docName}>Form1099-INT</span>
+                      <span className={styles.docSub}>1099-INT · 1 page</span>
+                    </div>
+                  </div>
+                  <span className={styles.confidenceBadge} data-level="high">91%</span>
+                </button>
               </div>
             )}
           </div>
@@ -168,10 +203,12 @@ export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, onRevi
           <div className={styles.scoreCard}>
             <div className={styles.scoreTopRow}>
               <span className={styles.scoreTitle}>Items to review</span>
-              <span className={styles.scoreRemaining}><strong>8</strong> items remaining</span>
+              <span className={styles.scoreRemaining}>
+                <strong>{TOTAL_REVIEW_ITEMS - reviewedCount}</strong> of {TOTAL_REVIEW_ITEMS} remaining
+              </span>
             </div>
             <div className={styles.progressTrack}>
-              <div className={styles.progressFill} style={{ width: '30%', background: '#00856d' }} />
+              <div className={styles.progressFill} style={{ width: `${progressPct || 5}%`, background: '#00856d', transition: 'width 400ms ease' }} />
             </div>
           </div>
 
@@ -194,26 +231,35 @@ export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, onRevi
                 </button>
 
                 {/* YoY finding — shown when expanded */}
-                {card.label === 'YoY analysis' && yoyExpanded && (
-                  <div className={styles.findingCard}>
-                    <div className={styles.findingInner}>
-                      <div className={styles.findingTitleRow}>
-                        <span className={styles.findingDot} />
-                        <span className={styles.findingTitle}>Significant income drop</span>
-                      </div>
-                      <p className={styles.findingBody}>
-                        Wages dropped by $21.5k (-15%) vs Prior Year.
-                      </p>
-                      <div className={styles.findingActions}>
-                        <button className={styles.viewSourcesBtn}>
-                          <img src={imgViewSources} alt="" width={16} height={16} />
-                          View sources
-                        </button>
-                        <Button priority="tertiary" size="small" onClick={handleOpenYoyDetail}>More info <ChevronRight size="small" /></Button>
+                {card.label === 'YoY analysis' && yoyExpanded && (() => {
+                  const isWagesReviewed = reviewedFields.has('wages')
+                  return (
+                    <div className={styles.findingCard}>
+                      <div className={`${styles.findingInner} ${isWagesReviewed ? styles.findingInnerReviewed : ''}`}>
+                        <div className={styles.findingTitleRow}>
+                          {isWagesReviewed
+                            ? <span className={styles.findingCheckIcon}><CircleCheck size="small" /></span>
+                            : <span className={styles.findingDot} />
+                          }
+                          <span className={styles.findingTitle}>Significant income drop</span>
+                          {isWagesReviewed && (
+                            <span className={styles.findingReviewedBadge}>Reviewed</span>
+                          )}
+                        </div>
+                        <p className={styles.findingBody}>
+                          Wages dropped by $21.5k (-15%) vs Prior Year.
+                        </p>
+                        <div className={styles.findingActions}>
+                          <button className={styles.viewSourcesBtn} onClick={() => onViewW2?.('overview')}>
+                            <img src={imgViewSources} alt="" width={16} height={16} />
+                            View sources
+                          </button>
+                          <Button priority="tertiary" size="small" onClick={handleOpenYoyDetail}>More info <ChevronRight size="small" /></Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )
+                })()}
               </div>
             ))}
           </div>
@@ -265,8 +311,12 @@ export default function AgentReportPane({ onClose, onYoyToggle, onViewW2, onRevi
           closing={yoyDetailClosing}
           onClose={() => { handleCloseYoyDetail(); onClose?.() }}
           onBack={handleCloseYoyDetail}
-          onViewW2={onViewW2}
+          onViewW2={() => onViewW2?.('yoyDetail')}
           onReviewSource={onReviewSource ? () => { handleCloseYoyDetail(); onReviewSource() } : undefined}
+          onMarkReviewed={onMarkReviewed}
+          reviewedCount={reviewedCount}
+          totalItems={TOTAL_REVIEW_ITEMS}
+          reviewedFields={reviewedFields}
         />
       )}
 

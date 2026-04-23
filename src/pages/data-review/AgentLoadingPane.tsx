@@ -1,3 +1,4 @@
+import { useEffect, useState, ReactNode } from 'react'
 import { CommentPencil, Close } from '@design-systems/icons'
 import intuitAssistIcon from '../../assets/icons/intuit-assist.svg'
 import loadingGif from '../../assets/intuit-assist-loading.gif'
@@ -5,6 +6,12 @@ import styles from '../../styles/data-review/AgentLoadingPane.module.css'
 
 interface AgentLoadingPaneProps {
   onClose: () => void
+  /** When true the body crossfades from loading content → report content */
+  showReport?: boolean
+  /** Whether the whole panel is closing (drives slide-out) */
+  closing?: boolean
+  /** The report pane to fade in once loading is done */
+  reportContent?: ReactNode
 }
 
 function MenuIcon() {
@@ -15,10 +22,25 @@ function MenuIcon() {
   )
 }
 
-export default function AgentLoadingPane({ onClose }: AgentLoadingPaneProps) {
+// Loading phases (within the body only — header never moves):
+//   'gif-only'  0–800ms   — animated GIF centered
+//   'greeting'  800–1800ms — spinning snowflake + "Hi, Jordan" + subtext fade in
+//   'exiting'   1800ms+   — greeting fades out
+//   then parent sets showReport=true → report fades in
+export default function AgentLoadingPane({ onClose, showReport = false, closing = false, reportContent }: AgentLoadingPaneProps) {
+  const [phase, setPhase] = useState<'gif-only' | 'greeting' | 'exiting'>('gif-only')
+
+  useEffect(() => {
+    if (showReport) return // already showing report, don't run timers
+    const greetTimer = setTimeout(() => setPhase('greeting'),  800)
+    const exitTimer  = setTimeout(() => setPhase('exiting'),  1800)
+    return () => { clearTimeout(greetTimer); clearTimeout(exitTimer) }
+  }, [showReport])
+
   return (
-    <div className={styles.panel}>
-      {/* Header — identical to AgentReportPane */}
+    <div className={`${styles.panel} ${closing ? styles.panelClosing : ''}`}>
+
+      {/* ── Header — always static, never re-animates ── */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <button className={styles.iconBtn} aria-label="Menu">
@@ -39,11 +61,43 @@ export default function AgentLoadingPane({ onClose }: AgentLoadingPaneProps) {
         </div>
       </div>
 
-      {/* Pane — GIF centered, nothing else */}
-      <div className={styles.pane}>
-        <div className={styles.logoContainer}>
-          <img src={loadingGif} alt="Tax Prep Agent is analyzing your return" className={styles.logo} />
-        </div>
+      {/* ── Body — loading content crossfades to report content ── */}
+      <div className={styles.body}>
+
+        {/* Loading content — fades out when showReport becomes true */}
+        {!showReport && (
+          <div className={styles.pane}>
+            {/* Phase A: GIF only */}
+            {phase === 'gif-only' && (
+              <div className={styles.gifOnlyPhase}>
+                <img src={loadingGif} alt="Tax Prep Agent is analyzing your return" className={styles.logo} />
+              </div>
+            )}
+
+            {/* Phase B + C: spinning snowflake + greeting text */}
+            {(phase === 'greeting' || phase === 'exiting') && (
+              <div className={phase === 'exiting' ? styles.greetingExiting : styles.greetingPhase}>
+                <div className={styles.spinningIcon}>
+                  <img src={intuitAssistIcon} alt="" className={styles.greetingIconImg} />
+                </div>
+                <div className={styles.greetingText}>
+                  <h2 className={styles.greetingTitle}>Hi, Jordan</h2>
+                  <p className={styles.greetingSubtext}>
+                    We're checking the accuracy and integrity of your return.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Report content — fades in when showReport becomes true */}
+        {showReport && (
+          <div className={styles.reportFadeIn}>
+            {reportContent}
+          </div>
+        )}
+
       </div>
     </div>
   )

@@ -313,6 +313,19 @@
 }
 .tabActive svg { color: #21262a; }
 
+/* Inline SVG icon used as img inside tab buttons */
+.tabIconImg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: inherit;
+  /* Tint the SVG using CSS filter to match tab text color */
+  filter: brightness(0) saturate(100%) invert(40%) sepia(5%) saturate(500%) hue-rotate(180deg) brightness(85%);
+}
+.tabActive .tabIconImg {
+  filter: brightness(0) saturate(100%);
+}
+
 .tabsRight {
   display: flex;
   align-items: center;

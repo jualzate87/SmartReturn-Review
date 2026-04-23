@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Refresh } from '@design-systems/icons'
 import SubTab from './SubTab'
 import styles from '../../styles/data-review/DetailFields.module.css'
@@ -6,6 +7,7 @@ interface DetailFieldsProps {
   formTitle: string
   tabs: { label: string; active: boolean }[]
   selectedField?: string | null
+  highlightMode?: 'orange' | 'blue'
   onFieldSelect?: (field: string | null) => void
   activeSubTab?: 'bingEquipment' | 'techCircle'
   onSubTabChange?: (tab: string) => void
@@ -43,6 +45,7 @@ export default function DetailFields({
   formTitle,
   tabs,
   selectedField,
+  highlightMode = 'blue',
   onFieldSelect,
   activeSubTab = 'bingEquipment',
   onSubTabChange,
@@ -51,6 +54,13 @@ export default function DetailFields({
 }: DetailFieldsProps) {
   const employer = EMPLOYER_DATA[activeSubTab]
   const currentWages = wages[activeSubTab]
+  const highlightedRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (selectedField && highlightedRef.current) {
+      highlightedRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [selectedField])
 
   const handleWagesChange = (value: string) => {
     const num = parseFloat(value.replace(/,/g, '')) || 0
@@ -106,13 +116,14 @@ export default function DetailFields({
 
         {/* (1) Wages — editable, drives 1040 line 1a */}
         <div
-          className={styles.fieldRow}
+          ref={selectedField === 'wages' ? highlightedRef : undefined}
+          className={`${styles.fieldRow} ${selectedField === 'wages' ? (highlightMode === 'orange' ? styles.fieldRowHighlightedOrange : styles.fieldRowHighlighted) : ''}`}
           onClick={() => onFieldSelect?.(selectedField === 'wages' ? null : 'wages')}
           style={{ cursor: 'pointer' }}
         >
           <span className={styles.fieldLabel}>(1) Wages, tips, etc.</span>
           <input
-            className={`${styles.fieldInput} ${styles.fieldInputSmall} ${selectedField === 'wages' ? styles.fieldInputHighlighted : ''}`}
+            className={`${styles.fieldInput} ${styles.fieldInputSmall} ${selectedField === 'wages' ? (highlightMode === 'orange' ? styles.fieldInputHighlightedOrange : styles.fieldInputHighlighted) : ''}`}
             value={currentWages}
             onChange={e => {
               const raw = e.target.value.replace(/,/g, '')

@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import {
   Question, Notification, Settings, Lock, PersonThree,
-  CircleInfo, ChevronDown, List, Lightning, Edit, Checklist,
-  Send, CloudUpload, AlarmClock,
+  CircleInfo, ChevronDown, List, Edit, Checklist,
+  Send, CloudUpload, AlarmClock, Rocket,
 } from '@design-systems/icons'
 import { Button } from '@ids-ts/button'
 import '@ids-ts/button/dist/main.css'
@@ -102,7 +102,7 @@ export default function SmartReturnHeader({ activeTab = 'smartreturn' }: SmartRe
             className={`${styles.tab} ${activeTab === 'smartreturn' ? styles.tabActive : ''}`}
             onClick={() => navigate('/smart-return')}
           >
-            <Lightning size="small" /> SmartReturn
+            <Rocket size="small" /> Launch return
           </button>
           <button className={styles.tab}>
             <Edit size="small" /> Input return

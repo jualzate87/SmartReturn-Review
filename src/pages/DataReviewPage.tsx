@@ -1,11 +1,22 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { ArrowLeft, DotsSix, OverflowIos, Panel } from '@design-systems/icons'
+import { ArrowLeft, DotsSix, Panel, ChevronLeft } from '@design-systems/icons'
+
+function VerticalGripIcon() {
+  return (
+    <svg width="4" height="20" viewBox="0 0 4 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="2" cy="4"  r="1.5" fill="#93A3AB"/>
+      <circle cx="2" cy="10" r="1.5" fill="#93A3AB"/>
+      <circle cx="2" cy="16" r="1.5" fill="#93A3AB"/>
+    </svg>
+  )
+}
 import intuitAssistIcon from '../assets/icons/intuit-assist.svg'
 import LeftPanel1040 from './data-review/LeftPanel1040'
 import ReviewTab from './data-review/ReviewTab'
 import DocumentPreview from './data-review/DocumentPreview'
 import DetailFields from './data-review/DetailFields'
 import DetailFields1099 from './data-review/DetailFields1099'
+import DetailFieldsDiv from './data-review/DetailFieldsDiv'
 import DetailFieldsK1 from './data-review/DetailFieldsK1'
 import AgentReportPane from './data-review/AgentReportPane'
 import AgentLoadingPane from './data-review/AgentLoadingPane'
@@ -19,25 +30,47 @@ import dragStyles from '../styles/data-review/DragHandle.module.css'
 export default function DataReviewPage() {
   // Selected field for cross-document highlighting
   const [selectedField, setSelectedField] = useState<string | null>(null)
-  // Active top tab: 'w2s' | '1099-ints' | 'k1'
-  const [activeTopTab, setActiveTopTab] = useState<'w2s' | '1099-ints' | 'k1'>('w2s')
+  // Active top tab: 'w2s' | '1099-divs' | '1099-ints' | 'k1'
+  const [activeTopTab, setActiveTopTab] = useState<'w2s' | '1099-divs' | '1099-ints' | 'k1'>('w2s')
   // Active W-2 sub-tab: 'bingEquipment' | 'techCircle'
   const [activeSubTab, setActiveSubTab] = useState<'bingEquipment' | 'techCircle'>('bingEquipment')
   // W-2 wages — drives 1040 line 1a dynamically
   const [wages, setWages] = useState({ bingEquipment: 60000, techCircle: 64304 })
   const total1a = wages.bingEquipment + wages.techCircle
-  // Left/right panel width ratio — 50% when idle
+  // Left panel width in px when idle (950px default); as % when agent open
   const [leftWidth, setLeftWidth] = useState(50)
-  // Left panel width when agent panel is open (draggable)
-  const [agentLeftWidth, setAgentLeftWidth] = useState(62)
+  // Agent panel width in px when open (default 588px, user-resizable)
+  const [agentPanelWidth, setAgentPanelWidth] = useState(588)
+  // Right panel width in px (default 700px, user-resizable)
+  const [rightPanelWidth, setRightPanelWidth] = useState(700)
   // Top/bottom section height ratio in right panel (0-100, where value = preview percentage)
   const [previewHeight, setPreviewHeight] = useState(40)
   // Whether right panel is popped out
   const [poppedOut, setPoppedOut] = useState(false)
+  // Whether the right document panel is visible (toggle with Panel button)
+  const [rightPanelVisible, setRightPanelVisible] = useState(true)
+  // Whether the right panel is animating out (slide-out before display:none)
+  const [rightPanelExiting, setRightPanelExiting] = useState(false)
   // Agent panel view state: idle → loading → report → closing → idle
   const [agentView, setAgentView] = useState<'idle' | 'loading' | 'report' | 'closing'>('idle')
+  // Right panel animating-in: true during the 'closing' state so enter CSS fires
+  const [rightPanelAnimating, setRightPanelAnimating] = useState(false)
   // Whether YoY analysis is expanded (screen 4) — drives -15% badge on 1040
   const [yoyExpanded, setYoyExpanded] = useState(false)
+  // Whether user navigated to source docs from the agent panel — shows back link
+  const [fromAgent, setFromAgent] = useState(false)
+  // Which agent subview to restore when going back to agent insights
+  // 'overview' = report overview, 'yoyDetail' = YoY detail pane open
+  const [agentSubView, setAgentSubView] = useState<'overview' | 'yoyDetail'>('overview')
+  // Set of 1040 field names that have been marked as reviewed in the agent pane
+  const [reviewedFields, setReviewedFields] = useState<Set<string>>(new Set())
+
+  // issueField: active while agent is open on yoyDetail, OR while viewing source docs that came from yoyDetail
+  const issueField = (
+    (agentSubView === 'yoyDetail' && (agentView === 'report' || agentView === 'closing')) ||
+    (fromAgent && agentSubView === 'yoyDetail')
+  ) ? 'wages' : null
+  const highlightMode: 'orange' | 'blue' = (selectedField && selectedField === issueField) ? 'orange' : 'blue'
 
   // Reset field selection on mount
   useEffect(() => {
@@ -52,12 +85,13 @@ export default function DataReviewPage() {
       setTimeout(() => {
         setAgentView('report')
         sessionStorage.setItem('agentLoaded', '1')
-      }, 5000)
+      }, 2200)
     }
   }, [])
 
-  const handleAgentOpen = () => {
+  const handleAgentOpen = (subView?: 'overview' | 'yoyDetail') => {
     setSelectedField(null)
+    if (subView) setAgentSubView(subView)
     const alreadyLoaded = sessionStorage.getItem('agentLoaded')
     if (alreadyLoaded) {
       setAgentView('report')
@@ -66,15 +100,30 @@ export default function DataReviewPage() {
       setTimeout(() => {
         setAgentView('report')
         sessionStorage.setItem('agentLoaded', '1')
-      }, 5000)
+      }, 2200)
     }
   }
 
-  const handleAgentClose = () => {
+  const handleAgentClose = (preserveSelection = false) => {
     setAgentView('closing')
     setYoyExpanded(false)
-    setSelectedField(null)
-    setTimeout(() => setAgentView('idle'), 350)
+    if (!preserveSelection) setSelectedField(null)
+    // Step 1: agent plays panelSlideOut (350ms)
+    // Step 2: switch to idle (display:flex appears on right panel)
+    // Step 3: one rAF later, add the enter animation class (browser has painted display:flex)
+    setTimeout(() => {
+      setAgentView('idle')          // right panel: display:flex now
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => { // second rAF: browser has rendered the flex layout
+          setRightPanelAnimating(true)
+          setTimeout(() => setRightPanelAnimating(false), 420)
+        })
+      })
+    }, 350)
+  }
+
+  const handleMarkReviewed = (fieldName: string) => {
+    setReviewedFields(prev => new Set([...prev, fieldName]))
   }
 
   const bodyRef = useRef<HTMLDivElement>(null)
@@ -109,19 +158,18 @@ export default function DataReviewPage() {
     document.addEventListener('mouseup', onMouseUp)
   }, [leftWidth])
 
-  // Horizontal drag between left panel and agent panel
+  // Horizontal drag between left panel and agent panel (resizes agent panel px width)
   const handleAgentDrag = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     const body = bodyRef.current
     if (!body) return
     const startX = e.clientX
-    const startWidth = agentLeftWidth
+    const startPanelWidth = agentPanelWidth
     const onMouseMove = (moveEvent: MouseEvent) => {
-      const delta = moveEvent.clientX - startX
+      const delta = startX - moveEvent.clientX // dragging left = wider agent panel
       const bodyWidth = body.getBoundingClientRect().width
-      const minLeftPct = ((bodyWidth - 400) / bodyWidth) * 100
-      const newWidth = startWidth + (delta / bodyWidth) * 100
-      setAgentLeftWidth(Math.max(20, Math.min(minLeftPct, newWidth)))
+      const newWidth = Math.max(360, Math.min(bodyWidth * 0.7, startPanelWidth + delta))
+      setAgentPanelWidth(newWidth)
     }
     const onMouseUp = () => {
       document.removeEventListener('mousemove', onMouseMove)
@@ -133,7 +181,32 @@ export default function DataReviewPage() {
     document.body.style.userSelect = 'none'
     document.addEventListener('mousemove', onMouseMove)
     document.addEventListener('mouseup', onMouseUp)
-  }, [agentLeftWidth])
+  }, [agentPanelWidth])
+
+  // Horizontal drag between left panel and right panel (resizes rightPanelWidth)
+  const handleRightPanelDrag = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    const body = bodyRef.current
+    if (!body) return
+    const startX = e.clientX
+    const startPanelWidth = rightPanelWidth
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const delta = startX - moveEvent.clientX // dragging left = wider right panel
+      const bodyWidth = body.getBoundingClientRect().width
+      const newWidth = Math.max(400, Math.min(bodyWidth * 0.75, startPanelWidth + delta))
+      setRightPanelWidth(newWidth)
+    }
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup', onMouseUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
+  }, [rightPanelWidth])
 
   // Vertical drag (up/down resize within right panel)
   const handleVerticalDrag = useCallback((e: React.MouseEvent) => {
@@ -178,16 +251,34 @@ export default function DataReviewPage() {
         </div>
         <div className={styles.headerRight}>
           <button
-            className={`${styles.intuitIntelBtn} ${activeTopTab === 'w2s' && agentView === 'idle' ? styles.intuitIntelBtnActive : ''}`}
+            className={`${styles.intuitIntelBtn} ${rightPanelVisible && agentView === 'idle' ? styles.intuitIntelBtnActive : ''}`}
             aria-label="Toggle panel"
-            onClick={agentView !== 'idle' ? handleAgentClose : handleAgentOpen}
+            onClick={() => {
+              if (agentView !== 'idle') {
+                handleAgentClose()
+              } else if (rightPanelVisible) {
+                // Slide out first, then hide
+                setRightPanelExiting(true)
+                setTimeout(() => {
+                  setRightPanelExiting(false)
+                  setRightPanelVisible(false)
+                }, 280)
+              } else {
+                // Show with slide-in
+                setRightPanelVisible(true)
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                  setRightPanelAnimating(true)
+                  setTimeout(() => setRightPanelAnimating(false), 350)
+                }))
+              }
+            }}
           >
             <Panel size="medium" />
           </button>
           <button
             className={`${styles.intuitIntelBtn} ${agentView !== 'idle' ? styles.intuitIntelBtnActive : ''}`}
             aria-label="Intuit Intelligence"
-            onClick={handleAgentOpen}
+            onClick={() => handleAgentOpen()}
           >
             <img src={intuitAssistIcon} alt="" className={styles.intuitIntelIcon} />
           </button>
@@ -196,23 +287,87 @@ export default function DataReviewPage() {
 
       {/* Body — left panel + drag handle + right panel + agent panel */}
       <div className={styles.body} ref={bodyRef}>
-        <div className={styles.leftPanel} style={{ width: poppedOut ? '100%' : (agentView === 'loading' || agentView === 'report' || agentView === 'closing') ? `${agentLeftWidth}%` : `${leftWidth}%` }}>
-          <LeftPanel1040 selectedField={selectedField} total1a={total1a} wages={wages} yoyExpanded={yoyExpanded} />
+        {/* Left panel: flex:1 always (takes remaining space after fixed right/agent) */}
+        <div className={styles.leftPanel} style={{ flex: 1, minWidth: 0 }}>
+          <LeftPanel1040
+            selectedField={selectedField}
+            onFieldClick={setSelectedField}
+            total1a={total1a}
+            wages={wages}
+            yoyExpanded={yoyExpanded}
+            reviewedFields={reviewedFields}
+            issueField={issueField}
+            onViewSource={(fieldName) => {
+              // Map field → document tab
+              const tabMap: Record<string, typeof activeTopTab> = {
+                wages:           'w2s',
+                taxableInterest: '1099-ints',
+                qualifiedDivs:   '1099-divs',
+                ordinaryDivs:    '1099-divs',
+                capitalGain:     'w2s',
+                stdDeduction:    'w2s',
+              }
+              const tab = tabMap[fieldName] ?? 'w2s'
+              setActiveTopTab(tab)
+
+              if (agentView !== 'idle') {
+                // Agent is open — close it preserving the field selection
+                setFromAgent(true)
+                setAgentSubView('overview')
+                handleAgentClose(true)
+              } else if (!rightPanelVisible) {
+                // Agent idle, panel hidden — slide it in
+                setRightPanelVisible(true)
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                  setRightPanelAnimating(true)
+                  setTimeout(() => setRightPanelAnimating(false), 350)
+                }))
+              }
+            }}
+          />
         </div>
 
         {!poppedOut && (
           <>
-            {/* Left/right drag handle — hidden when agent panel is open */}
-            {agentView === 'idle' && (
-              <div className={dragStyles.handleVertical} onMouseDown={handleHorizontalDrag}>
-                <OverflowIos size="small" className={dragStyles.handleIcon} />
+            {/* Left/right drag handle — only when right panel visible and agent idle */}
+            {agentView === 'idle' && rightPanelVisible && !rightPanelExiting && (
+              <div className={dragStyles.handleVertical} onMouseDown={handleRightPanelDrag}>
+                <VerticalGripIcon />
               </div>
             )}
 
-            <div className={`${styles.rightPanel} ${agentView === 'closing' ? styles.rightPanelFadeIn : ''}`} ref={rightRef} style={{ flex: 1, display: (agentView === 'loading' || agentView === 'report') ? 'none' : 'flex' }}>
+            {/* Right panel — always in DOM, width animates to 0 when hidden */}
+            <div
+              className={`${styles.rightPanel} ${rightPanelAnimating ? styles.rightPanelEntering : ''} ${rightPanelExiting ? styles.rightPanelExiting : ''}`}
+              ref={rightRef}
+              style={{
+                width: (agentView === 'loading' || agentView === 'report' || agentView === 'closing' || (!rightPanelVisible && !rightPanelExiting))
+                  ? 0
+                  : rightPanelWidth,
+                overflow: 'hidden',
+                flexShrink: 0,
+                opacity: (agentView === 'loading' || agentView === 'report' || agentView === 'closing' || (!rightPanelVisible && !rightPanelExiting)) ? 0 : 1,
+              }}
+            >
+              {/* Back to agent insights — shown when user navigated here from agent panel */}
+              {fromAgent && agentView === 'idle' && (
+                <div className={styles.agentBackLink}>
+                  <button
+                    className={styles.agentBackBtn}
+                    onClick={() => { setFromAgent(false); handleAgentOpen(agentSubView) }}
+                  >
+                    <ChevronLeft size="small" /> Back to agent insights
+                  </button>
+                </div>
+              )}
               <ReviewTab
                 activeTopTab={activeTopTab}
-                onTopTabChange={setActiveTopTab}
+                onTopTabChange={(tab) => {
+                  setActiveTopTab(tab)
+                  // Manual tab switch clears issue context so orange doesn't bleed across tabs
+                  setFromAgent(false)
+                  setSelectedField(null)
+                }}
                 onPopOut={() => {
                   setPoppedOut(true)
                   const popoutWindow = window.open(
@@ -236,15 +391,24 @@ export default function DataReviewPage() {
                 <DocumentPreview
                   imageSrc={
                     activeTopTab === '1099-ints' ? img1099Int :
+                    activeTopTab === '1099-divs' ? img1099Int :
                     activeTopTab === 'k1' ? imgK1 :
                     activeSubTab === 'techCircle' ? w2TechCircle : w2BingEquipment
                   }
                   alt={
                     activeTopTab === '1099-ints' ? '1099-INT MegaBank' :
+                    activeTopTab === '1099-divs' ? '1099-DIV Citigroup' :
                     activeTopTab === 'k1' ? 'K-1 Easy Money Ltd' :
                     activeSubTab === 'techCircle' ? 'W-2 Tech Circle' : 'W-2 Bing Equipment'
                   }
-                  selectedField={activeTopTab === 'w2s' ? selectedField : null}
+                  selectedField={selectedField}
+                  highlightMode={highlightMode}
+                  docType={
+                    activeTopTab === '1099-ints' ? '1099-int' :
+                    activeTopTab === '1099-divs' ? '1099-div' :
+                    activeTopTab === 'k1'        ? 'k1'       :
+                    'w2'
+                  }
                 />
               </div>
 
@@ -262,6 +426,7 @@ export default function DataReviewPage() {
                     { label: 'Tech circle', active: activeSubTab === 'techCircle' },
                   ]}
                   selectedField={selectedField}
+                  highlightMode={highlightMode}
                   onFieldSelect={setSelectedField}
                   activeSubTab={activeSubTab}
                   onSubTabChange={(tab) => setActiveSubTab(tab as 'bingEquipment' | 'techCircle')}
@@ -269,34 +434,60 @@ export default function DataReviewPage() {
                   onWageChange={(employer, value) => setWages(prev => ({ ...prev, [employer]: value }))}
                 />
               )}
-              {activeTopTab === '1099-ints' && <DetailFields1099 />}
+              {activeTopTab === '1099-divs' && <DetailFieldsDiv selectedField={selectedField} highlightMode={highlightMode} />}
+              {activeTopTab === '1099-ints' && <DetailFields1099 selectedField={selectedField} highlightMode={highlightMode} />}
               {activeTopTab === 'k1' && <DetailFieldsK1 />}
             </div>
 
-            {/* Loading pane — screen 2.5 */}
-            {agentView === 'loading' && (
-              <AgentLoadingPane onClose={handleAgentClose} />
-            )}
-
-            {/* Drag handle between left panel and agent panel */}
-            {(agentView === 'report' || agentView === 'closing') && (
+            {/* Drag handle between left panel and agent panel — only when agent open */}
+            {agentView !== 'idle' && (
               <div className={dragStyles.handleVertical} onMouseDown={handleAgentDrag}>
-                <OverflowIos size="small" className={dragStyles.handleIcon} />
+                <VerticalGripIcon />
               </div>
             )}
 
-            {/* Agent report panel — screen 3 & 4 */}
-            {(agentView === 'report' || agentView === 'closing') && (
-              <AgentReportPane
-                closing={agentView === 'closing'}
-                onClose={handleAgentClose}
-                onYoyToggle={setYoyExpanded}
-                onViewW2={() => {
-                  handleAgentClose()
-                  setActiveTopTab('w2s')
-                }}
-              />
-            )}
+            {/* Agent panel — always mounted, width animates between 0 and agentPanelWidth */}
+            <div
+              className={styles.agentPanelWrapper}
+              style={{
+                width: agentView === 'idle' ? 0 : agentPanelWidth,
+              }}
+            >
+                <AgentLoadingPane
+                  onClose={handleAgentClose}
+                  showReport={agentView === 'report' || agentView === 'closing'}
+                  closing={agentView === 'closing'}
+                  reportContent={
+                    <AgentReportPane
+                      embedded
+                      closing={agentView === 'closing'}
+                      onClose={handleAgentClose}
+                      onYoyToggle={setYoyExpanded}
+                      onMarkReviewed={handleMarkReviewed}
+                      reviewedFields={reviewedFields}
+                      initialSubView={agentSubView}
+                      onSubViewChange={(subView) => {
+                        setAgentSubView(subView)
+                        // Auto-select the issue field when detail pane opens
+                        if (subView === 'yoyDetail') {
+                          setSelectedField('wages')
+                        } else {
+                          setSelectedField(null)
+                        }
+                      }}
+                      onViewW2={(fromSubView) => {
+                        // Keep agentSubView as-is (yoyDetail) so orange highlight persists in doc panel
+                        // Only update if explicitly provided and different
+                        if (fromSubView) setAgentSubView(fromSubView)
+                        setFromAgent(true)
+                        // Preserve wages selection so highlight carries through to document panel
+                        handleAgentClose(true)
+                        setActiveTopTab('w2s')
+                      }}
+                    />
+                  }
+                />
+            </div>
           </>
         )}
       </div>

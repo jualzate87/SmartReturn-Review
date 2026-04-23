@@ -1,20 +1,21 @@
 import { useState } from 'react'
-import { Close, Plus, ChevronLeft, CircleCheck, Panel } from '@design-systems/icons'
+import { Plus, ChevronLeft, CircleCheck, Panel } from '@design-systems/icons'
 import { Button } from '@ids-ts/button'
 import '@ids-ts/button/dist/main.css'
-import intuitAssistIcon from '../../assets/icons/intuit-assist.svg'
 import sendArrow from '../../assets/send-arrow.svg'
 import styles from '../../styles/data-review/YoYDetailPane.module.css'
-
-// Figma asset — dot badge
-const imgDot = 'https://www.figma.com/api/mcp/asset/37253f74-69e2-4ed1-8932-1a0f58cbc258'
 
 interface YoYDetailPaneProps {
   onClose?: () => void
   onBack?: () => void
   onViewW2?: () => void
   onReviewSource?: () => void
+  onMarkReviewed?: (fieldName: string) => void
+  reviewedCount?: number
+  totalItems?: number
   closing?: boolean
+  /** Set of reviewed field names — used to persist reviewed state across remounts */
+  reviewedFields?: Set<string>
 }
 
 const TABLE_ROWS = [
@@ -23,37 +24,42 @@ const TABLE_ROWS = [
   { label: 'Wages',          y2024: '$124,000', y2023: '$145,000', diff: '$20,735' },
 ]
 
-export default function YoYDetailPane({ onClose, onBack, onViewW2, onReviewSource, closing = false }: YoYDetailPaneProps) {
+// The 1040 field this finding maps to
+const FINDING_FIELD = 'wages'
+
+export default function YoYDetailPane({ onClose, onBack, onViewW2, onReviewSource, onMarkReviewed, reviewedCount = 0, totalItems = 8, closing = false, reviewedFields }: YoYDetailPaneProps) {
   const [inputValue, setInputValue] = useState('')
+  // Derive reviewed state from parent set so it survives remounts
+  const isReviewed = reviewedFields?.has(FINDING_FIELD) ?? false
+
+  const handleMarkReviewed = () => {
+    if (!isReviewed) {
+      onMarkReviewed?.(FINDING_FIELD)
+    }
+  }
 
   return (
     <div className={`${styles.panel} ${closing ? styles.panelClosing : ''}`}>
-
-      {/* ── Header ── */}
-      <div className={styles.header}>
-        <div className={styles.headerLeft} />
-        <div className={styles.headerTitle}>
-          <img src={intuitAssistIcon} alt="" className={styles.assistIcon} />
-          <span className={styles.titleText}>Tax Prep Agent</span>
-        </div>
-        <div className={styles.headerRight}>
-          <button className={styles.iconBtn} aria-label="Close" onClick={onClose}>
-            <Close size="small" />
-          </button>
-        </div>
-      </div>
 
       {/* ── Scrollable pane ── */}
       <div className={styles.pane}>
         <div className={styles.chat}>
 
-          {/* Back + counter row */}
+          {/* Back + unified progress row */}
           <div className={styles.navRow}>
             <button className={styles.backLink} onClick={onBack}>
               <ChevronLeft size="small" />
               <span>Back to overview</span>
             </button>
-            <span className={styles.counter}>1 of 8</span>
+            <div className={styles.navProgress}>
+              <div className={styles.miniProgressTrack}>
+                <div
+                  className={styles.miniProgressFill}
+                  style={{ width: `${Math.max(reviewedCount / totalItems * 100, reviewedCount > 0 ? 8 : 0)}%` }}
+                />
+              </div>
+              <span className={styles.counter}><strong className={styles.counterNum}>{reviewedCount}</strong> of {totalItems} reviewed</span>
+            </div>
           </div>
 
           {/* Title row */}
@@ -112,14 +118,18 @@ export default function YoYDetailPane({ onClose, onBack, onViewW2, onReviewSourc
             </ul>
           </div>
 
-          {/* Divider */}
-          <div className={styles.divider} />
-
           {/* Action buttons */}
           <div className={styles.actionButtons}>
-            <Button priority="secondary" size="small">
-              <CircleCheck size="small" /> Mark as reviewed
-            </Button>
+            {isReviewed ? (
+              <button className={styles.reviewedBtn} disabled>
+                <CircleCheck size="small" />
+                <span>Reviewed</span>
+              </button>
+            ) : (
+              <Button priority="secondary" size="small" onClick={handleMarkReviewed}>
+                <CircleCheck size="small" /> Mark as reviewed
+              </Button>
+            )}
             <Button priority="secondary" size="small" onClick={onReviewSource ?? onViewW2}>
               <Panel size="small" /> Review source and input
             </Button>

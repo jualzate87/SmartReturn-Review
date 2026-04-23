@@ -16,14 +16,26 @@
 .panel {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-width: 400px;
+  width: 100%;
   height: 100%;
   position: relative;
   background: var(--color-container-background-primary, #ffffff);
   border-left: 1px solid var(--color-divider-tertiary, #d4d7dc);
   overflow: hidden;
   animation: panelSlideIn var(--duration-appear-moderate, 300ms) var(--ease-appear, cubic-bezier(0, 0, 0.25, 1));
+}
+
+/* Embedded inside AgentLoadingPane — no independent animation, no border */
+.panelEmbedded {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: var(--color-container-background-primary, #ffffff);
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
 }
 
 .panelClosing {
@@ -142,7 +154,7 @@
   flex-direction: column;
   gap: 16px;
   width: 100%;
-  max-width: 400px;
+  box-sizing: border-box;
 }
 
 .scoreTopRow {
@@ -191,7 +203,8 @@
   overflow: hidden;
   flex-shrink: 0;
   width: 100%;
-  max-width: 400px;
+  box-sizing: border-box;
+  background: #ffffff;
 }
 
 .importedDocsHeader {
@@ -209,97 +222,85 @@
   background: #f5f7f9;
 }
 
-/* ── Imported documents expanded list ── */
+/* ── Imported documents expanded list — table style ── */
 .docList {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--color-container-border-primary, #d4d7dc);
-  padding: 8px 0;
+  border-top: 1px solid #e3e8eb;
 }
 
-.docGroup {
-  display: flex;
-  flex-direction: column;
-}
-
-.docGroupHeader {
+/* Column header row */
+.docTableHeader {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 20px;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #f5f7f9;
+  border-bottom: 1px solid #e3e8eb;
+}
+
+.docColDocument {
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5d686f;
+}
+
+.docColConfidence {
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5d686f;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.docConfidenceInfo {
+  font-size: 12px;
+  color: #859299;
+  cursor: default;
+}
+
+/* Document row — flat, full-width, clickable */
+.docRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
   background: none;
   border: none;
+  border-bottom: 1px solid #f0f1f3;
   width: 100%;
   text-align: left;
   cursor: pointer;
+  gap: 12px;
 }
-.docGroupHeader:hover {
-  background: #f5f7f9;
-}
+.docRow:last-child { border-bottom: none; }
+.docRow:hover { background: #f8fafb; }
 
-.docGroupLabel {
-  font-family: var(--font-name-component, sans-serif);
-  font-size: var(--font-size-component-medium, 16px);
-  font-weight: var(--font-weight-component-bold, 600);
-  line-height: 1.3;
-  color: var(--color-text-primary, #21262a);
-}
-
-.docGroupChildren {
-  display: flex;
-  flex-direction: column;
-  padding-left: 20px;
-  border-left: 2px solid var(--color-container-border-primary, #d4d7dc);
-  margin-left: 40px;
-  margin-bottom: 4px;
-}
-
-.docChildItem {
+.docRowLeft {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 20px 8px 12px;
-  position: relative;
-  background: none;
-  border: none;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-}
-.docChildItem:hover {
-  background: #f5f7f9;
+  min-width: 0;
+  flex: 1;
 }
 
-.docChildLine {
-  width: 12px;
-  height: 1px;
-  background: var(--color-container-border-primary, #d4d7dc);
-  flex-shrink: 0;
-}
-
-.docItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 20px;
-}
-.docItem:hover {
-  background: #f5f7f9;
-  cursor: pointer;
-}
-
-.docFab {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+/* File type icon — DS Document icon, neutral grey */
+.docFileIcon {
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  color: #5d686f;
 }
-.docFab[data-type='W-2']   { background: #dbeafe; color: #1d4ed8; }
-.docFab[data-type='1099']  { background: #dcfce7; color: #15803d; }
-.docFab[data-type='SCH']   { background: #fef3c7; color: #b45309; }
 
 .docMeta {
   display: flex;
@@ -310,8 +311,8 @@
 
 .docName {
   font-family: var(--font-name-component, sans-serif);
-  font-size: var(--font-size-component-medium, 16px);
-  font-weight: var(--font-weight-component-bold, 600);
+  font-size: 14px;
+  font-weight: 600;
   line-height: 1.3;
   color: var(--color-text-primary, #21262a);
   white-space: nowrap;
@@ -321,11 +322,28 @@
 
 .docSub {
   font-family: var(--font-name-body, sans-serif);
-  font-size: var(--font-size-body-4, 12px);
-  font-weight: var(--font-weight-body, 400);
+  font-size: 12px;
+  font-weight: 400;
   line-height: 1.4;
-  color: var(--color-text-secondary, #6b6c72);
+  color: #4a90c4;
 }
+
+/* Confidence badge — pill, color by level */
+.confidenceBadge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 10px;
+  border-radius: 100px;
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  min-width: 52px;
+}
+.confidenceBadge[data-level='low']  { background: #fde8ec; color: #db334d; }
+.confidenceBadge[data-level='high'] { background: #e6f6ef; color: #006b4f; }
 
 .importedDocsContent {
   display: flex;
@@ -363,7 +381,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 400px;
+  box-sizing: border-box;
   overflow: hidden;
   border-radius: 8px;
 }
@@ -513,6 +531,35 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+/* Reviewed state — keep original card color, just badge + checkmark signal it */
+.findingInnerReviewed {}
+
+/* Green checkmark icon replacing the red dot */
+.findingCheckIcon {
+  display: flex;
+  align-items: center;
+  color: #1a8254;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* "Reviewed" pill badge — matches YoYDetailPane reviewedBtn style */
+.findingReviewedBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid #1a8254;
+  border-radius: 4px;
+  background: #e6f6ef;
+  color: #1a8254;
+  font-family: var(--font-name-body, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .viewSourcesBtn {
