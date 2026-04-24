@@ -48,9 +48,25 @@ jobs:
 
       - name: Build
         run: yarn build
+        env:
+          GITHUB_ACTIONS: true
 
       - name: Test
         run: yarn test
 
       - name: Check tokens
         run: yarn check-tokens
+
+      - name: Deploy to gh-pages
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git fetch origin
+          git checkout --orphan gh-pages-deploy
+          git reset --hard
+          cp -r dist/* .
+          rm -rf dist node_modules .yarn src public .github
+          git add .
+          git commit -m "Deploy to GitHub Pages [skip ci]"
+          git push origin HEAD:gh-pages --force
