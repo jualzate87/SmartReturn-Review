@@ -10,6 +10,7 @@ import { getConfig, applyTheme } from './config'
 import OnboardingPage from './pages/OnboardingPage'
 import ImportPage from './pages/ImportPage'
 import AutomatedOnboardingPage from './pages/AutomatedOnboardingPage'
+import OpenReturnPage from './pages/OpenReturnPage'
 import DataReviewPage from './pages/DataReviewPage'
 import DataReviewPopout from './pages/DataReviewPopout'
 import SmartReturnPage from './pages/SmartReturnPage'
@@ -48,6 +49,8 @@ export default function App() {
         <HashRouter>
           <FusionProvider pathPrefix={FUSION_CONFIG.pathPrefix || ''}>
             <Routes>
+              <Route path="/" element={<Navigate to="/import-hub" replace />} />
+              <Route path="/import-hub" element={<OpenReturnPage />} />
               <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/import" element={<ImportPage />} />
               <Route path="/automated-onboarding" element={<AutomatedOnboardingPage />} />
@@ -57,7 +60,6 @@ export default function App() {
               <Route path="/data-review" element={<DataReviewPage />} />
               <Route path="/data-review-popout" element={<DataReviewPopout />} />
               <Route element={<AppLayout />}>
-                <Route path="/" element={<Navigate to="/home" replace />} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/workspace" element={<WorkspacePage />} />
                 {APP_PAGES.map(({ path, component: Page }) => (

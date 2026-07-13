@@ -10,13 +10,11 @@
   pointer-events: none;
 }
 
-/* The popover card itself */
+/* The popover card itself — positioned fixed via portal to document.body */
 .popover {
-  position: absolute;
-  left: calc(100% + 12px); /* 12px gap from anchor edge */
-  top: 50%;
-  transform: translateY(-50%);
-  width: 260px;
+  width: 360px;
+  min-width: 360px;
+  max-width: calc(100vw - 24px);
   background: #ffffff;
   border: 2px solid #236cff;
   border-radius: 8px;
@@ -24,6 +22,7 @@
   pointer-events: all;
   animation: popoverIn 180ms cubic-bezier(0.2, 0, 0.25, 1) both;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 @keyframes popoverIn {
@@ -75,7 +74,7 @@
 
 .fieldLabel {
   flex: 1;
-  font-family: var(--font-name-body, 'AvenirNext forINTUIT', sans-serif);
+  font-family: var(--font-family-component) !important;
   font-size: 12px;
   font-weight: 600;
   color: #21262a;
@@ -109,7 +108,7 @@
 }
 
 .yoySectionLabel {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: #5d686f;
   text-transform: uppercase;
@@ -138,7 +137,7 @@
 }
 
 .yoyColLabel {
-  font-size: 9px;
+  font-size: 12px;
   color: #8a9ba5;
   font-weight: 600;
   text-transform: uppercase;
@@ -146,7 +145,7 @@
 }
 
 .yoyColValue {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: #21262a;
   white-space: nowrap;
@@ -164,7 +163,7 @@
   align-items: center;
   padding: 2px 6px;
   border-radius: 100px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: #ffffff;
   white-space: nowrap;
@@ -172,17 +171,23 @@
   align-self: center;
 }
 
-.yoyBadgeOrange { background: #E5A14E; }
-.yoyBadgeRed    { background: #b3261e; }
-.yoyBadgeGrey   { background: #8a9ba5; }
+.yoyBadgeOrange  { background: #E5A14E; }
+.yoyBadgeRed     { background: #b3261e; }
+.yoyBadgeGrey    { background: #8a9ba5; }
+.yoyBadgeNeutral { background: var(--color-text-secondary); }
 
-/* ── Sources section ── */
+/* ── Sources section — slim dotted rows (original FieldPopover language) ── */
 .sourcesSection {
   padding: 8px 10px 10px;
+  border-bottom: 1px solid #e8edf2;
+}
+
+.sourcesSection:last-child {
+  border-bottom: none;
 }
 
 .sourcesSectionLabel {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: #5d686f;
   text-transform: uppercase;
@@ -191,67 +196,144 @@
 }
 
 .sourceRow {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(12px, 40px) max-content;
   align-items: baseline;
-  gap: 0;
-  margin-bottom: 4px;
+  column-gap: 0;
+  margin-bottom: 6px;
+  min-width: 0;
 }
 
 .sourceRow:last-child {
   margin-bottom: 0;
 }
 
-/* Link = name + panel icon together */
+/* Label wraps; amount column is max-content so dollars stay fully visible */
 .sourceLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  display: block;
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-family: inherit;
   color: #0365ac;
-  white-space: nowrap;
-  flex-shrink: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-width: 0;
   text-align: left;
+  line-height: 1.35;
 }
 
 .sourceLink:hover {
   text-decoration: underline;
 }
 
-.sourceLink:hover .sourcePanelIcon {
-  color: #0365ac;
-}
-
-.sourcePanelIcon {
-  display: inline-flex;
-  align-items: center;
-  color: #5d9ec6;
-  flex-shrink: 0;
-  line-height: 1;
-}
-
 .sourceDots {
-  flex: 1;
   border-bottom: 1px dotted #adb9c2;
-  margin: 0 6px;
-  min-width: 8px;
+  margin: 0 8px;
+  min-width: 12px;
   /* sits on baseline */
   position: relative;
   top: -3px;
+  align-self: baseline;
 }
 
 .sourceValue {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: #21262a;
   white-space: nowrap;
-  flex-shrink: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
-.sourcePanelIcon:hover {
-  color: #0365ac;
+/* ── Calculated-from section (quiet, matches TaxControlBreakdownPopover) ── */
+.calcSection {
+  padding: 8px 10px 10px;
+}
+
+.calcFormula {
+  margin: 0 0 8px;
+  font-family: var(--font-family-component);
+  font-size: var(--font-size-component-x-small, 12px);
+  color: var(--color-text-secondary, #5d686f);
+  line-height: 1.4;
+}
+
+.calcList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calcRow {
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-family-component);
+  font-size: var(--font-size-component-x-small, 12px);
+}
+
+.calcOp {
+  color: #8fa3af;
+  font-weight: var(--font-weight-component-semibold, 500);
+  text-align: center;
+}
+
+.calcLabel {
+  color: #2d4a5e;
+  line-height: 1.35;
+}
+
+.calcValue {
+  font-weight: var(--font-weight-component-semibold, 500);
+  color: #1a3347;
+  white-space: nowrap;
+}
+
+.calcTotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e3e8eb;
+}
+
+.calcTotalLabel {
+  font-family: var(--font-family-component);
+  font-size: var(--font-size-component-x-small, 12px);
+  font-weight: var(--font-weight-component-bold, 600);
+  color: #2d4a5e;
+}
+
+.calcTotalValue {
+  font-family: var(--font-family-component);
+  font-size: var(--font-size-component-small, 14px);
+  font-weight: var(--font-weight-component-bold, 600);
+  color: #1a3347;
+  white-space: nowrap;
+}
+
+.calcFootnote {
+  margin: 6px 0 0;
+  font-family: var(--font-family-component);
+  font-size: var(--font-size-component-x-small, 12px);
+  color: #8fa3af;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+.noteText {
+  margin: 0;
+  font-family: var(--font-family-component);
+  font-size: var(--font-size-component-x-small, 12px);
+  line-height: 1.4;
+  color: #495a63;
 }

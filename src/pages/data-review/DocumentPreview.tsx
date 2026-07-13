@@ -1,86 +1,96 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { ZoomOut, ZoomIn } from '@design-systems/icons'
 import styles from '../../styles/data-review/DocumentPreview.module.css'
 
-type DocType = 'w2' | '1099-int' | '1099-div' | 'k1'
-
-interface FieldOverlay {
-  left: string; top: string; width: string; height: string
-}
-
-// Overlay positions (%) for each 1040 field on each document image
-// Positions measured against the actual PNG dimensions
-const OVERLAYS: Record<DocType, Partial<Record<string, FieldOverlay>>> = {
-  'w2': {
-    // Box 1 — Wages (feeds 1040 line 1a)
-    wages: { left: '55%', top: '12.5%', width: '20%', height: '7.48%' },
-  },
-  '1099-int': {
-    // Box 1 — Interest income (feeds 1040 line 2b)
-    taxableInterest: { left: '47%', top: '27%', width: '19%', height: '5.5%' },
-  },
-  '1099-div': {
-    // Box 1a — Total ordinary dividends (feeds 1040 line 3b)
-    ordinaryDivs:  { left: '47%', top: '38%', width: '19%', height: '5%' },
-    // Box 1b — Qualified dividends (feeds 1040 line 3a)
-    qualifiedDivs: { left: '47%', top: '44%', width: '19%', height: '5%' },
-  },
-  'k1': {},
-}
-
 interface DocumentPreviewProps {
-  imageSrc: string
+  imageSrc?: string | string[]
   alt: string
-  selectedField?: string | null
-  highlightMode?: 'orange' | 'blue'
-  docType?: DocType
+  /** When set, renders custom content instead of image(s) */
+  customContent?: React.ReactNode
 }
 
-const ZOOM_LEVELS = [50, 60, 65, 70, 75, 100, 125, 150, 200]
+const ZOOM_LEVELS = [50, 60, 65, 70, 75, 85, 100, 125, 150, 200]
 
-export default function DocumentPreview({ imageSrc, alt, selectedField, highlightMode = 'blue', docType = 'w2' }: DocumentPreviewProps) {
-  const [zoomIndex, setZoomIndex] = useState(2) // default 65%
+export default function DocumentPreview({ imageSrc, alt, customContent }: DocumentPreviewProps) {
+  const [zoomIndex, setZoomIndex] = useState(5) // default 85%
   const zoom = ZOOM_LEVELS[zoomIndex]
+  const images = imageSrc ? (Array.isArray(imageSrc) ? imageSrc : [imageSrc]) : []
 
   const zoomOut = () => setZoomIndex(i => Math.max(0, i - 1))
   const zoomIn  = () => setZoomIndex(i => Math.min(ZOOM_LEVELS.length - 1, i + 1))
 
-  // Find if there's an overlay for the currently selected field on this doc type
-  const overlay = selectedField ? OVERLAYS[docType]?.[selectedField] : undefined
+  // ── Click-and-drag panning ──
+  const imageAreaRef = useRef<HTMLDivElement>(null)
+  const dragState = useRef({ active: false, startX: 0, startY: 0, scrollLeft: 0, scrollTop: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+
+  const onMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return
+    const el = imageAreaRef.current
+    if (!el) return
+    dragState.current = { active: true, startX: e.clientX, startY: e.clientY, scrollLeft: el.scrollLeft, scrollTop: el.scrollTop }
+    setIsDragging(false)
+  }, [])
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!dragState.current.active) return
+      const dx = e.clientX - dragState.current.startX
+      const dy = e.clientY - dragState.current.startY
+      if (!isDragging && Math.abs(dx) < 4 && Math.abs(dy) < 4) return
+      setIsDragging(true)
+      const el = imageAreaRef.current
+      if (!el) return
+      el.scrollLeft = dragState.current.scrollLeft - dx
+      el.scrollTop  = dragState.current.scrollTop  - dy
+    }
+    const onMouseUp = () => {
+      dragState.current.active = false
+      setTimeout(() => setIsDragging(false), 0)
+    }
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+    }
+  }, [isDragging])
+
+  // ── Trackpad pinch-to-zoom — non-passive to allow preventDefault ──
+  useEffect(() => {
+    const el = imageAreaRef.current
+    if (!el) return
+    const handleWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey) return
+      e.preventDefault()
+      if (e.deltaY > 0) setZoomIndex(i => Math.max(0, i - 1))
+      else              setZoomIndex(i => Math.min(ZOOM_LEVELS.length - 1, i + 1))
+    }
+    el.addEventListener('wheel', handleWheel, { passive: false })
+    return () => el.removeEventListener('wheel', handleWheel)
+  }, [])
 
   return (
     <div className={styles.container}>
       {/* Scrollable image area */}
-      <div className={styles.imageArea}>
-        <div style={{ position: 'relative', width: `${zoom}%`, lineHeight: 0, flexShrink: 0 }}>
-          <img
-            src={imageSrc}
-            alt={alt}
-            className={styles.documentImage}
-          />
-
-          {/* Field highlight overlay — orange for issue mode, blue for generic */}
-          {overlay && (
-            <div
-              style={{
-                position: 'absolute',
-                left:   overlay.left,
-                top:    overlay.top,
-                width:  overlay.width,
-                height: overlay.height,
-                background: highlightMode === 'orange'
-                  ? 'rgba(201, 80, 15, 0.08)'
-                  : 'rgba(32, 94, 163, 0.08)',
-                border: highlightMode === 'orange'
-                  ? '2px solid #c9500f'
-                  : '2px solid #205ea3',
-                borderRadius: '2px',
-                pointerEvents: 'none',
-                zIndex: 3,
-                transition: 'opacity 200ms ease',
-              }}
-            />
-          )}
+      <div
+        ref={imageAreaRef}
+        className={styles.imageArea}
+        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+        onMouseDown={onMouseDown}
+      >
+        <div className={styles.imageAreaInner}>
+          <div style={{ position: 'relative', width: customContent ? '100%' : `${zoom}%`, lineHeight: 0, flexShrink: 0 }}>
+            {customContent ?? images.map((src, i) => (
+              <img
+                key={src}
+                src={src}
+                alt={images.length > 1 ? `${alt} — page ${i + 1}` : alt}
+                className={styles.documentImage}
+                draggable={false}
+              />
+            ))}
+          </div>
         </div>
       </div>
 

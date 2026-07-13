@@ -23,6 +23,20 @@
   display: flex;
   flex: 1;
   align-items: flex-start;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tabs::-webkit-scrollbar-thumb {
+  background: #c8d3da;
+  border-radius: 2px;
 }
 
 /* Individual tab */
@@ -31,11 +45,12 @@
   flex-direction: column;
   gap: 2px;
   align-items: flex-start;
-  padding: 0 16px;
+  padding: 0 12px;
   cursor: pointer;
   background: none;
   border: none;
   position: relative;
+  flex-shrink: 0;
 }
 
 .tabContent {
@@ -57,7 +72,7 @@
 }
 
 .tabLabel {
-  font-family: var(--font-name-body, sans-serif);
+  font-family: var(--font-family-component) !important;
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
@@ -114,4 +129,49 @@
 
 .popOutBtn:hover {
   opacity: 0.7;
+}
+
+/* Dock-back button — shown in the popout window instead of the pop-out icon */
+.dockBackBtn {
+  position: absolute;
+  top: 9px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: 1px solid #c8d3da;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #393a3d;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 8px 3px 6px;
+  line-height: 1;
+  z-index: 2;
+  white-space: nowrap;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.dockBackBtn:hover {
+  background: #f0f4f7;
+  border-color: #93a3ab;
+}
+
+/* ProtoC — dynamic per-tab unresolved import-flag badge */
+.tabFlagBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: #d68000;
+  color: #ffffff;
+  font-family: var(--font-family-component, sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
 }
