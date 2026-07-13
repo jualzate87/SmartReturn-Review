@@ -202,7 +202,7 @@ export default function DataReviewPopout() {
                   setWages({ ...wages, [employer]: value })
                   markEdited(`wages-${employer}`)
                 }}
-                fieldValues={{ ...fieldValues, withholding: fieldValues.withholding.techCircle }}
+                fieldValues={{ ...fieldValues, withholding: fieldValues.withholding[activeSubTab] }}
                 onFieldValueChange={(key, value) => {
                   if (key === 'withholding' && typeof value === 'number') {
                     updateField('withholding', { techCircle: value })
