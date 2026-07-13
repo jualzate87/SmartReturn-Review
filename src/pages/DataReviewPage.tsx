@@ -4,7 +4,6 @@ import { ArrowLeft, DotsSix, Panel, ChevronLeft, ChevronRight, Comment, PopOut }
 import NotesPane from './data-review/NotesPane'
 import Tooltip from './data-review/Tooltip'
 import type { Note } from './data-review/NotesPane'
-import intuitAssistIcon from '../assets/icons/intuit-assist.svg'
 import LeftPanel1040 from './data-review/LeftPanel1040'
 import ReviewTab from './data-review/ReviewTab'
 import DocumentPreview from './data-review/DocumentPreview'
@@ -19,9 +18,6 @@ import DetailFields1099R, { R_PAYER_TABS } from './data-review/DetailFields1099R
 import DetailFieldsNec, { NEC_PAYER_TABS } from './data-review/DetailFieldsNec'
 import PeelTab from './data-review/PeelTab'
 import PriorYear1040Fields from './data-review/PriorYear1040Fields'
-import AgentReportPane from './data-review/AgentReportPane'
-import AgentLoadingPane from './data-review/AgentLoadingPane'
-import Phase1Banner from './data-review/Phase1Banner'
 import Phase1IssueBanner from './data-review/Phase1IssueBanner'
 import TaxControlUnlockModal, {
   dismissTaxControlModalForSession,
@@ -29,7 +25,6 @@ import TaxControlUnlockModal, {
   resetTaxControlModalDismiss,
 } from './data-review/TaxControlUnlockModal'
 import {
-  PHASE1_FLAG_KEYS,
   countPhase1Remaining,
   countPhase1FlagsForDivPayer,
   countPhase1FlagsForIntPayer,
@@ -39,7 +34,6 @@ import {
   get1040HighlightField,
   getNextVerifyItem,
   getTabFlagCounts,
-  isPhase1FlagResolved,
   navigationForDetailField,
 } from './data-review/phase1FieldSync'
 import { PHASE1_FLAG_MESSAGES } from './data-review/phase1FlagMessages'
@@ -86,8 +80,6 @@ export default function DataReviewPage() {
   const totalWithholding = liveTotals.totalWithholding
   const updateField = (key: keyof typeof fieldValues, value: number | { techCircle: number }) =>
     updateFieldValue(key, value)
-  // Agent panel width in px when open (default 588px, user-resizable)
-  const [agentPanelWidth, setAgentPanelWidth] = useState(588)
   // Right panel width in px (default 700px, user-resizable)
   const [rightPanelWidth, setRightPanelWidth] = useState(920)
   // Top/bottom section height ratio in right panel (0-100, where value = preview percentage)
@@ -98,18 +90,9 @@ export default function DataReviewPage() {
   const [rightPanelVisible, setRightPanelVisible] = useState(true)
   // Whether the right panel is animating out (slide-out before display:none)
   const [rightPanelExiting, setRightPanelExiting] = useState(false)
-  // Agent panel view state: idle → loading → report → closing → idle
-  const [agentView, setAgentView] = useState<'idle' | 'loading' | 'report' | 'closing'>('idle')
-  // Right panel animating-in: true during the 'closing' state so enter CSS fires
+  // Right panel animating-in so enter CSS fires after show
   const [rightPanelAnimating, setRightPanelAnimating] = useState(false)
-  // Whether YoY analysis is expanded (screen 4) — drives -15% badge on 1040
-  const [yoyExpanded, setYoyExpanded] = useState(false)
-  // Whether user navigated to source docs from the agent panel — shows back link
-  const [fromAgent, setFromAgent] = useState(false)
-  // Which agent subview to restore when going back to agent insights
-  // 'overview' = report overview, 'yoyDetail' = YoY detail pane open
-  const [agentSubView, setAgentSubView] = useState<'overview' | 'yoyDetail'>('overview')
-  // Set of 1040 field names manually checked off by the preparer (independent of AI review)
+  // Set of 1040 field names manually checked off by the preparer
   const [checkedFields, setCheckedFields] = useState<Set<string>>(new Set())
   // Notes / comments
   const [notes, setNotes] = useState<Note[]>([])
@@ -128,8 +111,6 @@ export default function DataReviewPage() {
 
   // The import/OCR flags owned by Phase 1. Each key matches the reviewed-field key
   // emitted by the DetailFields "Edit+Save" / "Mark as correct" controls.
-  const phase1Total = PHASE1_FLAG_KEYS.length
-  const phase1Resolved = PHASE1_FLAG_KEYS.filter(k => isPhase1FlagResolved(k, reviewedFields)).length
   // Counter of unresolved import flags — never below 0
   const phase1Remaining = countPhase1Remaining(reviewedFields)
   const phase1Complete = phase1Remaining === 0
@@ -153,23 +134,6 @@ export default function DataReviewPage() {
       return next
     })
   }
-  // Field that the agent flagged as an issue — drives orange highlight mode
-  // Set when navigating to source docs from any issue detail pane
-  const [activeIssueField, setActiveIssueField] = useState<string | null>(null)
-
-  // Maps doc-overlay field keys → 1040 field keys (when they differ)
-  const DOC_FIELD_TO_1040: Record<string, string> = {
-    earlyWithdrawal: 'taxableInterest', // Box 2 flows to same 1040 line 2b
-  }
-
-  // issueField: the 1040 field currently flagged by the active agent issue
-  const issueField = (() => {
-    if (activeIssueField && (agentView === 'report' || agentView === 'closing' || fromAgent)) {
-      return DOC_FIELD_TO_1040[activeIssueField] ?? activeIssueField
-    }
-    if (agentSubView === 'yoyDetail' && (agentView === 'report' || agentView === 'closing')) return 'wages'
-    return null
-  })()
   const highlightMode: 'orange' | 'blue' = 'blue'
 
   const applyVerifyNavigation = useCallback((field: string) => {
@@ -209,13 +173,7 @@ export default function DataReviewPage() {
     if (nav.divPayer) setActiveDivPayer(nav.divPayer)
     if (nav.intPayer) setActiveIntPayer(nav.intPayer)
 
-    if (agentView !== 'idle') {
-      setFromAgent(true)
-      setAgentSubView('overview')
-      setAgentView('closing')
-      setYoyExpanded(false)
-      setTimeout(() => setAgentView('idle'), 350)
-    } else if (!rightPanelVisible) {
+    if (!rightPanelVisible) {
       setRightPanelVisible(true)
       requestAnimationFrame(() => requestAnimationFrame(() => {
         setRightPanelAnimating(true)
@@ -223,7 +181,6 @@ export default function DataReviewPage() {
       }))
     }
   }, [
-    agentView,
     rightPanelVisible,
     setActiveTopTab,
     setActiveSubTab,
@@ -298,51 +255,6 @@ export default function DataReviewPage() {
     setSelectedField(null)
   }, [])
 
-  const handleAgentOpen = (subView?: 'overview' | 'yoyDetail') => {
-    setSelectedField(null)
-    if (subView) setAgentSubView(subView)
-    const alreadyLoaded = sessionStorage.getItem('agentLoaded')
-    if (alreadyLoaded) {
-      setAgentView('report')
-    } else {
-      setAgentView('loading')
-      setTimeout(() => {
-        setAgentView('report')
-        sessionStorage.setItem('agentLoaded', '1')
-      }, 2200)
-    }
-  }
-
-  // Auto-open agent panel when launched via ?agent=true (ProtoA legacy entry)
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.hash.split('?')[1] || '')
-    if (params.get('agent') === 'true') {
-      handleAgentOpen()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const handleAgentClose = (preserveSelection = false) => {
-    setAgentView('closing')
-    setYoyExpanded(false)
-    if (!preserveSelection) {
-      setSelectedField(null)
-      setActiveIssueField(null)
-    }
-    // Step 1: agent plays panelSlideOut (350ms)
-    // Step 2: switch to idle (display:flex appears on right panel)
-    // Step 3: one rAF later, add the enter animation class (browser has painted display:flex)
-    setTimeout(() => {
-      setAgentView('idle')          // right panel: display:flex now
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => { // second rAF: browser has rendered the flex layout
-          setRightPanelAnimating(true)
-          setTimeout(() => setRightPanelAnimating(false), 420)
-        })
-      })
-    }, 350)
-  }
-
   const PREPARER_NAME = 'Sara Chen'
 
   const handleOpenNotes = () => setNotesOpen(true)
@@ -364,31 +276,6 @@ export default function DataReviewPage() {
 
   const bodyRef = useRef<HTMLDivElement>(null)
   const rightRef = useRef<HTMLDivElement>(null)
-
-  // Horizontal drag between left panel and agent panel (resizes agent panel px width)
-  const handleAgentDrag = useCallback((e: React.MouseEvent) => {
-    e.preventDefault()
-    const body = bodyRef.current
-    if (!body) return
-    const startX = e.clientX
-    const startPanelWidth = agentPanelWidth
-    const onMouseMove = (moveEvent: MouseEvent) => {
-      const delta = startX - moveEvent.clientX // dragging left = wider agent panel
-      const bodyWidth = body.getBoundingClientRect().width
-      const newWidth = Math.max(360, Math.min(bodyWidth * 0.7, startPanelWidth + delta))
-      setAgentPanelWidth(newWidth)
-    }
-    const onMouseUp = () => {
-      document.removeEventListener('mousemove', onMouseMove)
-      document.removeEventListener('mouseup', onMouseUp)
-      document.body.style.cursor = ''
-      document.body.style.userSelect = ''
-    }
-    document.body.style.cursor = 'col-resize'
-    document.body.style.userSelect = 'none'
-    document.addEventListener('mousemove', onMouseMove)
-    document.addEventListener('mouseup', onMouseUp)
-  }, [agentPanelWidth])
 
   // Horizontal drag between left panel and right panel (resizes rightPanelWidth)
   const handleRightPanelDrag = useCallback((e: React.MouseEvent) => {
@@ -480,12 +367,10 @@ export default function DataReviewPage() {
             )}
           </button>
           <button
-            className={`${styles.intuitIntelBtn} ${rightPanelVisible && agentView === 'idle' ? styles.intuitIntelBtnActive : ''}`}
+            className={`${styles.intuitIntelBtn} ${rightPanelVisible ? styles.intuitIntelBtnActive : ''}`}
             aria-label="Toggle panel"
             onClick={() => {
-              if (agentView !== 'idle') {
-                handleAgentClose()
-              } else if (rightPanelVisible) {
+              if (rightPanelVisible) {
                 // Slide out first, then hide
                 setRightPanelExiting(true)
                 setTimeout(() => {
@@ -505,29 +390,10 @@ export default function DataReviewPage() {
             <Panel size="medium" />
             <span className={styles.intuitIntelLabel}>Source Documents</span>
           </button>
-          {/* ProtoA keeps optional Assist open — not Phase 2 gated */}
-          <button
-            className={`${styles.intuitIntelBtn} ${agentView !== 'idle' ? styles.intuitIntelBtnActive : ''}`}
-            aria-label="Intuit Intelligence"
-            onClick={() => handleAgentOpen()}
-          >
-            <img src={intuitAssistIcon} alt="" className={styles.intuitIntelIcon} />
-            <span className={styles.intuitIntelLabel}>Assist</span>
-          </button>
         </div>
       </div>
 
-      {/* ProtoA Phase 1 — Import Accuracy banner (dynamic progress + gated Phase 2 CTA) */}
-      {inImportPhase && (
-        <Phase1Banner
-          resolved={phase1Resolved}
-          total={phase1Total}
-          complete={phase1Complete}
-        />
-      )}
-
-
-      {/* Body — left panel + drag handle + right panel + agent panel */}
+      {/* Body — left panel + drag handle + right panel */}
       <div className={styles.body} ref={bodyRef}>
         {/* ProtoA Phase 1: 1040 is minimized by default — collapsed to a compact button
             pinned near the top of the column. Expanding grows the panel horizontally, so
@@ -569,11 +435,11 @@ export default function DataReviewPage() {
             onFieldClick={inImportPhase ? handle1040FieldClick : setSelectedField}
             total1a={total1a}
             wages={wages}
-            yoyExpanded={yoyExpanded || agentSubView === 'yoyDetail' || activeTopTab === 'prior-1040'}
+            yoyExpanded={activeTopTab === 'prior-1040'}
             reviewedFields={new Set(reviewedFields.keys())}
             checkedFields={checkedFields}
             onToggleChecked={handleToggleChecked}
-            issueField={issueField}
+            issueField={null}
             liveTotals={liveTotals}
             liveAmounts={amounts}
             editedFields={editedFields}
@@ -610,13 +476,7 @@ export default function DataReviewPage() {
                 if (lc.includes('tech circle')) setActiveSubTab('techCircle')
               }
 
-              if (agentView !== 'idle') {
-                // Agent is open — close it preserving the field selection
-                setFromAgent(true)
-                setAgentSubView('overview')
-                handleAgentClose(true)
-              } else if (!rightPanelVisible) {
-                // Agent idle, panel hidden — slide it in
+              if (!rightPanelVisible) {
                 setRightPanelVisible(true)
                 requestAnimationFrame(() => requestAnimationFrame(() => {
                   setRightPanelAnimating(true)
@@ -630,8 +490,8 @@ export default function DataReviewPage() {
         {!poppedOut && (
           <>
             {/* Left/right drag handle — hidden when the 1040 is collapsed (nothing to drag
-                against) or when the right panel/agent isn't visible */}
-            {agentView === 'idle' && rightPanelVisible && !rightPanelExiting && !(inImportPhase && !show1040) && (
+                against) or when the right panel isn't visible */}
+            {rightPanelVisible && !rightPanelExiting && !(inImportPhase && !show1040) && (
               <div className={dragStyles.handleVertical} onMouseDown={handleRightPanelDrag}>
                 <VerticalGripIcon />
               </div>
@@ -644,27 +504,17 @@ export default function DataReviewPage() {
               className={`${styles.rightPanel} ${rightPanelAnimating ? styles.rightPanelEntering : ''} ${rightPanelExiting ? styles.rightPanelExiting : ''}`}
               ref={rightRef}
               style={{
-                width: (agentView === 'loading' || agentView === 'report' || agentView === 'closing' || (!rightPanelVisible && !rightPanelExiting))
+                width: (!rightPanelVisible && !rightPanelExiting)
                   ? 0
                   : (inImportPhase && !show1040) ? undefined : rightPanelWidth,
                 flex: (inImportPhase && !show1040 && rightPanelVisible) ? '1 1 0%' : '0 0 auto',
                 overflow: 'hidden',
-                opacity: (agentView === 'loading' || agentView === 'report' || agentView === 'closing' || (!rightPanelVisible && !rightPanelExiting)) ? 0 : 1,
+                opacity: (!rightPanelVisible && !rightPanelExiting) ? 0 : 1,
               }}
             >
               {/* Source panel header — always visible, pop-out on right */}
               <div className={styles.sourcePanelHeader}>
-                {/* "Back to agent insights" only makes sense in Phase 2, after navigating from the agent */}
-                {!inImportPhase && fromAgent && agentView === 'idle' && rightPanelVisible ? (
-                  <button
-                    className={styles.agentBackBtn}
-                    onClick={() => { setFromAgent(false); setActiveIssueField(null); handleAgentOpen(agentSubView) }}
-                  >
-                    <ChevronLeft size="small" /> Back to agent insights
-                  </button>
-                ) : (
-                  <span className={styles.sourcePanelTitle}>Imported documents</span>
-                )}
+                <span className={styles.sourcePanelTitle}>Imported documents</span>
                 <Tooltip text="Open in new window" placement="bottom">
                   <button
                     className={styles.agentPopOutBtn}
@@ -698,9 +548,7 @@ export default function DataReviewPage() {
                 flagCounts={inImportPhase ? tabFlagCounts : undefined}
                 onTopTabChange={(tab) => {
                   setActiveTopTab(tab)
-                  setFromAgent(false)
                   setSelectedField(null)
-                  setActiveIssueField(null)
                 }}
               />
 
@@ -913,53 +761,6 @@ export default function DataReviewPage() {
               </div>
             </div>
 
-            {/* Drag handle between left panel and agent panel — only when agent open */}
-            {agentView !== 'idle' && (
-              <div className={dragStyles.handleVertical} onMouseDown={handleAgentDrag}>
-                <VerticalGripIcon />
-              </div>
-            )}
-
-            {/* Agent panel — always mounted, width animates between 0 and agentPanelWidth */}
-            <div
-              className={styles.agentPanelWrapper}
-              style={{
-                width: agentView === 'idle' ? 0 : agentPanelWidth,
-              }}
-            >
-                <AgentLoadingPane
-                  onClose={handleAgentClose}
-                  showReport={agentView === 'report' || agentView === 'closing'}
-                  closing={agentView === 'closing'}
-                  reportContent={
-                    <AgentReportPane
-                      embedded
-                      closing={agentView === 'closing'}
-                      onClose={handleAgentClose}
-                      onYoyToggle={setYoyExpanded}
-                      onMarkReviewed={(fieldName) => handleMarkReviewed(fieldName)}
-                      reviewedFields={new Set(reviewedFields.keys())}
-                      initialSubView={agentSubView}
-                      onSubViewChange={(subView) => {
-                        setAgentSubView(subView)
-                        if (subView === 'yoyDetail') {
-                          setSelectedField('wages')
-                        } else {
-                          setSelectedField(null)
-                        }
-                      }}
-                      onViewW2={(fromSubView) => {
-                        if (fromSubView) setAgentSubView(fromSubView)
-                        setFromAgent(true)
-                        setActiveIssueField('wages')
-                        setSelectedField('wages')
-                        handleAgentClose(true)
-                        setActiveTopTab('w2s')
-                      }}
-                    />
-                  }
-                />
-            </div>
           </>
         )}
       </div>
