@@ -52,11 +52,11 @@ export default function Phase1Banner({
           ) : needsDocReview ? (
             <>
               <span className={styles.title}>
-                Flags cleared — {unreviewedDocCount}{' '}
-                {unreviewedDocCount === 1 ? 'document still needs' : 'documents still need'} a review
+                {unreviewedDocCount}{' '}
+                {unreviewedDocCount === 1 ? 'document left' : 'documents left'} to review
               </span>
               <span className={styles.subtitle}>
-                Open each remaining source document (including Questionnaire) and mark it reviewed.
+                Flags are cleared. Confirm each remaining source document (and Questionnaire).
               </span>
             </>
           ) : (
@@ -88,7 +88,7 @@ export default function Phase1Banner({
         )}
 
         {needsDocReview && onReviewNextDocument && (
-          <Button priority="primary" size="medium" onClick={onReviewNextDocument}>
+          <Button priority="secondary" size="medium" onClick={onReviewNextDocument}>
             Review next document
           </Button>
         )}
