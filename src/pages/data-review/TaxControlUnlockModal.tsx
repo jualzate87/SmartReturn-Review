@@ -5,7 +5,7 @@ import '@ids-ts/button/dist/main.css'
 import styles from '../../styles/data-review/LeftPanel1040.module.css'
 
 /** Session-scoped — survives refresh within a tab but resets when Phase 1 flags reopen. */
-export const TAX_CONTROL_MODAL_KEY = 'smartReviewProtoC:taxControlModalDismissed'
+export const TAX_CONTROL_MODAL_KEY = 'smartReviewProtoA:taxControlModalDismissed'
 /** Legacy ProtoA/ProtoC key — clear so prior deploys don't block the modal forever. */
 const LEGACY_TAX_CONTROL_MODAL_KEY = 'taxControlModalDismissed'
 
@@ -50,16 +50,16 @@ export default function TaxControlUnlockModal({ open, onClose, onCheckTotals }: 
   return (
     <Modal open={open} onClose={onClose} size="medium" dismissible>
       <ModalHeader alignment="center" transparentBackground onClose={onClose}>
-        <ModalTitle title="Nice job! Want to check your totals?" />
+        <ModalTitle title="Next… Let's lock in your tax control sheet" />
       </ModalHeader>
       <ModalContent alignment="left">
         <p className={styles.controlModalBody}>
-          Compare summary totals against the source documents to quickly see if everything aligns or if you need to look closer at the details.
+          You&apos;ve cleared the import flags. Open the tax control sheet to compare summary totals against your source documents — a quick check before you dig into the details.
         </p>
       </ModalContent>
       <ModalActions alignment="right">
         <Button priority="tertiary" onClick={onClose}>Not now</Button>
-        <Button priority="primary" onClick={handleCheckTotals}>Check totals</Button>
+        <Button priority="primary" onClick={handleCheckTotals}>Open tax control sheet</Button>
       </ModalActions>
     </Modal>
   )

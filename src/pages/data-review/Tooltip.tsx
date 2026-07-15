@@ -20,7 +20,7 @@ interface TooltipProps {
 export default function Tooltip({ text, children, placement = 'top' }: TooltipProps) {
   return (
     <IDSTooltip
-      message={text as string}
+      message={text}
       position={placement}
       alignment="center"
       delayOpen

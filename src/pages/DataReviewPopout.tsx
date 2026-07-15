@@ -285,10 +285,10 @@ export default function DataReviewPopout() {
                 onSubTabChange={(tab) => setActiveSubTab(tab as W2Employer)}
                 wages={{ bingEquipment: 0, techCircle: wages.techCircle }}
                 onWageChange={(employer, value) => {
-                  if (employer === 'techCircle') setWages({ techCircle: value })
+                  setWages({ ...wages, [employer]: value })
                   markEdited(`wages-${employer}`)
                 }}
-                fieldValues={{ ...fieldValues, withholding: fieldValues.withholding.techCircle }}
+                fieldValues={{ ...fieldValues, withholding: fieldValues.withholding[activeSubTab] }}
                 onFieldValueChange={(key, value) => {
                   if (key === 'withholding' && typeof value === 'number') {
                     updateField('withholding', { techCircle: value })
@@ -380,7 +380,9 @@ export default function DataReviewPopout() {
                 onMarkReviewedBulk={handleMarkReviewedBulk}
                 reviewedFields={reviewedFields}
                 editedFields={editedFields}
+                editedFieldsMeta={editedFieldsMeta}
                 verifiedDocs={verifiedDocs}
+                verifiedDocsMeta={verifiedDocsMeta}
                 onVerifyDoc={toggleVerifiedDoc}
                 flaggedFields={{
                   taxableInterest: PHASE1_FLAG_MESSAGES.int.taxableInterest,
