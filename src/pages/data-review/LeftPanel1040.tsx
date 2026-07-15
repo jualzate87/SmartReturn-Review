@@ -1,24 +1,33 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { CircleCheck, CircleInfo, Comment } from '@design-systems/icons'
+import { CircleCheck, CircleInfo, Comment, Flag } from '@design-systems/icons'
 import FieldPopover, { FIELD_META } from './FieldPopover'
 import TaxControlDocPopover, {
-  getDocValuesForRow,
-  setDocValuesForRow,
-  sumControlDocInputs,
+  docsToSummaryItems,
+  type SummaryInfoItem,
+  type SummaryInfoMode,
 } from './TaxControlDocPopover'
-import TaxControlBreakdownPopover from './TaxControlBreakdownPopover'
 import { getTaxControlBreakdown } from '../../data/taxControlBreakdowns'
 import { getFieldLiveCurrent, getFieldOrigin } from '../../data/fieldOrigins'
 import type { FieldOriginSource } from '../../data/fieldOrigins'
 import type { LiveAmounts } from '../../data/liveReturn'
 import { SEED_AMOUNTS } from '../../data/liveReturn'
 import Tooltip from './Tooltip'
-import { TAX_CONTROL_ROWS, getControlSystemValues } from '../../data/sourceDocuments'
+import { TAX_CONTROL_ROWS, getControlSystemValues, type TaxControlDocEntry } from '../../data/sourceDocuments'
 import type { LiveReturnTotals } from '../../data/liveReturn'
 import { CLIENT_ADDRESS, formatClientCityStateZip } from '../../data/clientAddress'
+import { summaryFieldHasUnresolvedFlags } from './phase1FieldSync'
+import {
+  formatActivityMeta,
+  type ActivityEntry,
+} from '../../hooks/useSyncedReviewState'
 import styles from '../../styles/data-review/LeftPanel1040.module.css'
 
+/** Tooltip body with optional who/when meta line */
+function activityTooltip(primary: string, entry?: ActivityEntry | null): string {
+  const meta = formatActivityMeta(entry)
+  return meta ? `${primary}\n${meta}` : primary
+}
 
 interface LeftPanel1040Props {
   selectedField?: string | null
@@ -29,18 +38,32 @@ interface LeftPanel1040Props {
   wages?: { techCircle: number }
   /** When true: clicking a field shows YoY badge, not blue popover */
   yoyExpanded?: boolean
-  reviewedFields?: Set<string>
-  /** Fields manually checked off by the preparer (independent of AI review) */
+  reviewedFields?: Set<string> | Map<string, unknown>
+  /** Summary-row checks — mutually exclusive with user flags */
   checkedFields?: Set<string>
-  /** Toggle a field's checked state */
+  /** Who/when for last check on each field */
+  checkedMeta?: Map<string, ActivityEntry>
+  /** Toggle a field's summary-checked state */
   onToggleChecked?: (fieldName: string) => void
+  /** Summary-row user flags — mutually exclusive with checks */
+  flaggedFields?: Set<string>
+  /** Who/when for currently active flags */
+  flaggedMeta?: Map<string, ActivityEntry>
+  /** Toggle a field's summary user-flag (clears check when turning on) */
+  onToggleFlagged?: (fieldName: string) => void
+  /** Optional notes stored with user flags (kept when flag is turned off) */
+  flagNotes?: Record<string, string>
+  /** Last flag set / note Done activity (survives flag off) */
+  flagActivity?: Record<string, ActivityEntry>
+  /** Persist / clear the short note for a flagged Summary row */
+  onSetFlagNote?: (fieldName: string, note: string) => void
   /** When true: this field is highlighted orange (active agent issue card) — takes precedence over blue */
   issueField?: string | null
   /** Called when user clicks a source link in the field popover */
   onViewSource?: (fieldName: string, sourceLabel?: string) => void
   /** Navigate to a specific source document + highlight its detail field */
   onNavigateSource?: (source: FieldOriginSource) => void
-  /** Navigate to a specific source document (tax control flyout) */
+  /** Navigate to a specific source document (summary flyout) */
   onNavigateToSourceDoc?: (docId: string) => void
   /**
    * Live-computed 1040 totals from synced editable amounts.
@@ -53,10 +76,6 @@ interface LeftPanel1040Props {
   editedFields?: Set<string>
   /** Called when user posts a comment from a 1040 field */
   onAddFieldNote?: (text: string, context: string) => void
-  /** When true: all Phase 1 import flags have been reviewed — unlocks the Tax control tab's dot indicator */
-  allFlagsCleared?: boolean
-  /** Increment to switch the 1040 panel to the Tax control view (from page-level modal). */
-  taxControlViewRequest?: number
 }
 
 import { PRIOR_YEAR_1040_VALUES, buildYoyMap, yoyPercent } from './priorYear1040Data'
@@ -64,7 +83,7 @@ import { PRIOR_YEAR_1040_VALUES, buildYoyMap, yoyPercent } from './priorYear1040
 const PRIOR_YEAR = PRIOR_YEAR_1040_VALUES
 
 // Threshold: >=15% change AND >$300 estimated tax impact
-function meetsRowTintThreshold(field: string, yoy: Record<string, number>): boolean {
+function _meetsRowTintThreshold(field: string, yoy: Record<string, number>): boolean {
   const pct = yoy[field]
   if (pct === undefined) return false
   const prior = PRIOR_YEAR[field]
@@ -74,7 +93,7 @@ function meetsRowTintThreshold(field: string, yoy: Record<string, number>): bool
 
 // Badge color based purely on absolute magnitude (no green — green = reviewed only)
 // Applied to ALL YoY fields (badges on every YoY field, tints only on threshold-meeting ones)
-function badgeColor(pct: number): string {
+function _badgeColor(pct: number): string {
   const abs = Math.abs(pct)
   if (abs <= 10)  return styles.badgeGrey
   if (abs <= 30)  return styles.badgeOrange
@@ -97,20 +116,25 @@ export default function LeftPanel1040({
   highlightField,
   onFieldClick,
   total1a = 118940,
-  yoyExpanded = false,
+  yoyExpanded: _yoyExpanded = false,
   reviewedFields = new Set(),
   checkedFields = new Set(),
+  checkedMeta = new Map(),
   onToggleChecked,
+  flaggedFields = new Set(),
+  flaggedMeta = new Map(),
+  onToggleFlagged,
+  flagNotes = {},
+  flagActivity = {},
+  onSetFlagNote,
   issueField,
   onViewSource,
   onNavigateSource,
   onNavigateToSourceDoc,
   liveTotals,
   liveAmounts = SEED_AMOUNTS,
-  editedFields = new Set(),
+  editedFields: _editedFields = new Set(),
   onAddFieldNote,
-  allFlagsCleared = false,
-  taxControlViewRequest = 0,
 }: LeftPanel1040Props) {
   // Detail-field keys may differ from 1040 row keys (e.g. fedTaxWithheld ↔ withholding).
   const activeHighlight = highlightField ?? selectedField
@@ -166,6 +190,9 @@ export default function LeftPanel1040({
   const fieldHasPopover = (field: string) =>
     !!FIELD_META[field] || !!getFieldOrigin(field, originTotals, liveAmounts)
 
+  const reviewedHas = (key: string) =>
+    reviewedFields instanceof Map ? reviewedFields.has(key) : reviewedFields.has(key)
+
   const controlSystemVals = getControlSystemValues({
     total1a: wages1040,
     taxableInterest: taxableInterest1040,
@@ -183,32 +210,23 @@ export default function LeftPanel1040({
     otherIncome,
   })
 
-  /** Tax-control row ids that should show an Edited audit chip. */
-  const CONTROL_EDITED_KEYS: Record<string, string[]> = {
-    wages: ['wages', 'wages-techCircle'],
-    interest: [
-      'taxableInterest',
-      'taxableInterest-harborlineCredit',
-      'taxableInterest-cascadeFederal',
-    ],
-    dividends: [
-      'ordinaryDivs',
-      'ordinaryDivs-tokenFinancial',
-      'ordinaryDivs-northmark',
-      'ordinaryDivs-northmarkIndex',
-      'ordinaryDivs-beaconDividend',
-    ],
-    qualDivs: [
-      'qualifiedDivs',
-      'qualifiedDivs-northmarkIndex',
-      'qualifiedDivs-beaconDividend',
-    ],
-    ira: ['r-taxableAmt', 'iraDistrib'],
-    withholdingW2: ['withholding'],
-    withholding99: ['fedTaxWithheld', 'r-fedTaxWithheld', 'withholding1099'],
+  /** Summary CY field → tax-control row id (for breakdown / source flyouts). */
+  const SUMMARY_TO_CONTROL: Record<string, string> = {
+    wages: 'wages',
+    taxableInterest: 'interest',
+    ordinaryDivs: 'dividends',
+    qualifiedDivs: 'qualDivs',
+    iraDistrib: 'ira',
+    totalIncome: 'totalIncome',
+    stdDeduction: 'stdDeduction',
+    taxableIncome: 'taxableIncome',
+    incomeTax: 'totalTax',
+    totalTax: 'totalTax',
+    w2Withholding: 'withholdingW2',
+    withholding: 'withholding99',
+    totalPayments: 'totalPayments',
+    amountOwed: 'amountOwed',
   }
-  const isControlRowEdited = (rowId: string) =>
-    (CONTROL_EDITED_KEYS[rowId] ?? []).some(k => editedFields.has(k))
 
   const YOY = buildYoyMap({
     wages: wages1040,
@@ -232,22 +250,23 @@ export default function LeftPanel1040({
     amountOwed: oweAmount,
   })
 
-  // View toggle: 'form' | 'table' | 'control'
-  const [view, setView] = useState<'form' | 'table' | 'control'>('form')
+  // View toggle: Summary (default) | Form
+  const [view, setView] = useState<'form' | 'table'>('table')
   // Table view: which categories are expanded
   const [expanded, setExpanded] = useState<Set<string>>(new Set(['income', 'deductions', 'tax', 'payments']))
-  // Control sheet: input values keyed by "rowId" (single doc) or "rowId::docId" (multi-doc)
-  const [controlInputs, setControlInputs] = useState<Record<string, string>>({})
-  // Multi-doc popover state for tax control rows
-  const [controlPopoverRow, setControlPopoverRow] = useState<string | null>(null)
-  const [controlPopoverRect, setControlPopoverRect] = useState<DOMRect | null>(null)
-  // Read-only calculation / source breakdown popover (system column)
-  const [breakdownRow, setBreakdownRow] = useState<string | null>(null)
-  const [breakdownRect, setBreakdownRect] = useState<DOMRect | null>(null)
-
-  useEffect(() => {
-    if (taxControlViewRequest > 0) setView('control')
-  }, [taxControlViewRequest])
+  /** Unified Summary info flyout — Interest-style chrome for source / calc / note */
+  const [summaryFlyout, setSummaryFlyout] = useState<{
+    field: string
+    label: string
+    mode: SummaryInfoMode
+    items: SummaryInfoItem[]
+    detailByDocId?: Record<string, string>
+    sumLabel?: string
+    sumValue?: number
+    subtitle?: string
+    footnote?: string
+  } | null>(null)
+  const [summaryFlyoutRect, setSummaryFlyoutRect] = useState<DOMRect | null>(null)
 
   const toggleExpanded = (key: string) =>
     setExpanded(prev => { const s = new Set(prev); s.has(key) ? s.delete(key) : s.add(key); return s })
@@ -263,6 +282,12 @@ export default function LeftPanel1040({
   const [commentAnchor, setCommentAnchor] = useState<{ top: number; left: number } | null>(null)
   const commentRef = useRef<HTMLDivElement>(null)
 
+  // Flag-note popover (optional short note when turning a Summary flag on)
+  const [flagNoteField, setFlagNoteField] = useState<string | null>(null)
+  const [flagNoteDraft, setFlagNoteDraft] = useState('')
+  const [flagNoteAnchor, setFlagNoteAnchor] = useState<{ top: number; left: number } | null>(null)
+  const flagNoteRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     if (!commentField) return
     const onDown = (e: MouseEvent) => {
@@ -274,7 +299,18 @@ export default function LeftPanel1040({
     return () => document.removeEventListener('mousedown', onDown)
   }, [commentField])
 
-  const openComment1040 = (fieldKey: string, label: string, btn: HTMLElement) => {
+  useEffect(() => {
+    if (!flagNoteField) return
+    const onDown = (e: MouseEvent) => {
+      if (flagNoteRef.current && !flagNoteRef.current.contains(e.target as Node)) {
+        setFlagNoteField(null); setFlagNoteDraft(''); setFlagNoteAnchor(null)
+      }
+    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [flagNoteField])
+
+  const openComment1040 = (fieldKey: string, _label: string, btn: HTMLElement) => {
     const btnRect = btn.getBoundingClientRect()
     setCommentAnchor({ top: btnRect.top + btnRect.height / 2, left: btnRect.left - 292 })
     setCommentField(fieldKey)
@@ -287,8 +323,40 @@ export default function LeftPanel1040({
     setCommentField(null); setCommentDraft(''); setCommentAnchor(null)
   }
 
-  /** Anchor popover to the Amount cell of a form row. */
+  const openFlagNotePopover = (fieldKey: string, btn: HTMLElement) => {
+    const btnRect = btn.getBoundingClientRect()
+    setFlagNoteAnchor({ top: btnRect.top + btnRect.height / 2, left: btnRect.left - 292 })
+    setFlagNoteField(fieldKey)
+    setFlagNoteDraft(flagNotes[fieldKey] ?? '')
+    // Close comment popover if open — one floaty at a time
+    setCommentField(null); setCommentDraft(''); setCommentAnchor(null)
+  }
+
+  const closeFlagNotePopover = () => {
+    setFlagNoteField(null); setFlagNoteDraft(''); setFlagNoteAnchor(null)
+  }
+
+  const saveFlagNote = () => {
+    if (!flagNoteField) return
+    onSetFlagNote?.(flagNoteField, flagNoteDraft)
+    closeFlagNotePopover()
+  }
+
+  /** Toggle user flag; opening note prompt only when turning on. Clears check off via store. */
+  const handleFlagClick = (fieldKey: string, btn: HTMLElement) => {
+    if (!onToggleFlagged) return
+    const turningOn = !flaggedFields.has(fieldKey)
+    onToggleFlagged(fieldKey)
+    if (turningOn) openFlagNotePopover(fieldKey, btn)
+    else {
+      // Turning off — keep note stored; just close editor if open for this row
+      if (flagNoteField === fieldKey) closeFlagNotePopover()
+    }
+  }
+
+  /** Anchor popover to the Amount cell of a form row (Form view only). */
   const openPopoverForRow = (field: string, rowEl: HTMLElement) => {
+    clearSummaryFlyouts()
     const cells = rowEl.querySelectorAll('td')
     const valueCell = cells[cells.length - 1] as HTMLElement | undefined
     const anchor = valueCell ?? rowEl
@@ -296,31 +364,154 @@ export default function LeftPanel1040({
     setPopoverField(field)
   }
 
-  const handleRowClick = (field: string, e: React.MouseEvent<HTMLTableRowElement>) => {
-    // If the field is the active issue field, just toggle selection (orange mode)
-    if (field === issueField) {
-      onFieldClick?.(activeHighlight === field ? null : field)
+  const clearSummaryFlyouts = () => {
+    setSummaryFlyout(null)
+    setSummaryFlyoutRect(null)
+  }
+
+  /**
+   * Open Summary CY info flyout only — never navigates to / shows a source document.
+   * Document open is reserved for a source-card click inside TaxControlDocPopover.
+   * All modes share Interest-style chrome (source / calc / note).
+   */
+  const openSummaryInfo = (field: string, el: HTMLElement) => {
+    // Toggle closed if the same flyout is already open
+    if (summaryFlyout?.field === field) {
+      clearSummaryFlyouts()
+      return
+    }
+
+    clearSummaryFlyouts()
+    // Don't leave a Form FieldPopover overlapping Summary flyouts
+    setPopoverField(null)
+    setPopoverRect(null)
+
+    const rect = el.getBoundingClientRect()
+    const controlId = SUMMARY_TO_CONTROL[field]
+    const cfg = controlId ? TAX_CONTROL_ROWS.find(r => r.id === controlId) : undefined
+    const breakdown = controlId ? getTaxControlBreakdown(controlId, controlSystemVals) : null
+    const origin = getFieldOrigin(field, originTotals, liveAmounts)
+    const meta = FIELD_META[field]
+    const liveCurrent = getFieldLiveCurrent(field, originTotals)
+
+    // 1) Source-backed → Interest cards with View source + doc open on card click
+    if (cfg && cfg.docs.length > 0 && breakdown?.kind === 'source') {
+      setSummaryFlyout({
+        field,
+        label: cfg.label,
+        mode: 'source',
+        items: docsToSummaryItems(cfg.docs),
+        sumLabel: 'Total from sources',
+        sumValue: breakdown.total,
+      })
+      setSummaryFlyoutRect(rect)
+      return
+    }
+    if (origin?.sources && origin.sources.length > 0) {
+      const detailByDocId: Record<string, string> = {}
+      const docs: TaxControlDocEntry[] = origin.sources.map(s => {
+        detailByDocId[s.docId] = s.detailFieldId
+        return {
+          docId: s.docId,
+          label: s.box ? `${s.label} · ${s.box}` : s.label,
+          hint: s.amount,
+        }
+      })
+      setSummaryFlyout({
+        field,
+        label: origin.label,
+        mode: 'source',
+        items: docsToSummaryItems(docs),
+        detailByDocId,
+        sumLabel: 'Total from sources',
+      })
+      setSummaryFlyoutRect(rect)
+      return
+    }
+
+    // 2) Totals / calc → same card chrome; contributing lines only (no doc open)
+    const calcComponents =
+      breakdown?.kind === 'calc'
+        ? breakdown.components.map((c, i) => ({
+            id: `calc-${i}`,
+            label: c.label,
+            amount: c.value,
+          }))
+        : origin?.calc?.components.map((c, i) => ({
+            id: `calc-${i}`,
+            label: c.label,
+            amount: c.amount,
+          }))
+    if (calcComponents && calcComponents.length > 0) {
+      const total = breakdown?.kind === 'calc' ? breakdown.total : origin!.calc!.total
+      const noteFoot =
+        meta?.note ??
+        origin?.note ??
+        (breakdown?.kind === 'calc' ? breakdown.footnote : undefined) ??
+        origin?.calc?.footnote
+      setSummaryFlyout({
+        field,
+        label: breakdown?.title ?? origin?.label ?? meta?.label ?? field,
+        mode: 'calc',
+        items: calcComponents,
+        sumLabel: 'Total from lines',
+        sumValue: total,
+        footnote: noteFoot,
+      })
+      setSummaryFlyoutRect(rect)
+      return
+    }
+
+    // 3) Note-only / capital gain — Interest chrome, no FieldPopover YoY / flair
+    if (fieldHasPopover(field) || origin?.note || meta?.note) {
+      const items: SummaryInfoItem[] = []
+      const note = origin?.note ?? meta?.note
+      if (note) {
+        items.push({ id: 'note', label: 'Note', note })
+      }
+      if (meta) {
+        items.push({ id: 'py', label: 'Prior year (2024)', amount: meta.prior })
+        items.push({
+          id: 'cy',
+          label: 'Current year (2025)',
+          amount: liveCurrent ?? meta.current,
+        })
+      } else if (liveCurrent !== undefined) {
+        items.push({ id: 'cy', label: 'Current year (2025)', amount: liveCurrent })
+      }
+      if (items.length === 0) return
+      setSummaryFlyout({
+        field,
+        label: origin?.label ?? meta?.label ?? field,
+        mode: 'info',
+        items,
+        sumLabel: 'Total',
+        sumValue: liveCurrent ?? meta?.current,
+        subtitle: note ? 'About this amount.' : undefined,
+      })
+      setSummaryFlyoutRect(rect)
+    }
+  }
+
+  const handleRowClick = (field: string) => {
+    // Row / amount click: selection highlight only — never open FieldPopover
+    if (popoverField) {
+      setPopoverField(null)
+      setPopoverRect(null)
+    }
+    onFieldClick?.(activeHighlight === field ? null : field)
+  }
+
+  /** Form view: open FieldPopover only from the (i) info button. */
+  const openFormInfo = (field: string, btn: HTMLElement) => {
+    if (popoverField === field) {
       setPopoverField(null)
       setPopoverRect(null)
       return
     }
-
-    // Same field + popover already open → toggle closed
-    if (field === activeHighlight && popoverField === field) {
-      onFieldClick?.(null)
-      setPopoverField(null)
-      setPopoverRect(null)
-      return
-    }
-
-    // New field, OR selected (e.g. from detail nav) without a popover → open it
+    const rowEl = btn.closest('tr') as HTMLElement | null
+    if (rowEl) openPopoverForRow(field, rowEl)
     onFieldClick?.(field)
-    if (fieldHasPopover(field)) {
-      openPopoverForRow(field, e.currentTarget)
-    } else {
-      setPopoverField(null)
-      setPopoverRect(null)
-    }
   }
 
   // Close popover and deselect field (e.g. X button or outside click)
@@ -371,7 +562,7 @@ export default function LeftPanel1040({
     const commentable = !!field && !!onAddFieldNote
     const isIssueHighlight = !!field && field === issueField
     const isSelected       = !!field && activeHighlight === field
-    const isReviewed       = !!field && reviewedFields.has(field)
+    const isReviewed       = !!field && reviewedHas(field)
     const isChecked        = !!field && checkedFields.has(field)
     const isHovered        = !!field && hoveredField === field
     const isPopoverOpen    = !!field && popoverField === field
@@ -435,7 +626,7 @@ export default function LeftPanel1040({
           // Keep FieldPopover's document mousedown-outside from stealing 1040 row clicks
           e.stopPropagation()
         } : undefined}
-        onClick={clickable ? (e) => handleRowClick(field!, e) : undefined}
+        onClick={clickable ? () => handleRowClick(field!) : undefined}
         onMouseEnter={field ? () => setHoveredField(field) : undefined}
         onMouseLeave={field ? () => setHoveredField(null) : undefined}
       >
@@ -463,16 +654,35 @@ export default function LeftPanel1040({
 
             </div>
 
-            {/* YoY badge — outside value box, to the right */}
-            {yoyExpanded && yoy !== undefined && !!field && (
-              <span className={`${styles.badge} ${badgeColor(yoy)}`}>
-                {yoy > 0 ? `+${yoy}%` : `${yoy}%`}
-              </span>
+            {/* Info — sole trigger for FieldPopover (not row / amount click) */}
+            {!!field && fieldHasPopover(field) && value !== undefined && (
+              <Tooltip
+                text={kind === 'calc' ? 'View subtotals' : 'View sources'}
+                placement="top"
+              >
+                <button
+                  type="button"
+                  className={`${styles.summaryInfoBtn} ${isPopoverOpen ? styles.summaryInfoBtnActive : ''}`}
+                  aria-label={kind === 'calc' ? `View subtotals for ${label}` : `View sources for ${label}`}
+                  onClick={e => {
+                    e.stopPropagation()
+                    openFormInfo(field!, e.currentTarget)
+                  }}
+                >
+                  <CircleInfo size="small" />
+                </button>
+              </Tooltip>
             )}
 
             {/* Check button — outside value box, shown on hover */}
             {showCheckBtn && !isReviewed && (
-              <Tooltip text={isChecked ? 'Unmark as correct' : 'Mark as correct'} placement="top"><button
+              <Tooltip
+                text={activityTooltip(
+                  isChecked ? 'Unmark as correct' : 'Mark as correct',
+                  isChecked ? checkedMeta.get(field!) : undefined,
+                )}
+                placement="top"
+              ><button
                 className={`${styles.checkBtn} ${isChecked ? styles.checkBtnActive : ''}`}
                 aria-label={isChecked ? `Unmark ${field} as verified` : `Mark ${field} as verified`}
                 onClick={(e) => { e.stopPropagation(); onToggleChecked?.(field!) }}
@@ -523,7 +733,7 @@ export default function LeftPanel1040({
   const py = (_current: number, field: string): number | null => {
     return PRIOR_YEAR[field] ?? null
   }
-  const fmtDiff = (curr: number, prior: number | null) => {
+  const _fmtDiff = (curr: number, prior: number | null) => {
     if (prior === null) return { diff: null, pct: null }
     const diff = curr - prior
     const pct  = prior !== 0 ? Math.round((diff / prior) * 100) : null
@@ -583,30 +793,16 @@ export default function LeftPanel1040({
         <div className={styles.viewTogglePill} role="tablist">
           <button
             role="tab"
-            aria-selected={view === 'form'}
-            className={`${styles.viewToggleTab} ${view === 'form' ? styles.viewToggleTabActive : ''}`}
-            onClick={() => setView('form')}
-          >Form</button>
-          <button
-            role="tab"
             aria-selected={view === 'table'}
             className={`${styles.viewToggleTab} ${view === 'table' ? styles.viewToggleTabActive : ''}`}
             onClick={() => setView('table')}
           >Summary</button>
           <button
             role="tab"
-            aria-selected={view === 'control'}
-            className={[
-              styles.viewToggleTab,
-              view === 'control' ? styles.viewToggleTabActive : '',
-            ].filter(Boolean).join(' ')}
-            onClick={() => setView('control')}
-          >
-            Tax control
-            {allFlagsCleared && view !== 'control' && (
-              <span className={styles.tabDot} aria-hidden="true" />
-            )}
-          </button>
+            aria-selected={view === 'form'}
+            className={`${styles.viewToggleTab} ${view === 'form' ? styles.viewToggleTabActive : ''}`}
+            onClick={() => setView('form')}
+          >Form</button>
         </div>
       </div>
 
@@ -623,10 +819,11 @@ export default function LeftPanel1040({
             <div className={styles.summaryColHeaders}>
               <div className={styles.summaryColSpacer} />
               <div className={styles.summaryColValues}>
-                <div className={styles.summaryColLabel} style={{ width: 88 }}>Current year</div>
+                <div className={styles.summaryColLabel} style={{ width: 108 }}>Current year</div>
                 <div className={styles.summaryColLabel} style={{ width: 80 }}>Prior year</div>
                 <div className={styles.summaryColLabel} style={{ width: 72 }}>Change $</div>
                 <div className={styles.summaryColLabel} style={{ width: 52 }}>Change %</div>
+                <div className={styles.summaryColLabel} style={{ width: 96 }} />
               </div>
             </div>
 
@@ -636,11 +833,19 @@ export default function LeftPanel1040({
                 const isOpen = expanded.has(cat.key)
                 return (
                   <div key={cat.key}>
-                    {/* Section header row */}
-                    <button
+                    {/* Section header row — div (not button) so info (i) can nest without invalid HTML */}
+                    <div
                       className={styles.summarySectionRow}
-                      onClick={() => toggleExpanded(cat.key)}
+                      role="button"
+                      tabIndex={0}
                       aria-expanded={isOpen}
+                      onClick={() => toggleExpanded(cat.key)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          toggleExpanded(cat.key)
+                        }
+                      }}
                     >
                       <div className={styles.summaryRowLeft}>
                         <span className={`${styles.summaryChevron} ${isOpen ? styles.summaryChevronOpen : ''}`}>
@@ -654,9 +859,28 @@ export default function LeftPanel1040({
                         const pct = p !== null && p !== 0 ? Math.round((cat.totalCurr - p) / Math.abs(p) * 100) : null
                         const pos = d !== null && d > 0
                         const neg = d !== null && d < 0
+                        const totalHasBreakdown = !!cat.totalField && !!SUMMARY_TO_CONTROL[cat.totalField]
+                          && getTaxControlBreakdown(SUMMARY_TO_CONTROL[cat.totalField], controlSystemVals)?.kind === 'calc'
                         return (
                           <div className={styles.summaryRowRight}>
-                            <div className={styles.summaryCurrVal}><span className={styles.summaryCurrValText}>${fmt(cat.totalCurr)}</span></div>
+                            <div className={styles.summaryCurrVal} style={{ width: 108 }}>
+                              <span className={styles.summaryCurrValText}>${fmt(cat.totalCurr)}</span>
+                              {totalHasBreakdown && (
+                                <Tooltip text="View subtotals" placement="top">
+                                  <button
+                                    type="button"
+                                    className={`${styles.summaryInfoBtn} ${summaryFlyout?.field === cat.totalField ? styles.summaryInfoBtnActive : ''}`}
+                                    aria-label={`View subtotals for ${cat.label}`}
+                                    onClick={e => {
+                                      e.stopPropagation()
+                                      openSummaryInfo(cat.totalField!, e.currentTarget)
+                                    }}
+                                  >
+                                    <CircleInfo size="small" />
+                                  </button>
+                                </Tooltip>
+                              )}
+                            </div>
                             <span className={styles.summaryPriorVal}>{p !== null ? `$${fmt(p)}` : ''}</span>
                             <span className={`${styles.summaryDiffVal} ${pos ? styles.summaryDiffPos : ''} ${neg ? styles.summaryDiffNeg : ''}`}>
                               {d !== null ? (d >= 0 ? `$${fmt(d)}` : `−$${fmt(Math.abs(d))}`) : ''}
@@ -664,10 +888,11 @@ export default function LeftPanel1040({
                             <span className={`${styles.summaryPctVal} ${pos ? styles.summaryDiffPos : ''} ${neg ? styles.summaryDiffNeg : ''}`}>
                               {pct !== null ? `${pct < 0 ? '−' : ''}${Math.abs(pct)}%` : ''}
                             </span>
+                            <div className={styles.summaryRowEndActions} aria-hidden="true" />
                           </div>
                         )
                       })()}
-                    </button>
+                    </div>
 
                     {/* Sub-rows */}
                     {isOpen && cat.rows.map(row => {
@@ -675,15 +900,38 @@ export default function LeftPanel1040({
                       const hasPrior = prior !== null
                       const diff = hasPrior ? row.curr - prior! : null
                       const pctChg = hasPrior && prior !== 0 ? Math.round((row.curr - prior!) / Math.abs(prior!) * 100) : null
-                      const isReviewed = !!row.field && reviewedFields.has(row.field)
+                      const isReviewed = !!row.field && reviewedHas(row.field)
                       const isChecked  = !!row.field && checkedFields.has(row.field)
+                      const isFlagged  = !!row.field && flaggedFields.has(row.field)
+                      const flagNote   = row.field ? (flagNotes[row.field] ?? '') : ''
                       const isSelected = !!row.field && activeHighlight === row.field
                       const isIssue    = !!row.field && row.field === issueField
-                      const isHov      = !!row.field && hoveredField === row.field
                       const isBlue     = isSelected && !isIssue
                       const isOrange   = isSelected && !!isIssue
                       const clickable  = !!row.field
                       const hasPopover = !!row.field && fieldHasPopover(row.field)
+                      // System Phase 1 import attention — informational only; not the user flag
+                      const hasImportAttention = !!row.field && summaryFieldHasUnresolvedFlags(
+                        row.field,
+                        reviewedFields instanceof Map ? reviewedFields : new Map([...reviewedFields].map(k => [k, true])),
+                      )
+                      const flagActivityEntry =
+                        (row.field && (flaggedMeta.get(row.field) ?? flagActivity[row.field])) || undefined
+                      const flagTooltipPrimary = isFlagged
+                        ? (flagNote
+                          ? `Flagged: ${flagNote}`
+                          : 'Flagged for follow-up — click to remove flag')
+                        : (hasImportAttention
+                          ? 'Flag this row for follow-up (import issues still need review)'
+                          : 'Flag this row for follow-up')
+                      const flagTooltip = activityTooltip(
+                        flagTooltipPrimary,
+                        isFlagged ? flagActivityEntry : undefined,
+                      )
+                      const checkTooltip = activityTooltip(
+                        isChecked ? 'Unmark as reviewed' : 'Mark row as reviewed',
+                        isChecked && row.field ? checkedMeta.get(row.field) : undefined,
+                      )
                       const diffPos = diff !== null && diff > 0
                       const diffNeg = diff !== null && diff < 0
 
@@ -701,18 +949,9 @@ export default function LeftPanel1040({
                           className={subRowCls}
                           data-field-row={row.field || undefined}
                           onMouseDown={clickable ? (e) => e.stopPropagation() : undefined}
-                          onClick={clickable ? (e) => {
-                            if (activeHighlight === row.field && popoverField === row.field) {
-                              onFieldClick?.(null)
-                              setPopoverField(null); setPopoverRect(null)
-                            } else {
-                              onFieldClick?.(row.field!)
-                              if (hasPopover) {
-                                const el = (e.currentTarget as HTMLElement).querySelector(`.${styles.summaryCurrValText}`) as HTMLElement | null
-                                setPopoverRect((el ?? e.currentTarget).getBoundingClientRect())
-                                setPopoverField(row.field!)
-                              }
-                            }
+                          onClick={clickable ? () => {
+                            // Row click: highlight/selection only — flyout opens via (i) only
+                            onFieldClick?.(activeHighlight === row.field ? null : row.field!)
                           } : undefined}
                           onMouseEnter={row.field ? () => setHoveredField(row.field!) : undefined}
                           onMouseLeave={row.field ? () => setHoveredField(null) : undefined}
@@ -720,77 +959,111 @@ export default function LeftPanel1040({
                           <div className={styles.summaryRowLeft}>
                             <div className={styles.summarySubLabelGroup}>
                               <span className={`${styles.summarySubLabel} ${row.kind === 'calc' ? styles.summarySubLabelCalc : ''}`}>
-                                {isReviewed && <span className={styles.summaryReviewedIcon}><CircleCheck size="small" /></span>}
                                 {row.label}
                               </span>
                               <span className={styles.summarySubNote}>Line {row.line} · {row.sub}</span>
                             </div>
                           </div>
                           <div className={styles.summaryRowRight}>
-                            {/* Current year — value text + action buttons */}
-                            <div className={styles.summaryCurrVal}>
+                            {/* Current year — value + info affordance (info stays here for drilldown) */}
+                            <div className={styles.summaryCurrVal} style={{ width: 108 }}>
                               <span
-                                className={`${styles.summaryCurrValText} ${row.kind === 'calc' ? styles.summaryCurrValCalc : ''} ${isBlue ? styles.summaryCurrValBlue : ''} ${isOrange ? styles.summaryCurrValOrange : ''} ${clickable ? styles.summaryCurrValClickable : ''}`}
-                                onClick={clickable ? e => {
-                                  e.stopPropagation()
-                                  const el = e.currentTarget as HTMLElement
-                                  if (activeHighlight === row.field) {
-                                    onFieldClick?.(null)
-                                    setPopoverField(null); setPopoverRect(null)
-                                  } else {
-                                    onFieldClick?.(row.field!)
-                                    if (hasPopover) {
-                                      setPopoverRect(el.getBoundingClientRect())
-                                      setPopoverField(row.field!)
-                                    }
-                                  }
-                                } : undefined}
+                                className={`${styles.summaryCurrValText} ${row.kind === 'calc' ? styles.summaryCurrValCalc : ''} ${isBlue ? styles.summaryCurrValBlue : ''} ${isOrange ? styles.summaryCurrValOrange : ''}`}
                               >
                                 ${fmt(row.curr)}
                               </span>
-                              {/* Action buttons — check + comment, shown on row hover */}
-                              {!!row.field && !isReviewed && !!row.kind && (
-                                <div className={`${styles.summaryRowActions} ${(isChecked || commentField === row.field) ? styles.summaryRowActionsVisible : ''}`}>
-                                  {!!onToggleChecked && (
-                                    <Tooltip text={isChecked ? 'Unmark as correct' : 'Mark as correct'} placement="top">
-                                      <button
-                                        className={`${styles.checkBtn} ${isChecked ? styles.checkBtnActive : ''}`}
-                                        aria-label={isChecked ? 'Unmark' : 'Mark as correct'}
-                                        onClick={e => { e.stopPropagation(); onToggleChecked(row.field!) }}
-                                      ><CircleCheck size="small" /></button>
-                                    </Tooltip>
-                                  )}
-                                  {!!onAddFieldNote && (
-                                    <Tooltip text="Add a comment" placement="top">
-                                      <button
-                                        className={`${styles.commentBtn1040} ${commentField === row.field ? styles.commentBtn1040Active : ''}`}
-                                        aria-label="Add comment"
-                                        onClick={e => {
-                                          e.stopPropagation()
-                                          if (commentField === row.field) { setCommentField(null); setCommentDraft(''); setCommentAnchor(null) }
-                                          else openComment1040(row.field!, row.label, e.currentTarget)
-                                        }}
-                                      ><Comment size="small" /></button>
-                                    </Tooltip>
-                                  )}
-                                </div>
+                              {hasPopover && (
+                                <Tooltip
+                                  text={row.kind === 'calc' ? 'View subtotals' : 'View sources'}
+                                  placement="top"
+                                >
+                                  <button
+                                    type="button"
+                                    className={`${styles.summaryInfoBtn} ${summaryFlyout?.field === row.field ? styles.summaryInfoBtnActive : ''}`}
+                                    aria-label={row.kind === 'calc' ? `View subtotals for ${row.label}` : `View sources for ${row.label}`}
+                                    onClick={e => {
+                                      e.stopPropagation()
+                                      openSummaryInfo(row.field!, e.currentTarget)
+                                    }}
+                                  >
+                                    <CircleInfo size="small" />
+                                  </button>
+                                </Tooltip>
                               )}
                             </div>
                             <span className={styles.summaryPriorVal}>
                               {hasPrior ? `$${fmt(prior!)}` : ''}
                             </span>
-                            {/* Diff $ — only if prior year exists */}
                             <span className={`${styles.summaryDiffVal} ${diffPos ? styles.summaryDiffPos : ''} ${diffNeg ? styles.summaryDiffNeg : ''}`}>
                               {hasPrior && diff !== null
                                 ? diff >= 0 ? `$${fmt(diff)}` : `−$${fmt(Math.abs(diff))}`
                                 : ''}
                             </span>
-                            {/* Diff % — only if prior year exists */}
                             <span className={`${styles.summaryPctVal} ${diffPos ? styles.summaryDiffPos : ''} ${diffNeg ? styles.summaryDiffNeg : ''}`}>
                               {hasPrior && pctChg !== null
                                 ? `${pctChg < 0 ? '−' : ''}${Math.abs(pctChg)}%`
                                 : ''}
                             </span>
+                            {/* Comment + flag + check — always three equal slots on data rows */}
+                            <div className={styles.summaryRowEndActions}>
+                              {!!row.field && !!onAddFieldNote ? (
+                                <Tooltip text="Add a comment" placement="top">
+                                  <button
+                                    type="button"
+                                    className={`${styles.summaryActionBtn} ${commentField === row.field ? styles.summaryActionBtnActive : ''}`}
+                                    aria-label={`Add comment for ${row.label}`}
+                                    onClick={e => {
+                                      e.stopPropagation()
+                                      if (commentField === row.field) { setCommentField(null); setCommentDraft(''); setCommentAnchor(null) }
+                                      else openComment1040(row.field!, row.label, e.currentTarget)
+                                    }}
+                                  >
+                                    <Comment size="small" />
+                                  </button>
+                                </Tooltip>
+                              ) : (
+                                <span className={styles.summaryActionBtnSlot} aria-hidden="true" />
+                              )}
+                              {!!row.field && !!onToggleFlagged ? (
+                                <Tooltip text={flagTooltip} placement="top">
+                                  <button
+                                    type="button"
+                                    className={`${styles.summaryActionBtn} ${isFlagged ? styles.summaryActionBtnFlag : ''} ${flagNoteField === row.field ? styles.summaryActionBtnActive : ''}`}
+                                    aria-label={isFlagged ? `Remove flag from ${row.label}` : `Flag ${row.label} for follow-up`}
+                                    aria-pressed={isFlagged}
+                                    onClick={e => {
+                                      e.stopPropagation()
+                                      // Already on + note editor open → treat as edit (keep flagged)
+                                      if (isFlagged && flagNoteField === row.field) {
+                                        closeFlagNotePopover()
+                                        return
+                                      }
+                                      // Already on → second click turns off (note kept in storage)
+                                      // Off → turn on + open optional note prompt (clears check)
+                                      handleFlagClick(row.field!, e.currentTarget)
+                                    }}
+                                  >
+                                    <Flag size="small" />
+                                  </button>
+                                </Tooltip>
+                              ) : (
+                                <span className={styles.summaryActionBtnSlot} aria-hidden="true" />
+                              )}
+                              {!!row.field && !!onToggleChecked ? (
+                                <Tooltip text={checkTooltip} placement="top">
+                                  <button
+                                    type="button"
+                                    className={`${styles.summaryActionBtn} ${isChecked ? styles.summaryActionBtnChecked : ''}`}
+                                    aria-label={isChecked ? 'Unmark' : 'Mark as reviewed'}
+                                    onClick={e => { e.stopPropagation(); onToggleChecked(row.field!) }}
+                                  >
+                                    <CircleCheck size="small" />
+                                  </button>
+                                </Tooltip>
+                              ) : (
+                                <span className={styles.summaryActionBtnSlot} aria-hidden="true" />
+                              )}
+                            </div>
                           </div>
                         </div>
                       )
@@ -820,7 +1093,22 @@ export default function LeftPanel1040({
                   <span className={styles.summaryOweLabel}>Amount you owe · Line 37</span>
                 </div>
                 <div className={styles.summaryRowRight}>
-                  <div className={styles.summaryCurrVal}><span className={`${styles.summaryCurrValText} ${styles.summaryOweAmt}`}>${fmt(oweAmount)}</span></div>
+                  <div className={styles.summaryCurrVal} style={{ width: 108 }}>
+                    <span className={`${styles.summaryCurrValText} ${styles.summaryOweAmt}`}>${fmt(oweAmount)}</span>
+                    <Tooltip text="View subtotals" placement="top">
+                      <button
+                        type="button"
+                        className={`${styles.summaryInfoBtn} ${summaryFlyout?.field === 'amountOwed' ? styles.summaryInfoBtnActive : ''}`}
+                        aria-label="View subtotals for amount you owe"
+                        onClick={e => {
+                          e.stopPropagation()
+                          openSummaryInfo('amountOwed', e.currentTarget)
+                        }}
+                      >
+                        <CircleInfo size="small" />
+                      </button>
+                    </Tooltip>
+                  </div>
                   <span className={styles.summaryPriorVal}>${fmt(priorOwed)}</span>
                   <span className={`${styles.summaryDiffVal} ${diffPos ? styles.summaryDiffPos : ''} ${diffNeg ? styles.summaryDiffNeg : ''}`}>
                     {diff >= 0 ? `$${fmt(diff)}` : `−$${fmt(Math.abs(diff))}`}
@@ -828,6 +1116,7 @@ export default function LeftPanel1040({
                   <span className={`${styles.summaryPctVal} ${diffPos ? styles.summaryDiffPos : ''} ${diffNeg ? styles.summaryDiffNeg : ''}`}>
                     {pctChg >= 0 ? '' : '−'}{Math.abs(pctChg)}%
                   </span>
+                  <div className={styles.summaryRowEndActions} aria-hidden="true" />
                 </div>
               </div>
                 )
@@ -837,288 +1126,43 @@ export default function LeftPanel1040({
         </div>
       )}
 
-      {/* ── TAX CONTROL VIEW ── */}
-      {view === 'control' && (() => {
-        const systemVals = controlSystemVals
 
-        const controlSections = [
-          { key: 'income', label: 'Income', rowIds: ['wages', 'interest', 'dividends', 'qualDivs', 'ira', 'totalIncome'] },
-          { key: 'deductions', label: 'Deductions', rowIds: ['stdDeduction', 'taxableIncome'] },
-          { key: 'payments', label: 'Payments & tax owed', rowIds: ['totalTax', 'withholdingW2', 'withholding99', 'totalPayments', 'amountOwed'] },
-        ]
-
-        const getRowConfig = (id: string) => TAX_CONTROL_ROWS.find(r => r.id === id)!
-
-        const getEnteredTotal = (rowId: string) => {
-          const cfg = getRowConfig(rowId)
-          if (cfg.docs.length === 0) {
-            const raw = controlInputs[rowId]
-            if (!raw?.trim()) return null
-            const parsed = parseFloat(raw.replace(/[,$]/g, ''))
-            return isNaN(parsed) ? null : parsed
+      {/* Summary info flyout — Interest card style for source / calc / note */}
+      {summaryFlyout && summaryFlyoutRect && (
+        <TaxControlDocPopover
+          rowLabel={summaryFlyout.label}
+          mode={summaryFlyout.mode}
+          items={summaryFlyout.items}
+          subtitle={summaryFlyout.subtitle}
+          sumLabel={summaryFlyout.sumLabel}
+          sumValue={summaryFlyout.sumValue}
+          footnote={summaryFlyout.footnote}
+          onNavigateToDoc={
+            summaryFlyout.mode === 'source'
+              ? docId => {
+                  const detailFieldId = summaryFlyout.detailByDocId?.[docId]
+                  const item = summaryFlyout.items.find(d => d.docId === docId)
+                  if (detailFieldId && onNavigateSource) {
+                    onNavigateSource({
+                      docId,
+                      detailFieldId,
+                      label: item?.label ?? docId,
+                      box: '',
+                      amount: item?.amount ?? 0,
+                    })
+                  } else {
+                    onNavigateToSourceDoc?.(docId)
+                  }
+                  clearSummaryFlyouts()
+                }
+              : undefined
           }
-          return sumControlDocInputs(cfg.docs, getDocValuesForRow(rowId, cfg.docs, controlInputs))
-        }
+          anchorRect={summaryFlyoutRect}
+          onClose={clearSummaryFlyouts}
+        />
+      )}
 
-        const inputRows = TAX_CONTROL_ROWS.filter(r => !r.isBlank && r.docs.length > 0 && systemVals[r.id] !== null)
-        const matches = inputRows.map(r => {
-          const entered = getEnteredTotal(r.id)
-          const systemVal = systemVals[r.id]
-          if (entered === null || systemVal === null) return null
-          return Math.abs(entered - systemVal) <= 1
-        })
-        const allMatch = matches.length > 0 && matches.every(m => m === true)
-
-        const getMatch = (id: string) => {
-          const idx = inputRows.findIndex(r => r.id === id)
-          return idx >= 0 ? matches[idx] : null
-        }
-
-        const openControlPopover = (rowId: string, el: HTMLElement) => {
-          setBreakdownRow(null)
-          setBreakdownRect(null)
-          setControlPopoverRect(el.getBoundingClientRect())
-          setControlPopoverRow(rowId)
-          const cfg = TAX_CONTROL_ROWS.find(r => r.id === rowId)
-          if (cfg?.docs[0]) onNavigateToSourceDoc?.(cfg.docs[0].docId)
-        }
-
-        const openBreakdownPopover = (rowId: string, el: HTMLElement) => {
-          setControlPopoverRow(null)
-          setControlPopoverRect(null)
-          setBreakdownRect(el.getBoundingClientRect())
-          setBreakdownRow(rowId)
-        }
-
-        const toggleBreakdownPopover = (rowId: string, el: HTMLElement) => {
-          if (breakdownRow === rowId) {
-            setBreakdownRow(null)
-            setBreakdownRect(null)
-          } else {
-            openBreakdownPopover(rowId, el)
-          }
-        }
-
-        return (
-          <div className={styles.controlWrapper}>
-            <div className={`${styles.summaryCard} ${allMatch ? styles.controlCardSuccess : ''}`}>
-              <div className={styles.summaryCardHeader}>
-                <span className={styles.summaryCardLabel}>TAX CONTROL</span>
-                <span className={styles.summaryCardSub}>Reconcile source totals · 2025 return</span>
-              </div>
-
-              <div className={styles.controlInstruction}>
-                <div className={styles.controlInstructionIcon}>
-                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                    <circle cx="10" cy="10" r="9" fill="#0077c5"/>
-                    <path d="M10 9v5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/>
-                    <circle cx="10" cy="6.5" r="1" fill="#fff"/>
-                  </svg>
-                </div>
-                <div className={styles.controlInstructionBody}>
-                  <strong>Enter each source amount, then Save.</strong> Totals update in the Source docs column for comparison with System. If both match, your extraction is confirmed correct. Small rounding differences (±$1) are normal.
-                </div>
-              </div>
-
-              {/* Column headers */}
-              <div className={styles.controlColHeaders}>
-                <div className={styles.controlColLine}>Box</div>
-                <div className={styles.controlColItem}>Item</div>
-                <div className={styles.controlColSystem}>System</div>
-                <div className={styles.controlColSource}>Source docs</div>
-                <div className={styles.controlColMatch}></div>
-              </div>
-
-              <div className={styles.summaryBody}>
-                {controlSections.map(section => (
-                  <div key={section.key}>
-                    <div className={styles.controlSectionHeader}>{section.label}</div>
-                    {section.rowIds.map(rowId => {
-                      const row = getRowConfig(rowId)
-                      const systemVal = systemVals[row.id]
-
-                      if (row.isBlank) {
-                        return (
-                          <div key={row.id} className={`${styles.controlRow} ${styles.controlRowBlank}`}>
-                            <div className={styles.controlLineNum}>{row.box}</div>
-                            <div className={styles.controlLabelGroup}>
-                              <span className={styles.controlLabelText}>{row.label}</span>
-                              <span className={styles.controlDesc}>{row.desc}</span>
-                            </div>
-                            <div className={styles.controlSystemVal}>—</div>
-                            <div className={styles.controlInputBlank}>N/A</div>
-                            <div className={styles.controlMatch} />
-                          </div>
-                        )
-                      }
-
-                      const hasSourceDocs = row.docs.length >= 1
-                      const enteredTotal = getEnteredTotal(row.id)
-                      const hasInput = enteredTotal !== null
-                      const matchResult = getMatch(row.id)
-                      const diff = hasInput && systemVal !== null ? enteredTotal! - systemVal : null
-                      const clickable = !!row.sourceTab
-                      const needsEntry = hasSourceDocs && !hasInput
-
-                      return (
-                        <div
-                          key={row.id}
-                          className={[
-                            styles.controlRow,
-                            row.isTotalRow ? styles.controlRowTotal : '',
-                            clickable ? styles.controlRowClickable : '',
-                          ].filter(Boolean).join(' ')}
-                          onClick={clickable ? () => onViewSource?.(row.sourceTab!) : undefined}
-                          title={clickable ? 'Click to view source document' : undefined}
-                        >
-                          <div className={styles.controlLineNum}>{row.box}</div>
-                          <div className={styles.controlLabelGroup}>
-                            <span className={styles.controlLabelText}>
-                              {row.label}
-                              {isControlRowEdited(row.id) && (
-                                <span className={styles.controlEditedBadge}>Edited</span>
-                              )}
-                              {clickable && (
-                                <svg className={styles.controlNavIcon} width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                                  <path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                              )}
-                            </span>
-                            <span className={styles.controlDesc}>{row.desc}</span>
-                          </div>
-                          <div className={styles.controlSystemCell}>
-                            {systemVal !== null ? (
-                              <>
-                                <button
-                                  type="button"
-                                  className={[
-                                    styles.controlSystemBtn,
-                                    row.isTotalRow ? styles.controlSystemBtnTotal : '',
-                                    breakdownRow === row.id ? styles.controlSystemBtnActive : '',
-                                  ].filter(Boolean).join(' ')}
-                                  onClick={e => {
-                                    e.stopPropagation()
-                                    toggleBreakdownPopover(row.id, e.currentTarget)
-                                  }}
-                                  aria-label={`View calculation for ${row.label}`}
-                                  aria-expanded={breakdownRow === row.id}
-                                >
-                                  ${fmt(systemVal)}
-                                </button>
-                                <button
-                                  type="button"
-                                  className={[
-                                    styles.controlInfoBtn,
-                                    breakdownRow === row.id ? styles.controlInfoBtnActive : '',
-                                  ].filter(Boolean).join(' ')}
-                                  onClick={e => {
-                                    e.stopPropagation()
-                                    toggleBreakdownPopover(row.id, e.currentTarget)
-                                  }}
-                                  aria-label={`View breakdown for ${row.label}`}
-                                  aria-expanded={breakdownRow === row.id}
-                                >
-                                  <CircleInfo size="small" />
-                                </button>
-                              </>
-                            ) : (
-                              <span className={styles.controlSystemVal}>—</span>
-                            )}
-                          </div>
-
-                          {hasSourceDocs ? (
-                            <button
-                              type="button"
-                              className={[
-                                styles.controlMultiBtn,
-                                needsEntry ? styles.controlMultiBtnNeedsEntry : '',
-                                hasInput && matchResult === true  ? styles.controlInputOk   : '',
-                                hasInput && matchResult === false ? styles.controlInputFail : '',
-                              ].filter(Boolean).join(' ')}
-                              onClick={e => {
-                                e.stopPropagation()
-                                openControlPopover(row.id, e.currentTarget)
-                              }}
-                              aria-label={needsEntry ? `Enter ${row.label} from sources` : `Edit ${row.label} from sources`}
-                              aria-expanded={controlPopoverRow === row.id}
-                            >
-                              {hasInput ? `$${fmt(enteredTotal!)}` : 'Enter from sources'}
-                            </button>
-                          ) : (
-                            <input
-                              className={[
-                                styles.controlInput,
-                                hasInput && matchResult === true  ? styles.controlInputOk   : '',
-                                hasInput && matchResult === false ? styles.controlInputFail : '',
-                              ].filter(Boolean).join(' ')}
-                              type="text"
-                              inputMode="numeric"
-                              placeholder="$0"
-                              value={controlInputs[row.id] ?? ''}
-                              onChange={e => setControlInputs(prev => ({ ...prev, [row.id]: e.target.value }))}
-                              onClick={e => e.stopPropagation()}
-                              aria-label={`Source total for ${row.label}`}
-                            />
-                          )}
-
-                          <div className={styles.controlMatch}>
-                            {hasInput && matchResult === true  && <span className={styles.controlMatchOk}>✓</span>}
-                            {hasInput && matchResult === false && (
-                              <span className={styles.controlMatchFail} title={`Diff: ${diff !== null && diff >= 0 ? '+' : ''}${diff?.toFixed(2)}`}>✗</span>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                ))}
-              </div>
-
-              {allMatch && (
-                <div className={styles.controlFooter}>
-                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                    <circle cx="10" cy="10" r="9" fill="#00856D"/>
-                    <path d="M6.5 10.5L8.5 12.5L13.5 7.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  Totals reconciled — return is confirmed complete.
-                </div>
-              )}
-            </div>
-          </div>
-        )
-      })()}
-
-      {/* Tax control multi-doc popover */}
-      {controlPopoverRow && controlPopoverRect && (() => {
-        const cfg = TAX_CONTROL_ROWS.find(r => r.id === controlPopoverRow)
-        if (!cfg || cfg.docs.length === 0) return null
-        return (
-          <TaxControlDocPopover
-            rowLabel={cfg.label}
-            docs={cfg.docs}
-            values={getDocValuesForRow(cfg.id, cfg.docs, controlInputs)}
-            onSave={(draft) => setControlInputs(prev => setDocValuesForRow(cfg.id, draft, prev))}
-            onNavigateToDoc={onNavigateToSourceDoc}
-            anchorRect={controlPopoverRect}
-            onClose={() => { setControlPopoverRow(null); setControlPopoverRect(null) }}
-          />
-        )
-      })()}
-
-      {/* Tax control calculation / source breakdown popover */}
-      {breakdownRow && breakdownRect && (() => {
-        const breakdown = getTaxControlBreakdown(breakdownRow, controlSystemVals)
-        if (!breakdown) return null
-        return (
-          <TaxControlBreakdownPopover
-            breakdown={breakdown}
-            anchorRect={breakdownRect}
-            onClose={() => { setBreakdownRow(null); setBreakdownRect(null) }}
-          />
-        )
-      })()}
-
-      <div className={styles.documentViewer} style={{ display: (view === 'table' || view === 'control') ? 'none' : undefined }}>
+      <div className={styles.documentViewer} style={{ display: view === 'table' ? 'none' : undefined }}>
         <div className={styles.formDoc}>
 
           {/* ── IRS Header ── */}
@@ -1310,6 +1354,61 @@ export default function LeftPanel1040({
               }}
             >
               Post
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Flag note popover (portal) — optional; flag already toggled on ── */}
+      {flagNoteField && flagNoteAnchor && createPortal(
+        <div
+          className={styles.commentPopover1040}
+          style={{ top: flagNoteAnchor.top, left: flagNoteAnchor.left, transform: 'translateY(-50%)' }}
+          ref={flagNoteRef}
+          onClick={e => e.stopPropagation()}
+        >
+          <div className={styles.commentPopoverCtx}>
+            <span className={`${styles.commentPopoverChip} ${styles.flagNoteChip}`}>
+              Flag note · {FIELD_META[flagNoteField]?.label ?? flagNoteField}
+            </span>
+          </div>
+          <textarea
+            autoFocus
+            className={styles.commentPopoverInput}
+            placeholder="Why does this need a double-check? (optional)"
+            value={flagNoteDraft}
+            onChange={e => setFlagNoteDraft(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) saveFlagNote()
+              if (e.key === 'Escape') closeFlagNotePopover()
+            }}
+            rows={2}
+          />
+          {(() => {
+            const meta = formatActivityMeta(
+              flagNoteField
+                ? (flaggedMeta.get(flagNoteField) ?? flagActivity[flagNoteField])
+                : undefined,
+            )
+            return meta ? (
+              <div className={styles.flagNoteMeta}>{meta}</div>
+            ) : null
+          })()}
+          <div className={styles.commentPopoverActions}>
+            <button
+              type="button"
+              className={styles.commentPopoverCancel}
+              onClick={e => { e.stopPropagation(); closeFlagNotePopover() }}
+            >
+              Skip
+            </button>
+            <button
+              type="button"
+              className={`${styles.commentPopoverPost} ${styles.commentPopoverPostActive}`}
+              onClick={e => { e.stopPropagation(); saveFlagNote() }}
+            >
+              Done
             </button>
           </div>
         </div>,

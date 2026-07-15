@@ -8,6 +8,11 @@ import {
   countPhase1FlagsForIntPayer,
   countPhase1FlagsForW2Payer,
   getTabFlagCounts,
+  getTabInitialFlagCounts,
+  getInitialW2PayerFlagCount,
+  getInitialDivPayerFlagCount,
+  getInitialIntPayerFlagCount,
+  getInitialRPayerFlagCount,
   getNextVerifyItem,
   navigationForDetailField,
 } from './data-review/phase1FieldSync'
@@ -16,10 +21,15 @@ import Int1099FormPreview from './data-review/Int1099FormPreview'
 import { getSourceDocPreview } from './data-review/sourceDocImages'
 import DetailFields, { W2_PAYER_TABS } from './data-review/DetailFields'
 import type { W2Employer } from './data-review/DetailFields'
-import DetailFields1099, { INT_PAYER_TABS } from './data-review/DetailFields1099'
+import DetailFields1099, { INT_PAYER_TABS, intVerifiedDocKey } from './data-review/DetailFields1099'
 import type { IntPayer } from './data-review/DetailFields1099'
-import DetailFieldsDiv, { DIV_PAYER_TABS } from './data-review/DetailFieldsDiv'
+import DetailFieldsDiv, { DIV_PAYER_TABS, divVerifiedDocKey } from './data-review/DetailFieldsDiv'
 import type { DivPayer } from './data-review/DetailFieldsDiv'
+import {
+  buildTabVerifiedKeys,
+  buildTypeReviewed,
+  isDocReviewed,
+} from './data-review/docReviewStatus'
 import DetailFields1099R, { R_PAYER_TABS } from './data-review/DetailFields1099R'
 import DetailFieldsNec, { NEC_PAYER_TABS } from './data-review/DetailFieldsNec'
 import PeelTab from './data-review/PeelTab'
@@ -31,9 +41,10 @@ import img1040PriorPage1 from '../assets/jessica-1040-2024-variant-1.png'
 import img1040PriorPage2 from '../assets/jessica-1040-2024-variant-2.png'
 import dragStyles from '../styles/data-review/DragHandle.module.css'
 
-// ProtoA: the pop-out mirrors the main window's right panel — same flags,
-// reviewed state, and edits, live-synced via useSyncedReviewState
-// (BroadcastChannel + sessionStorage).
+// ProtoC: the pop-out is the same view as the main window's right panel, not a
+// separate copy — same flags, same reviewed state, same edits, same document
+// preview zoom/pan, all live-synced via useSyncedReviewState (BroadcastChannel).
+// See DataReviewPage.tsx's right panel for the layout this mirrors.
 
 export default function DataReviewPopout() {
   const {
@@ -45,12 +56,14 @@ export default function DataReviewPopout() {
     fieldValues, updateFieldValue,
     reviewedFields,
     editedFields,
+    editedFieldsMeta,
     markEdited,
     activeDivPayer, setActiveDivPayer,
     activeIntPayer, setActiveIntPayer,
     markReviewed: handleMarkReviewed,
     markReviewedBulk: handleMarkReviewedBulk,
     verifiedDocs,
+    verifiedDocsMeta,
     toggleVerifiedDoc,
   } = useSyncedReviewState()
 
@@ -83,6 +96,7 @@ export default function DataReviewPopout() {
   }, [reviewedFields, selectedField, applyVerifyNavigation])
 
   const tabFlagCounts = getTabFlagCounts(reviewedFields)
+  const tabInitialFlagCounts = getTabInitialFlagCounts()
   const divPayerFieldCounts: Record<DivPayer, number> = Object.fromEntries(
     DIV_PAYER_TABS.map(({ key: p }) => [p, countPhase1FlagsForDivPayer(p, reviewedFields)])
   ) as Record<DivPayer, number>
@@ -92,31 +106,47 @@ export default function DataReviewPopout() {
   const w2PayerFieldCounts: Record<W2Employer, number> = Object.fromEntries(
     W2_PAYER_TABS.map(({ key: p }) => [p, countPhase1FlagsForW2Payer(p, reviewedFields)])
   ) as Record<W2Employer, number>
+  const tabVerifiedKeys = buildTabVerifiedKeys()
+  const typeReviewed = buildTypeReviewed({
+    verifiedDocs,
+    w2Counts: w2PayerFieldCounts,
+    divCounts: divPayerFieldCounts,
+    intCounts: intPayerFieldCounts,
+    rRemaining: tabFlagCounts['1099-rs'] ?? 0,
+  })
 
   const rightRef = useRef<HTMLDivElement>(null)
   const [previewWidth, setPreviewWidth] = useState(40)
 
-  const handlePreviewDrag = useCallback((e: React.MouseEvent) => {
+  const handlePreviewDrag = useCallback((e: React.PointerEvent) => {
+    if (e.button !== 0) return
     e.preventDefault()
+    e.stopPropagation()
     const right = rightRef.current
     if (!right) return
+    const target = e.currentTarget as HTMLElement
+    target.setPointerCapture?.(e.pointerId)
     const startX = e.clientX
     const startWidth = previewWidth
-    const onMouseMove = (moveEvent: MouseEvent) => {
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    const onPointerMove = (moveEvent: PointerEvent) => {
       const delta = moveEvent.clientX - startX
       const rightWidth = right.getBoundingClientRect().width
+      if (rightWidth <= 0) return
       setPreviewWidth(Math.max(20, Math.min(75, startWidth + (delta / rightWidth) * 100)))
     }
-    const onMouseUp = () => {
-      document.removeEventListener('mousemove', onMouseMove)
-      document.removeEventListener('mouseup', onMouseUp)
+    const onPointerUp = (upEvent: PointerEvent) => {
+      try { target.releasePointerCapture?.(upEvent.pointerId) } catch { /* already released */ }
+      document.removeEventListener('pointermove', onPointerMove)
+      document.removeEventListener('pointerup', onPointerUp)
+      document.removeEventListener('pointercancel', onPointerUp)
       document.body.style.cursor = ''
       document.body.style.userSelect = ''
     }
-    document.body.style.cursor = 'col-resize'
-    document.body.style.userSelect = 'none'
-    document.addEventListener('mousemove', onMouseMove)
-    document.addEventListener('mouseup', onMouseUp)
+    document.addEventListener('pointermove', onPointerMove)
+    document.addEventListener('pointerup', onPointerUp)
+    document.addEventListener('pointercancel', onPointerUp)
   }, [previewWidth])
 
   const sourceDocPreview = getSourceDocPreview({
@@ -133,6 +163,10 @@ export default function DataReviewPopout() {
         isPopout
         activeTopTab={activeTopTab}
         flagCounts={tabFlagCounts}
+        initialFlagCounts={tabInitialFlagCounts}
+        verifiedDocs={verifiedDocs}
+        tabVerifiedKeys={tabVerifiedKeys}
+        typeReviewed={typeReviewed}
         onTopTabChange={(tab) => { setActiveTopTab(tab); setSelectedField(null) }}
       />
 
@@ -143,42 +177,82 @@ export default function DataReviewPopout() {
       {/* Peel tabs — payer switcher for multi-payer doc types */}
       {activeTopTab === '1099-divs' && (
         <PeelTab
-          tabs={DIV_PAYER_TABS.map(t => ({ ...t, badge: divPayerFieldCounts[t.key] }))}
+          tabs={DIV_PAYER_TABS.map(t => ({
+            ...t,
+            badge: divPayerFieldCounts[t.key],
+            showClearedCheck: isDocReviewed(
+              verifiedDocs,
+              divVerifiedDocKey(t.key),
+              divPayerFieldCounts[t.key],
+              getInitialDivPayerFlagCount(t.key),
+            ),
+          }))}
           activeKey={activeDivPayer}
           onChange={key => setActiveDivPayer(key as DivPayer)}
         />
       )}
       {activeTopTab === '1099-ints' && (
         <PeelTab
-          tabs={INT_PAYER_TABS.map(t => ({ ...t, badge: intPayerFieldCounts[t.key] }))}
+          tabs={INT_PAYER_TABS.map(t => ({
+            ...t,
+            badge: intPayerFieldCounts[t.key],
+            showClearedCheck: isDocReviewed(
+              verifiedDocs,
+              intVerifiedDocKey(t.key),
+              intPayerFieldCounts[t.key],
+              getInitialIntPayerFlagCount(t.key),
+            ),
+          }))}
           activeKey={activeIntPayer}
           onChange={key => setActiveIntPayer(key as IntPayer)}
         />
       )}
       {activeTopTab === 'w2s' && (
         <PeelTab
-          tabs={W2_PAYER_TABS.map(t => ({ ...t, badge: w2PayerFieldCounts[t.key] }))}
+          tabs={W2_PAYER_TABS.map(t => ({
+            ...t,
+            badge: w2PayerFieldCounts[t.key],
+            showClearedCheck: isDocReviewed(
+              verifiedDocs,
+              t.key,
+              w2PayerFieldCounts[t.key],
+              getInitialW2PayerFlagCount(t.key),
+            ),
+          }))}
           activeKey={activeSubTab}
           onChange={key => setActiveSubTab(key as W2Employer)}
         />
       )}
       {activeTopTab === '1099-rs' && (
         <PeelTab
-          tabs={R_PAYER_TABS.map(t => ({ ...t, badge: tabFlagCounts['1099-rs'] }))}
+          tabs={R_PAYER_TABS.map(t => ({
+            ...t,
+            badge: tabFlagCounts['1099-rs'],
+            showClearedCheck: isDocReviewed(
+              verifiedDocs,
+              '1099-r',
+              tabFlagCounts['1099-rs'],
+              getInitialRPayerFlagCount(),
+            ),
+          }))}
           activeKey="meridian"
           onChange={() => {}}
         />
       )}
       {activeTopTab === '1099-necs' && (
         <PeelTab
-          tabs={NEC_PAYER_TABS.map(t => ({ ...t, badge: 0 }))}
+          tabs={NEC_PAYER_TABS.map(t => ({
+            ...t,
+            badge: 0,
+            showClearedCheck: verifiedDocs.has('1099-nec'),
+          }))}
           activeKey="summit"
           onChange={() => {}}
         />
       )}
 
       <div ref={rightRef} style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-          <div style={{ width: `${previewWidth}%`, flexShrink: 0, overflow: 'hidden', borderRight: '1px solid #d5dee3' }}>
+          <div style={{ flex: `0 0 ${previewWidth}%`, minWidth: 0, minHeight: 0, overflow: 'hidden', borderRight: '1px solid #d5dee3' }}>
             <DocumentPreview
               imageSrc={sourceDocPreview.imageSrc}
               alt={sourceDocPreview.alt}
@@ -190,7 +264,13 @@ export default function DataReviewPopout() {
             />
           </div>
 
-          <div className={dragStyles.handleVertical} onMouseDown={handlePreviewDrag}>
+          <div
+            className={dragStyles.handleVertical}
+            onPointerDown={handlePreviewDrag}
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize document preview and Details"
+          >
             <DotsSix size="small" className={dragStyles.handleIcon} />
           </div>
 
@@ -205,10 +285,10 @@ export default function DataReviewPopout() {
                 onSubTabChange={(tab) => setActiveSubTab(tab as W2Employer)}
                 wages={{ bingEquipment: 0, techCircle: wages.techCircle }}
                 onWageChange={(employer, value) => {
-                  setWages({ ...wages, [employer]: value })
+                  if (employer === 'techCircle') setWages({ techCircle: value })
                   markEdited(`wages-${employer}`)
                 }}
-                fieldValues={{ ...fieldValues, withholding: fieldValues.withholding[activeSubTab] }}
+                fieldValues={{ ...fieldValues, withholding: fieldValues.withholding.techCircle }}
                 onFieldValueChange={(key, value) => {
                   if (key === 'withholding' && typeof value === 'number') {
                     updateField('withholding', { techCircle: value })
@@ -217,6 +297,16 @@ export default function DataReviewPopout() {
                     updateField(key as keyof typeof fieldValues, value as number)
                     markEdited(String(key))
                   }
+                }}
+                box12Rows={amounts.box12Rows}
+                onBox12RowChange={(sub, patch) => {
+                  updateAmounts({
+                    box12Rows: {
+                      ...amounts.box12Rows,
+                      [sub]: { ...amounts.box12Rows[sub], ...patch },
+                    },
+                  })
+                  markEdited(`box12${sub}-${activeSubTab}`)
                 }}
                 onIdentityChange={(kind, value) => {
                   if (kind === 'ssn') updateAmounts({ employeeSsn: value })
@@ -228,7 +318,9 @@ export default function DataReviewPopout() {
                 onMarkReviewedBulk={handleMarkReviewedBulk}
                 reviewedFields={reviewedFields}
                 editedFields={editedFields}
+                editedFieldsMeta={editedFieldsMeta}
                 verifiedDocs={verifiedDocs}
+                verifiedDocsMeta={verifiedDocsMeta}
                 onVerifyDoc={toggleVerifiedDoc}
                 flaggedFields={{
                   ssn: PHASE1_FLAG_MESSAGES.w2.ssn,

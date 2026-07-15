@@ -1,19 +1,34 @@
-import { useEffect, useRef, useState } from 'react'
-import { Close } from '@design-systems/icons'
-import { Button } from '@ids-ts/button'
-import '@ids-ts/button/dist/main.css'
+import { useEffect, useRef } from 'react'
+import { Close, Document } from '@design-systems/icons'
 import type { TaxControlDocEntry } from '../../data/sourceDocuments'
 import { parseCurrency } from '../../data/sourceDocuments'
 import styles from '../../styles/data-review/TaxControlDocPopover.module.css'
 
+/** One bordered card in the Interest-style Summary flyout. */
+export type SummaryInfoItem = {
+  id: string
+  label: string
+  amount?: number
+  /** When set in `source` mode, card click opens this document. */
+  docId?: string
+  /** Optional body text (info cards / notes). */
+  note?: string
+}
+
+export type SummaryInfoMode = 'source' | 'calc' | 'info'
+
 interface TaxControlDocPopoverProps {
   rowLabel: string
-  docs: TaxControlDocEntry[]
-  /** Saved per-doc values keyed by docId (committed on last Save) */
-  values: Record<string, string>
-  /** Commit draft values to the System / Source docs column */
-  onSave: (values: Record<string, string>) => void
-  /** Navigate to the source document for a specific doc field */
+  mode?: SummaryInfoMode
+  /** Override default subtitle for the mode. */
+  subtitle?: string
+  items: SummaryInfoItem[]
+  /** Footer left label. Omit to hide the footer. */
+  sumLabel?: string
+  /** Footer right amount. Defaults to sum of item amounts when omitted. */
+  sumValue?: number
+  footnote?: string
+  /** Navigate to the source document (source mode only). */
   onNavigateToDoc?: (docId: string) => void
   anchorRect: DOMRect
   onClose: () => void
@@ -23,17 +38,31 @@ function fmt(n: number) {
   return n.toLocaleString()
 }
 
+const DEFAULT_SUBTITLE: Record<SummaryInfoMode, string> = {
+  source: 'Select a source below to open its document.',
+  calc: 'Amounts included in this total.',
+  info: 'About this amount.',
+}
+
+const DEFAULT_SUM_LABEL: Record<SummaryInfoMode, string> = {
+  source: 'Total from sources',
+  calc: 'Total from lines',
+  info: 'Total',
+}
+
 export default function TaxControlDocPopover({
   rowLabel,
-  docs,
-  values,
-  onSave,
+  mode = 'source',
+  subtitle,
+  items,
+  sumLabel,
+  sumValue,
+  footnote,
   onNavigateToDoc,
   anchorRect,
   onClose,
 }: TaxControlDocPopoverProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const [draft, setDraft] = useState<Record<string, string>>(() => ({ ...values }))
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -49,29 +78,28 @@ export default function TaxControlDocPopover({
     return () => document.removeEventListener('keydown', handler)
   }, [onClose])
 
-  const docSums = docs.map(d => parseCurrency(draft[d.docId] ?? ''))
-  const enteredSum = docSums.every(v => v !== null)
-    ? docSums.reduce((a, b) => (a ?? 0) + (b ?? 0), 0)!
-    : null
-  const hasAnyInput = docs.some(d => draft[d.docId]?.trim())
-  const canSave = docs.every(d => parseCurrency(draft[d.docId] ?? '') !== null)
+  const itemsSum = items.reduce((sum, d) => sum + (d.amount ?? 0), 0)
+  const footerValue = sumValue ?? itemsSum
+  const showFooter = sumLabel !== undefined || mode !== 'info' || items.some(i => i.amount !== undefined)
+  const footerLabel = sumLabel ?? DEFAULT_SUM_LABEL[mode]
 
-  const handleSave = () => {
-    if (!canSave) return
-    onSave(draft)
-    onClose()
-  }
-
+  // Prefer right of the (i) icon; flip left if the flyout would overflow.
+  const POP_W = 300
+  const GAP = 12
+  const placeRight = anchorRect.right + GAP + POP_W <= window.innerWidth - 8
   const top = anchorRect.top + anchorRect.height / 2
-  const left = anchorRect.right + 8
+  const left = placeRight
+    ? anchorRect.right + GAP
+    : Math.max(8, anchorRect.left - GAP - POP_W)
+  const beakSide = placeRight ? 'left' : 'right'
 
   return (
     <div
       ref={ref}
-      className={styles.popover}
+      className={`${styles.popover} ${beakSide === 'left' ? styles.popoverBeakLeft : styles.popoverBeakRight}`}
       style={{ position: 'fixed', top, left, transform: 'translateY(-50%)', zIndex: 300 }}
       role="dialog"
-      aria-label={`Source documents for ${rowLabel}`}
+      aria-label={`${rowLabel} details`}
     >
       <div className={styles.header}>
         <span className={styles.title}>{rowLabel}</span>
@@ -80,64 +108,82 @@ export default function TaxControlDocPopover({
         </button>
       </div>
       <p className={styles.subtitle}>
-        Enter each source amount, then Save to update the Source docs column.
+        {subtitle ?? DEFAULT_SUBTITLE[mode]}
       </p>
 
       <div className={styles.docFields}>
-        {docs.map(doc => (
-          <div
-            key={doc.docId}
-            className={styles.docField}
-            onClick={() => onNavigateToDoc?.(doc.docId)}
-          >
-            <label className={styles.docLabel} htmlFor={`tc-${doc.docId}`}>
-              {doc.label}
-            </label>
-            <input
-              id={`tc-${doc.docId}`}
-              className={styles.docInput}
-              type="text"
-              inputMode="numeric"
-              placeholder={doc.hint !== undefined ? `$${fmt(doc.hint)}` : '$0'}
-              value={draft[doc.docId] ?? ''}
-              onChange={e => setDraft(prev => ({ ...prev, [doc.docId]: e.target.value }))}
-              onFocus={() => onNavigateToDoc?.(doc.docId)}
-              aria-label={`${doc.label} amount`}
-            />
-          </div>
-        ))}
+        {items.map(item => {
+          const isSourceNav = mode === 'source' && !!item.docId && !!onNavigateToDoc
+          const amount = item.amount
+          const content = (
+            <>
+              <div className={styles.docRowMain}>
+                <span className={styles.docLabel}>{item.label}</span>
+                {amount !== undefined && (
+                  <span className={styles.docAmount}>${fmt(amount)}</span>
+                )}
+              </div>
+              {item.note && (
+                <p className={styles.itemNote}>{item.note}</p>
+              )}
+              {isSourceNav && (
+                <span className={styles.viewSource}>
+                  <Document size="small" />
+                  View source
+                </span>
+              )}
+            </>
+          )
+
+          if (isSourceNav) {
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className={styles.docRow}
+                onClick={() => onNavigateToDoc?.(item.docId!)}
+                aria-label={`View source document for ${item.label}`}
+              >
+                {content}
+              </button>
+            )
+          }
+
+          return (
+            <div
+              key={item.id}
+              className={`${styles.docRow} ${styles.docRowStatic}`}
+              role="group"
+              aria-label={item.label}
+            >
+              {content}
+            </div>
+          )
+        })}
       </div>
 
-      {hasAnyInput && enteredSum !== null && (
+      {showFooter && (
         <div className={styles.sumRow}>
-          <span className={styles.sumLabel}>Total from sources</span>
-          <span className={styles.sumValue}>${fmt(enteredSum)}</span>
+          <span className={styles.sumLabel}>{footerLabel}</span>
+          <span className={styles.sumValue}>${fmt(footerValue)}</span>
         </div>
       )}
 
-      <div className={styles.actions}>
-        <Button
-          type="button"
-          size="small"
-          priority="secondary"
-          purpose="passive"
-          onClick={onClose}
-        >
-          Cancel
-        </Button>
-        <Button
-          type="button"
-          size="small"
-          priority="primary"
-          purpose="standard"
-          disabled={!canSave}
-          onClick={handleSave}
-        >
-          Save
-        </Button>
-      </div>
+      {footnote && (
+        <p className={styles.footnote}>{footnote}</p>
+      )}
     </div>
   )
+}
+
+/** Map legacy TaxControlDocEntry[] into SummaryInfoItems. */
+export function docsToSummaryItems(docs: TaxControlDocEntry[]): SummaryInfoItem[] {
+  return docs.map(doc => ({
+    id: doc.docId,
+    label: doc.label,
+    amount: doc.hint ?? 0,
+    docId: doc.docId,
+  }))
 }
 
 /** Sum all per-doc inputs for a control row. Returns null if any field is empty. */

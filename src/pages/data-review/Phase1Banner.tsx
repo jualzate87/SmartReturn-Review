@@ -1,4 +1,6 @@
 import { CircleCheck } from '@design-systems/icons'
+import { Button } from '@ids-ts/button'
+import '@ids-ts/button/dist/main.css'
 import intuitAssistIcon from '../../assets/icons/intuit-assist.svg'
 import styles from '../../styles/data-review/Phase1Banner.module.css'
 
@@ -6,15 +8,23 @@ interface Phase1BannerProps {
   resolved: number
   total: number
   complete: boolean
-  /** Kept optional for ProtoC API compatibility — unused in ProtoA (no Phase 2). */
-  onContinue?: () => void
+  /** Whether the CPA has started opening source docs for import review */
+  importsStarted?: boolean
+  /** Begin import review — reveals source documents on the right */
+  onStartImports?: () => void
 }
 
 /**
- * ProtoA — Import accuracy banner. Reflects live import-flag progress.
- * No Phase 2 / AI diagnostics handoff (that's ProtoC-only).
+ * ProtoA — Import accuracy banner. Reflects live import-flag progress and offers
+ * "Start reviewing imports" until the source panel is open. No Phase 2 / AI handoff.
  */
-export default function Phase1Banner({ resolved, total, complete }: Phase1BannerProps) {
+export default function Phase1Banner({
+  resolved,
+  total,
+  complete,
+  importsStarted = false,
+  onStartImports,
+}: Phase1BannerProps) {
   return (
     <div className={`${styles.banner} ${complete ? styles.bannerComplete : ''}`}>
       <div className={styles.left}>
@@ -42,6 +52,17 @@ export default function Phase1Banner({ resolved, total, complete }: Phase1Banner
             <strong className={styles.counterNum}>{resolved}</strong> of {total} flags resolved
           </span>
         )}
+
+        {!complete && !importsStarted && onStartImports && (
+          <Button
+            priority="primary"
+            size="medium"
+            onClick={onStartImports}
+          >
+            Start reviewing imports
+          </Button>
+        )}
+
         {complete && (
           <span className={styles.completeBadge}>
             <CircleCheck size="small" /> All flags resolved
