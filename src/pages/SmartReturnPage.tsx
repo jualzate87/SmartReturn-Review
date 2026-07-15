@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, CircleCheckFill, NewWindow, Flag, Comment, Document, InboxActivity } from '@design-systems/icons'
 import { Button } from '@ids-ts/button'
 import '@ids-ts/button/dist/main.css'
+import { H6, B3 } from '@ids-ts/typography'
+import '@ids-ts/typography/dist/main.css'
 import LeftNavPTO from './data-review/LeftNavPTO'
 import SmartReturnHeader from './SmartReturnHeader'
 import styles from '../styles/SmartReturnPage.module.css'
@@ -56,20 +58,22 @@ export default function SmartReturnPage() {
           {/* Center card */}
           <div className={styles.card}>
             <CircleCheckFill size="large" className={styles.checkIcon} />
-            <h2 className={styles.cardTitle}>The return is ready for review</h2>
-            <p className={styles.cardBody}>
+            <H6 as="h2" weight="regular" className={styles.cardTitle}>
+              The return is ready for review
+            </H6>
+            <B3 as="p" className={styles.cardBody}>
               Your review starts in a <strong>new tab</strong>, showing output forms first
-            </p>
+            </B3>
             <div className={styles.progressBar}>
               <div className={styles.progressFill} />
             </div>
             <Button priority="primary" onClick={handleReviewReturn}>
               Review the return <NewWindow size="small" />
             </Button>
-            <p className={styles.feedback}>
+            <B3 as="p" className={styles.feedback}>
               How was your import?{' '}
-              <button className={styles.feedbackLink}>Share your feedback</button>
-            </p>
+              <button type="button" className={styles.feedbackLink}>Share your feedback</button>
+            </B3>
           </div>
         </div>
 

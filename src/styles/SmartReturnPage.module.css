@@ -1,11 +1,13 @@
 /* SmartReturn Page — body layout only (header in SmartReturnHeader.module.css) */
+/* Use --font-family-* (full stack), not --font-name-* — name tokens are
+   unquoted multi-word values with no generic fallback → browser default serif. */
 
 .page {
   display: flex;
   flex-direction: column;
   height: 100vh;
   background: #ffffff;
-  font-family: var(--font-name-body, 'AvenirNext forINTUIT', sans-serif);
+  font-family: var(--font-family-body);
   overflow: hidden;
 }
 
@@ -37,7 +39,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-family: var(--font-name-body, sans-serif);
+  font-family: var(--font-family-component);
   font-size: 12px;
   font-weight: 600;
   line-height: 16px;
@@ -64,16 +66,14 @@
 }
 
 .cardTitle {
-  font-family: var(--font-name-component, sans-serif);
-  font-size: 20px;
-  font-weight: 400;
+  font-family: var(--font-family-component) !important;
   color: #21262a;
   margin: 0;
   text-align: center;
 }
 
 .cardBody {
-  font-size: 14px;
+  font-family: var(--font-family-body) !important;
   color: #6b6c72;
   margin: 0;
   text-align: center;
@@ -109,16 +109,15 @@
   font-weight: 700;
   cursor: pointer;
   margin-top: 4px;
-  font-family: var(--font-name-body, sans-serif);
+  font-family: var(--font-family-component);
 }
 .reviewBtn:hover { background: #174d87; }
 
 .feedback {
-  font-size: 13px;
+  font-family: var(--font-family-body) !important;
   color: #6b6c72;
   margin: 0;
   text-align: center;
-  font-family: var(--font-name-body, sans-serif);
 }
 
 .feedbackLink {
@@ -126,10 +125,10 @@
   border: none;
   cursor: pointer;
   color: #205ea3;
-  font-size: 13px;
+  font-size: inherit;
   font-weight: 600;
   padding: 0;
-  font-family: var(--font-name-body, sans-serif);
+  font-family: var(--font-family-component);
 }
 .feedbackLink:hover { text-decoration: underline; }
 
@@ -161,7 +160,7 @@
   font-size: 10px;
   line-height: 1.2;
   text-align: center;
-  font-family: var(--font-name-body, sans-serif);
+  font-family: var(--font-family-component);
 }
 .sidebarItem:hover { background: #f4f5f8; color: #393a3d; }
 
