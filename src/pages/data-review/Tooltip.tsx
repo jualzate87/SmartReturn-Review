@@ -25,6 +25,7 @@ export default function Tooltip({ text, children, placement = 'top' }: TooltipPr
       alignment="center"
       delayOpen
       delayOpenDuration={400}
+      preventOverflow={{ padding: 8, altAxis: true }}
       stylePosition={{ zIndex: 10000 }}
     >
       {children}

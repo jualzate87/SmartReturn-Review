@@ -56,7 +56,8 @@ git worktree add -f "$WORKTREE_DIR" gh-pages 2>/dev/null || {
 }
 
 find "$WORKTREE_DIR" -mindepth 1 -maxdepth 1 -not -name '.git' -exec rm -rf {} +
-cp -r "$REPO_ROOT/dist/." "$WORKTREE_DIR/"
+# Copy build output only — never clobber the worktree's .git
+rsync -a --exclude '.git' "$REPO_ROOT/dist/" "$WORKTREE_DIR/"
 cd "$WORKTREE_DIR"
 git add -A
 git commit -m "Deploy $(date -u +%Y-%m-%dT%H:%M:%SZ)" --allow-empty
