@@ -820,6 +820,7 @@ export default function DataReviewPage() {
                 }}
               >
               {activeTopTab !== 'questionnaire' && (
+              <>
               <div style={previewSideBySide
                 ? {
                     flex: `0 0 ${previewHeight}%`,
@@ -861,6 +862,7 @@ export default function DataReviewPage() {
               >
                 <DotsSix size="small" className={`${dragStyles.handleIcon} ${previewSideBySide ? '' : dragStyles.rotated90}`} />
               </div>
+              </>
               )}
 
               {/* Detail fields — switches based on active tab */}
