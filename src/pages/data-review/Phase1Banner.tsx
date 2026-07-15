@@ -7,24 +7,36 @@ import styles from '../../styles/data-review/Phase1Banner.module.css'
 interface Phase1BannerProps {
   resolved: number
   total: number
+  /** All import flags resolved */
+  flagsCleared: boolean
+  /** Count of packet source docs (incl. Questionnaire) not yet mark-reviewed */
+  unreviewedDocCount?: number
+  /** Fully complete: flags cleared AND all packet docs reviewed */
   complete: boolean
   /** Whether the CPA has started opening source docs for import review */
   importsStarted?: boolean
   /** Begin import review — reveals source documents on the right */
   onStartImports?: () => void
+  /** Jump to next source document that still needs a review */
+  onReviewNextDocument?: () => void
 }
 
 /**
- * ProtoA — Import accuracy banner. Reflects live import-flag progress and offers
- * "Start reviewing imports" until the source panel is open. No Phase 2 / AI handoff.
+ * ProtoA — Import accuracy banner. No Phase 2 / AI handoff.
+ * After flags clear, call out unreviewed source documents before import-complete.
  */
 export default function Phase1Banner({
   resolved,
   total,
+  flagsCleared,
+  unreviewedDocCount = 0,
   complete,
   importsStarted = false,
   onStartImports,
+  onReviewNextDocument,
 }: Phase1BannerProps) {
+  const needsDocReview = flagsCleared && unreviewedDocCount > 0 && !complete
+
   return (
     <div className={`${styles.banner} ${complete ? styles.bannerComplete : ''}`}>
       <div className={styles.left}>
@@ -33,7 +45,19 @@ export default function Phase1Banner({
           {complete ? (
             <>
               <span className={styles.title}>Import accuracy confirmed</span>
-              <span className={styles.subtitle}>All flagged fields have been reviewed.</span>
+              <span className={styles.subtitle}>
+                All flagged fields and source documents have been reviewed.
+              </span>
+            </>
+          ) : needsDocReview ? (
+            <>
+              <span className={styles.title}>
+                Flags cleared — {unreviewedDocCount}{' '}
+                {unreviewedDocCount === 1 ? 'document still needs' : 'documents still need'} a review
+              </span>
+              <span className={styles.subtitle}>
+                Open each remaining source document (including Questionnaire) and mark it reviewed.
+              </span>
             </>
           ) : (
             <>
@@ -47,13 +71,13 @@ export default function Phase1Banner({
       </div>
 
       <div className={styles.right}>
-        {!complete && (
+        {!flagsCleared && (
           <span className={styles.counter}>
             <strong className={styles.counterNum}>{resolved}</strong> of {total} flags resolved
           </span>
         )}
 
-        {!complete && !importsStarted && onStartImports && (
+        {!flagsCleared && !importsStarted && onStartImports && (
           <Button
             priority="primary"
             size="medium"
@@ -63,9 +87,15 @@ export default function Phase1Banner({
           </Button>
         )}
 
+        {needsDocReview && onReviewNextDocument && (
+          <Button priority="primary" size="medium" onClick={onReviewNextDocument}>
+            Review next document
+          </Button>
+        )}
+
         {complete && (
           <span className={styles.completeBadge}>
-            <CircleCheck size="small" /> All flags resolved
+            <CircleCheck size="small" /> All documents reviewed
           </span>
         )}
       </div>

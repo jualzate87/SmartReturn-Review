@@ -21,12 +21,15 @@ import type { DivPayer } from './data-review/DetailFieldsDiv'
 import {
   buildTabVerifiedKeys,
   buildTypeReviewed,
+  getNextUnreviewedSourceDoc,
+  getUnreviewedSourceDocs,
   isDocReviewed,
 } from './data-review/docReviewStatus'
 import DetailFields1099R, { R_PAYER_TABS } from './data-review/DetailFields1099R'
 import DetailFieldsNec, { NEC_PAYER_TABS } from './data-review/DetailFieldsNec'
 import PeelTab from './data-review/PeelTab'
 import PriorYear1040Fields from './data-review/PriorYear1040Fields'
+import QuestionnaireResponsesPanel from './data-review/QuestionnaireResponsesPanel'
 import Phase1Banner from './data-review/Phase1Banner'
 import Phase1IssueBanner from './data-review/Phase1IssueBanner'
 import {
@@ -169,6 +172,16 @@ export default function DataReviewPage() {
     intCounts: intPayerFieldCounts,
     rRemaining: tabFlagCounts['1099-rs'] ?? 0,
   })
+  const unreviewedSourceDocs = getUnreviewedSourceDocs({
+    verifiedDocs,
+    w2Counts: w2PayerFieldCounts,
+    divCounts: divPayerFieldCounts,
+    intCounts: intPayerFieldCounts,
+    rRemaining: tabFlagCounts['1099-rs'] ?? 0,
+  })
+  const unreviewedDocCount = unreviewedSourceDocs.length
+  const flagsCleared = phase1Complete
+  const phase1FullyComplete = flagsCleared && unreviewedDocCount === 0
   // ---------------------------------------------------------------------------
 
   const bodyRef = useRef<HTMLDivElement>(null)
@@ -237,6 +250,27 @@ export default function DataReviewPage() {
     if (!next) return
     applyVerifyNavigation(next.field)
   }, [importsStarted, startReviewingImports, reviewedFields, selectedField, applyVerifyNavigation])
+
+  const handleReviewNextDocument = useCallback(() => {
+    if (!importsStarted) startReviewingImports()
+    else ensureSourcePanelVisible()
+    const next = getNextUnreviewedSourceDoc(unreviewedSourceDocs, {
+      tab: activeTopTab,
+      w2SubTab: activeSubTab,
+      divPayer: activeDivPayer,
+      intPayer: activeIntPayer,
+    })
+    if (!next) return
+    setActiveTopTab(next.tab)
+    if (next.w2SubTab) setActiveSubTab(next.w2SubTab)
+    if (next.divPayer) setActiveDivPayer(next.divPayer)
+    if (next.intPayer) setActiveIntPayer(next.intPayer)
+    setSelectedField(null)
+  }, [
+    importsStarted, startReviewingImports, ensureSourcePanelVisible,
+    unreviewedSourceDocs, activeTopTab, activeSubTab, activeDivPayer, activeIntPayer,
+    setActiveTopTab, setActiveSubTab, setActiveDivPayer, setActiveIntPayer, setSelectedField,
+  ])
 
   const handleFieldSelect = useCallback((field: string | null) => {
     setSelectedField(field)
@@ -486,9 +520,12 @@ export default function DataReviewPage() {
       <Phase1Banner
         resolved={phase1Resolved}
         total={phase1Total}
-        complete={phase1Complete}
+        flagsCleared={flagsCleared}
+        unreviewedDocCount={unreviewedDocCount}
+        complete={phase1FullyComplete}
         importsStarted={importsStarted}
         onStartImports={startReviewingImports}
+        onReviewNextDocument={handleReviewNextDocument}
       />
 
       {/* Body — left panel + drag handle + right panel + agent panel */}
@@ -670,8 +707,13 @@ export default function DataReviewPage() {
                   </IconControl>
                 </div>
               </div>
-              {inImportPhase && phase1Remaining > 0 && (
-                <Phase1IssueBanner unresolvedCount={phase1Remaining} onVerify={handleVerifyNext} />
+              {inImportPhase && (phase1Remaining > 0 || (flagsCleared && unreviewedDocCount > 0)) && (
+                <Phase1IssueBanner
+                  unresolvedCount={phase1Remaining}
+                  onVerify={handleVerifyNext}
+                  unreviewedDocCount={unreviewedDocCount}
+                  onReviewNextDocument={handleReviewNextDocument}
+                />
               )}
               <ReviewTab
                 activeTopTab={activeTopTab}
@@ -777,6 +819,7 @@ export default function DataReviewPage() {
                   flexDirection: previewSideBySide ? 'row' : 'column',
                 }}
               >
+              {activeTopTab !== 'questionnaire' && (
               <div style={previewSideBySide
                 ? {
                     flex: `0 0 ${previewHeight}%`,
@@ -818,6 +861,7 @@ export default function DataReviewPage() {
               >
                 <DotsSix size="small" className={`${dragStyles.handleIcon} ${previewSideBySide ? '' : dragStyles.rotated90}`} />
               </div>
+              )}
 
               {/* Detail fields — switches based on active tab */}
               <div style={{ flex: 1, minWidth: 0, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -974,7 +1018,21 @@ export default function DataReviewPage() {
                   onAddFieldNote={(text, context) => handleAddNote(text, context)}
                 />
               )}
-              {activeTopTab === 'prior-1040' && <PriorYear1040Fields onMarkReviewed={handleMarkReviewed} reviewedFields={reviewedFields} onAddFieldNote={(text, context) => handleAddNote(text, context)} />}
+              {activeTopTab === 'prior-1040' && (
+                <PriorYear1040Fields
+                  onMarkReviewed={handleMarkReviewed}
+                  reviewedFields={reviewedFields}
+                  onAddFieldNote={(text, context) => handleAddNote(text, context)}
+                  verifiedDocs={verifiedDocs}
+                  onVerifyDoc={toggleVerifiedDoc}
+                />
+              )}
+              {activeTopTab === 'questionnaire' && (
+                <QuestionnaireResponsesPanel
+                  verifiedDocs={verifiedDocs}
+                  onVerifyDoc={toggleVerifiedDoc}
+                />
+              )}
               </div>
               </div>
             </div>
