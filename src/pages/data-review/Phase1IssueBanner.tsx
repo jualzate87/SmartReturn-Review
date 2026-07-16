@@ -37,7 +37,7 @@ export default function Phase1IssueBanner({
             {unreviewedDocCount === 1 ? 'document left' : 'documents left'} to review
           </span>
           <span className={styles.issueBannerBody}>
-            Flags are cleared. Confirm each remaining source document before you finish import review.
+            Flags are cleared. Reviewing remaining documents is recommended.
           </span>
         </span>
         <button type="button" className={styles.issueBannerPill} onClick={onReviewNextDocument}>

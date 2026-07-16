@@ -9,7 +9,7 @@ interface Phase1BannerProps {
   total: number
   /** All import flags resolved */
   flagsCleared: boolean
-  /** Fully complete: flags cleared AND all packet docs reviewed */
+  /** Soft complete: flags cleared AND all packet docs reviewed */
   complete: boolean
   /** Whether the CPA has started opening source docs for import review */
   importsStarted?: boolean
@@ -20,6 +20,7 @@ interface Phase1BannerProps {
 /**
  * ProtoA — Import accuracy step header. Progress + start/complete state.
  * Remaining-document attention (copy + CTA) lives on Phase1IssueBanner (documents mode).
+ * Document review after flags clear is optional (soft recommendation).
  */
 export default function Phase1Banner({
   resolved,
@@ -31,16 +32,18 @@ export default function Phase1Banner({
 }: Phase1BannerProps) {
   return (
     <div
-      className={[styles.banner, complete ? styles.bannerComplete : ''].filter(Boolean).join(' ')}
+      className={[styles.banner, flagsCleared ? styles.bannerComplete : ''].filter(Boolean).join(' ')}
     >
       <div className={styles.left}>
         <img src={intuitAssistIcon} alt="" className={styles.icon} />
         <div className={styles.text}>
-          {complete ? (
+          {flagsCleared ? (
             <>
               <span className={styles.title}>Import accuracy confirmed</span>
               <span className={styles.subtitle}>
-                All flagged fields and source documents have been reviewed.
+                {complete
+                  ? 'All flagged fields and source documents have been reviewed.'
+                  : 'Flags are cleared. Reviewing remaining documents is recommended.'}
               </span>
             </>
           ) : (
