@@ -616,11 +616,9 @@ export default function DataReviewPage() {
         resolved={phase1Resolved}
         total={phase1Total}
         flagsCleared={flagsCleared}
-        unreviewedDocCount={unreviewedDocCount}
         complete={phase1FullyComplete}
         importsStarted={importsStarted}
         onStartImports={startReviewingImports}
-        onReviewNextDocument={handleReviewNextDocument}
       />
 
       {/* Body — left panel + drag handle + right panel + agent panel */}
@@ -821,8 +819,16 @@ export default function DataReviewPage() {
               </div>
               {inImportPhase && phase1Remaining > 0 && (
                 <Phase1IssueBanner
+                  mode="flags"
                   unresolvedCount={phase1Remaining}
                   onVerify={handleVerifyNext}
+                />
+              )}
+              {inImportPhase && flagsCleared && unreviewedDocCount > 0 && !phase1FullyComplete && (
+                <Phase1IssueBanner
+                  mode="documents"
+                  unreviewedDocCount={unreviewedDocCount}
+                  onReviewNextDocument={handleReviewNextDocument}
                 />
               )}
               <ReviewTab
