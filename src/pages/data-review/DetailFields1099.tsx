@@ -83,9 +83,9 @@ const FORM_DATA: Record<IntPayer, {
     box9_specPrivActivity:'',        // Box 9 — Specified private activity bond interest
     box10_marketDiscount: '',        // Box 10 — Market discount
     box11_bondPremium:    '',        // Box 11 — Bond premium
-    box13_stateTaxId:     'CO-47882103',
+    box13_stateTaxId:     '',
     box14_stateTax:       '',
-    box15_stateIncome:    '1,986',
+    box15_stateIncome:    '',
   },
   harborlineCredit: {
     box1_interest:        '3,200',

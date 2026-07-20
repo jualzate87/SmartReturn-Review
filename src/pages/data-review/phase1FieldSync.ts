@@ -295,3 +295,29 @@ export function countPhase1FlagsForIntPayer(
 ): number {
   return INT_PAYER_FLAG_KEYS[payer].filter(k => !isPhase1FlagResolved(k, reviewedFields)).length
 }
+
+/**
+ * Phase 1 flag keys (and box12 sub-rows) cleared when "Mark as verified" is used
+ * for a given verified-docs key. Single source of truth for verify → clear flags.
+ */
+export function getPhase1FlagKeysForVerifiedDoc(docKey: string): string[] {
+  if (docKey === 'techCircle' || docKey === 'bingEquipment') {
+    const flags = W2_PAYER_FLAG_KEYS[docKey]
+    if (flags.includes('box12')) {
+      return [...flags, ...getBox12SubRowKeys(docKey)]
+    }
+    return [...flags]
+  }
+  if (docKey.startsWith('1099-div-')) {
+    const payer = docKey.slice('1099-div-'.length) as DivPayer
+    return [...(DIV_PAYER_FLAG_KEYS[payer] ?? [])]
+  }
+  if (docKey.startsWith('1099-int-')) {
+    const payer = docKey.slice('1099-int-'.length) as IntPayer
+    return [...(INT_PAYER_FLAG_KEYS[payer] ?? [])]
+  }
+  if (docKey === '1099-r') {
+    return [...R_PAYER_FLAG_KEYS.meridian]
+  }
+  return []
+}

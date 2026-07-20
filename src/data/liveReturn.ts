@@ -50,6 +50,12 @@ export type LiveAmounts = {
     c: { code: string; amount: number }
     d: { code: string; amount: number }
   }
+  /** W-2 Box 13 — Retirement plan checkbox (Tech Circle 401(k)) */
+  box13RetirementPlan: boolean
+  /** W-2 Box 13 — Statutory employee */
+  box13StatutoryEmployee: boolean
+  /** W-2 Box 13 — Third-party sick pay */
+  box13ThirdPartySickPay: boolean
 }
 
 /** Build Spec INITIAL seeds — verification anchors at session start. */
@@ -80,6 +86,10 @@ export const SEED_AMOUNTS: LiveAmounts = {
     c: { code: 'DD', amount: 0 },
     d: { code: '', amount: 0 },
   },
+  // Box 13 matches Tech Circle W-2 / questionnaire (401(k) coverage)
+  box13RetirementPlan: true,
+  box13StatutoryEmployee: false,
+  box13ThirdPartySickPay: false,
 }
 
 /** Source-true NEC Box 1 on the Summit PDF — not seeded onto the return/detail panel. */

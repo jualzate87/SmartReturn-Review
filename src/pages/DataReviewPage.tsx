@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { ArrowLeft, DotsSix, Panel, ChevronLeft, ChevronRight, Comment, PopOut, Close } from '@design-systems/icons'
+import { DotsSix, Panel, ChevronLeft, ChevronRight, Comment, PopOut, Close } from '@design-systems/icons'
 import { useSyncedReviewState } from '../hooks/useSyncedReviewState'
 import { Button } from '@ids-ts/button'
 import '@ids-ts/button/dist/main.css'
@@ -25,10 +25,6 @@ import {
   getUnreviewedSourceDocs,
   isDocReviewed,
 } from './data-review/docReviewStatus'
-import DocReviewTransitionModal, {
-  markDocReviewModalShown,
-  readDocReviewModalShown,
-} from './data-review/DocReviewTransitionModal'
 import DetailFields1099R, { R_PAYER_TABS } from './data-review/DetailFields1099R'
 import DetailFieldsNec, { NEC_PAYER_TABS } from './data-review/DetailFieldsNec'
 import PeelTab from './data-review/PeelTab'
@@ -36,6 +32,7 @@ import PriorYear1040Fields from './data-review/PriorYear1040Fields'
 import QuestionnaireResponsesPanel from './data-review/QuestionnaireResponsesPanel'
 import Phase1Banner from './data-review/Phase1Banner'
 import Phase1IssueBanner from './data-review/Phase1IssueBanner'
+import CoachTip, { markCoachTipShown, readCoachTipShown, type CoachTipId } from './data-review/CoachTip'
 import {
   PHASE1_FLAG_KEYS,
   countPhase1Remaining,
@@ -151,6 +148,8 @@ export default function DataReviewPage() {
   // Summary visible by default; sources hidden until Start reviewing imports
   const [show1040, setShow1040] = useState(true)
   const [importsStarted, setImportsStarted] = useState(false)
+  /** First-run coach tips: hide summary → detach → (popout) dock back */
+  const [coachTip, setCoachTip] = useState<CoachTipId | null>(null)
   /** Explicit left-panel px width during Summary collapse/expand (null = natural flex). */
   const [leftAnimWidth, setLeftAnimWidth] = useState<number | null>(null)
   /** Keep doc|Details side-by-side during Summary toggle so flexDirection doesn't flip mid-motion. */
@@ -194,14 +193,6 @@ export default function DataReviewPage() {
   const unreviewedDocCount = unreviewedSourceDocs.length
   const flagsCleared = phase1Complete
   const phase1FullyComplete = flagsCleared && unreviewedDocCount === 0
-  const [docReviewModalOpen, setDocReviewModalOpen] = useState(false)
-
-  useEffect(() => {
-    if (!(flagsCleared && unreviewedDocCount > 0 && !phase1FullyComplete)) return
-    if (readDocReviewModalShown()) return
-    markDocReviewModalShown()
-    setDocReviewModalOpen(true)
-  }, [flagsCleared, unreviewedDocCount, phase1FullyComplete])
   // ---------------------------------------------------------------------------
 
   const bodyRef = useRef<HTMLDivElement>(null)
@@ -239,6 +230,7 @@ export default function DataReviewPage() {
 
   const startReviewingImports = useCallback(() => {
     setImportsStarted(true)
+    // Keep Summary visible so the Hide Summary coach tip can teach the control
     setShow1040(true)
     const body = bodyRef.current
     const bodyW = body
@@ -253,6 +245,38 @@ export default function DataReviewPage() {
       setTimeout(() => setRightPanelAnimating(false), SOURCE_PANEL_ENTER_MS)
     }))
   }, [])
+
+  const dismissCoachTip = useCallback((id: CoachTipId) => {
+    markCoachTipShown(id)
+    if (id === 'hideSummary' && !readCoachTipShown('detach')) {
+      setCoachTip('detach')
+      return
+    }
+    setCoachTip(null)
+  }, [])
+
+  // Sequence coach tips once sources are open
+  useEffect(() => {
+    if (phase !== 'import' || !importsStarted || !rightPanelVisible || poppedOut) return
+    if (!readCoachTipShown('hideSummary')) {
+      if (show1040) {
+        setCoachTip('hideSummary')
+        return
+      }
+      // Summary already collapsed — skip that tip and move to Detach
+      markCoachTipShown('hideSummary')
+    }
+    if (!readCoachTipShown('detach')) {
+      setCoachTip('detach')
+    }
+  }, [phase, importsStarted, rightPanelVisible, show1040, poppedOut])
+
+  // If Hide Summary collapses while its tip is open, advance the sequence
+  useEffect(() => {
+    if (!show1040 && coachTip === 'hideSummary') {
+      dismissCoachTip('hideSummary')
+    }
+  }, [show1040, coachTip, dismissCoachTip])
 
   const issueField = null
   const highlightMode: 'orange' | 'blue' = 'blue'
@@ -567,11 +591,6 @@ export default function DataReviewPage() {
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <div className={styles.backDivider}>
-            <button className={styles.backButton} aria-label="Back">
-              <ArrowLeft size="medium" />
-            </button>
-          </div>
           <span className={styles.headerTitle}>Data Review - Form 1040</span>
         </div>
         <div className={styles.headerRight}>
@@ -668,15 +687,27 @@ export default function DataReviewPage() {
           }}
         >
           {inImportPhase && show1040 && (rightPanelVisible || notesOpen) && (
-            <Button
-              priority="secondary"
-              size="small"
-              className={styles.form1040HideBtn}
-              onClick={handleHideSummary}
-              aria-label="Hide Summary"
+            <CoachTip
+              open={coachTip === 'hideSummary'}
+              title="Hide the Summary"
+              message="Need more room for source documents? Use Hide Summary to collapse this panel. You can bring it back anytime with Show Summary."
+              onClose={() => dismissCoachTip('hideSummary')}
+              position="bottom"
+              alignment="left"
             >
-              <ChevronLeft size="small" /> Hide Summary
-            </Button>
+              <Button
+                priority="secondary"
+                size="small"
+                className={styles.form1040HideBtn}
+                onClick={() => {
+                  if (coachTip === 'hideSummary') dismissCoachTip('hideSummary')
+                  handleHideSummary()
+                }}
+                aria-label="Hide Summary"
+              >
+                <ChevronLeft size="small" /> Hide Summary
+              </Button>
+            </CoachTip>
           )}
           <LeftPanel1040
             selectedField={selectedField}
@@ -784,30 +815,40 @@ export default function DataReviewPage() {
               <div className={styles.sourcePanelHeader}>
                 <span className={styles.sourcePanelTitle}>Imported documents</span>
                 <div className={styles.sourcePanelActions}>
-                  <IconControl
-                    label="Detach"
-                    labelAlignment="right"
-                    size="small"
-                    aria-label="Detach"
-                    onClick={() => {
-                      setPoppedOut(true)
-                      const popoutWindow = window.open(
-                        `${window.location.origin}${window.location.pathname}#/data-review-popout`,
-                        '_blank',
-                        'width=950,height=900'
-                      )
-                      if (popoutWindow) {
-                        const checkClosed = setInterval(() => {
-                          if (popoutWindow.closed) {
-                            clearInterval(checkClosed)
-                            setPoppedOut(false)
-                          }
-                        }, 500)
-                      }
-                    }}
+                  <CoachTip
+                    open={coachTip === 'detach' && !poppedOut}
+                    title="Detach for a second screen"
+                    message="Open source documents in a separate window so you can put them on another monitor while you work the inputs here."
+                    onClose={() => dismissCoachTip('detach')}
+                    position="bottom"
+                    alignment="right"
                   >
-                    <PopOut size="small" />
-                  </IconControl>
+                    <IconControl
+                      label="Detach"
+                      labelAlignment="right"
+                      size="small"
+                      aria-label="Detach — open source documents on another screen"
+                      onClick={() => {
+                        if (coachTip === 'detach') dismissCoachTip('detach')
+                        setPoppedOut(true)
+                        const popoutWindow = window.open(
+                          `${window.location.origin}${window.location.pathname}#/data-review-popout`,
+                          '_blank',
+                          'width=950,height=900'
+                        )
+                        if (popoutWindow) {
+                          const checkClosed = setInterval(() => {
+                            if (popoutWindow.closed) {
+                              clearInterval(checkClosed)
+                              setPoppedOut(false)
+                            }
+                          }, 500)
+                        }
+                      }}
+                    >
+                      <PopOut size="small" />
+                    </IconControl>
+                  </CoachTip>
                   <IconControl
                     size="small"
                     aria-label="Close"
@@ -1022,6 +1063,25 @@ export default function DataReviewPage() {
                     markEdited(kind === 'ssn' ? 'ssn-techCircle' : 'ein-techCircle')
                   }}
                   identityValues={{ ssn: amounts.employeeSsn, ein: amounts.employerEin }}
+                  box13={{
+                    retirementPlan: amounts.box13RetirementPlan,
+                    statutoryEmployee: amounts.box13StatutoryEmployee,
+                    thirdPartySickPay: amounts.box13ThirdPartySickPay,
+                  }}
+                  onBox13Change={patch => {
+                    updateAmounts({
+                      ...(patch.retirementPlan !== undefined
+                        ? { box13RetirementPlan: patch.retirementPlan }
+                        : {}),
+                      ...(patch.statutoryEmployee !== undefined
+                        ? { box13StatutoryEmployee: patch.statutoryEmployee }
+                        : {}),
+                      ...(patch.thirdPartySickPay !== undefined
+                        ? { box13ThirdPartySickPay: patch.thirdPartySickPay }
+                        : {}),
+                    })
+                    markEdited('box13')
+                  }}
                   onMarkReviewed={handleMarkReviewed}
                   onMarkReviewedBulk={handleMarkReviewedBulk}
                   reviewedFields={reviewedFields}
@@ -1169,12 +1229,6 @@ export default function DataReviewPage() {
           closing={notesClosing}
         />
       )}
-
-      <DocReviewTransitionModal
-        open={docReviewModalOpen}
-        onClose={() => setDocReviewModalOpen(false)}
-        onReviewNextDocument={handleReviewNextDocument}
-      />
     </div>
   )
 }
