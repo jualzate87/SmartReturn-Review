@@ -11,7 +11,7 @@ import { getTaxControlBreakdown } from '../../data/taxControlBreakdowns'
 import { getFieldLiveCurrent, getFieldOrigin } from '../../data/fieldOrigins'
 import type { FieldOriginSource } from '../../data/fieldOrigins'
 import type { LiveAmounts } from '../../data/liveReturn'
-import { SEED_AMOUNTS } from '../../data/liveReturn'
+import { SAFE_HARBOR_2210, SEED_AMOUNTS } from '../../data/liveReturn'
 import Tooltip from './Tooltip'
 import { TAX_CONTROL_ROWS, getControlSystemValues, type TaxControlDocEntry } from '../../data/sourceDocuments'
 import type { LiveReturnTotals } from '../../data/liveReturn'
@@ -21,7 +21,13 @@ import {
   formatActivityMeta,
   type ActivityEntry,
 } from '../../hooks/useSyncedReviewState'
+import { PRIOR_YEAR_1040_VALUES, buildYoyMap, yoyPercent } from './priorYear1040Data'
+import OutputFormViews from './OutputFormViews'
+import { OUTPUT_FORM_OPTIONS, type OutputFormId } from './outputForms'
+import CoachTip from './CoachTip'
 import styles from '../../styles/data-review/LeftPanel1040.module.css'
+
+const PRIOR_YEAR = PRIOR_YEAR_1040_VALUES
 
 /** Tooltip body with optional who/when meta line */
 function activityTooltip(primary: string, entry?: ActivityEntry | null): string {
@@ -76,11 +82,20 @@ interface LeftPanel1040Props {
   editedFields?: Set<string>
   /** Called when user posts a comment from a 1040 field */
   onAddFieldNote?: (text: string, context: string) => void
+  /** Controlled output form / summary selection (Summary, 1040, Sch C, …) */
+  outputFormId?: OutputFormId
+  onOutputFormChange?: (id: OutputFormId) => void
+  /** One-shot nudge to review output forms after import review is complete */
+  outputFormsNudgeOpen?: boolean
+  onDismissOutputFormsNudge?: () => void
 }
 
-import { PRIOR_YEAR_1040_VALUES, buildYoyMap, yoyPercent } from './priorYear1040Data'
-
-const PRIOR_YEAR = PRIOR_YEAR_1040_VALUES
+/** Short hover copy for Summary (i) icons — click still opens the detail popover. */
+function summaryInfoDiscoveryTooltip(kind: 'calc' | 'source'): string {
+  return kind === 'calc'
+    ? 'Explore how this amount is calculated from underlying lines.'
+    : 'Explore which source documents feed this line.'
+}
 
 // Threshold: >=15% change AND >$300 estimated tax impact
 function _meetsRowTintThreshold(field: string, yoy: Record<string, number>): boolean {
@@ -135,6 +150,10 @@ export default function LeftPanel1040({
   liveAmounts = SEED_AMOUNTS,
   editedFields: _editedFields = new Set(),
   onAddFieldNote,
+  outputFormId: controlledOutputFormId,
+  onOutputFormChange,
+  outputFormsNudgeOpen = false,
+  onDismissOutputFormsNudge,
 }: LeftPanel1040Props) {
   // Detail-field keys may differ from 1040 row keys (e.g. fedTaxWithheld ↔ withholding).
   const activeHighlight = highlightField ?? selectedField
@@ -153,9 +172,15 @@ export default function LeftPanel1040({
   const capitalGain         = liveTotals?.capitalGain ?? 0
   const totalIncome         = liveTotals?.totalIncome ?? (wages1040 + taxableInterest1040 + ordinaryDivs + taxablePension + capitalGain + otherIncome)
   const stdDeduction        = liveTotals?.stdDeduction ?? 15_750
-  const taxableIncome       = liveTotals?.taxableIncome ?? (totalIncome - stdDeduction)
-  const totalTax            = liveTotals?.totalTax ?? 149_830
-  const incomeTax           = totalTax
+  const itemizedDeduction   = liveTotals?.itemizedDeduction ?? 0
+  const deductionTaken      = liveTotals?.deductionTaken ?? stdDeduction
+  const deductionMethod     = liveTotals?.deductionMethod ?? 'standard'
+  const taxableIncome       = liveTotals?.taxableIncome ?? (totalIncome - deductionTaken)
+  const incomeTaxBase       = liveTotals?.incomeTax ?? 149_830
+  const seTax               = liveTotals?.seTax ?? 0
+  const niitTax             = liveTotals?.niitTax ?? 0
+  const totalTax            = liveTotals?.totalTax ?? (incomeTaxBase + seTax + niitTax)
+  const incomeTax           = incomeTaxBase
   const estimatedPayments   = 0
   const oweAmount           = liveTotals?.oweAmount ?? Math.max(0, totalTax - withholding1040)
   const displaySsn          = liveTotals?.employeeSsn?.trim()
@@ -173,7 +198,13 @@ export default function LeftPanel1040({
     capitalGain,
     totalIncome,
     stdDeduction,
+    itemizedDeduction,
+    deductionTaken,
+    deductionMethod,
     taxableIncome,
+    incomeTax: incomeTaxBase,
+    seTax,
+    niitTax,
     totalTax,
     w2Withholding,
     divWithholding: withholding1099,
@@ -183,8 +214,16 @@ export default function LeftPanel1040({
     totalPayments: withholding1040,
     oweAmount,
     necOnReturn,
+    schCGross: otherIncome,
+    schCExpenses: 0,
+    schCNetProfit: otherIncome,
+    schedule1BusinessIncome: otherIncome,
+    netInvestmentIncome: taxableInterest1040 + ordinaryDivs + capitalGain,
+    requiredAnnualPayment: SAFE_HARBOR_2210,
+    underpaymentAmount: Math.max(0, SAFE_HARBOR_2210 - withholding1040),
     employeeSsn: displaySsn,
     employerEin: '',
+    box13RetirementPlan: true,
   }
 
   const fieldHasPopover = (field: string) =>
@@ -251,7 +290,14 @@ export default function LeftPanel1040({
   })
 
   // View toggle: Summary (default) | Form
-  const [view, setView] = useState<'form' | 'table'>('table')
+  const [internalOutputFormId, setInternalOutputFormId] = useState<OutputFormId>('summary')
+  const outputFormId = controlledOutputFormId ?? internalOutputFormId
+  const setOutputFormId = (id: OutputFormId) => {
+    onOutputFormChange?.(id)
+    if (controlledOutputFormId === undefined) setInternalOutputFormId(id)
+    if (outputFormsNudgeOpen) onDismissOutputFormsNudge?.()
+  }
+  const view: 'table' | 'form' = outputFormId === 'summary' ? 'table' : 'form'
   // Table view: which categories are expanded
   const [expanded, setExpanded] = useState<Set<string>>(new Set(['income', 'deductions', 'tax', 'payments']))
   /** Unified Summary info flyout — Interest-style chrome for source / calc / note */
@@ -766,7 +812,7 @@ export default function LeftPanel1040({
       totalField: 'taxableIncome', totalCurr: taxableIncome,
       rows: [
         // AGI (Line 11) omitted — equals Income total shown in section header above
-        { line: '12', label: 'Standard deduction',  sub: 'From Schedule A', field: 'stdDeduction', curr: stdDeduction,  kind: 'calc' as const },
+        { line: '12', label: deductionMethod === 'itemized' ? 'Itemized deductions' : 'Standard deduction',  sub: deductionMethod === 'itemized' ? 'From Schedule A' : 'Single filer', field: 'stdDeduction', curr: deductionTaken,  kind: 'calc' as const },
         // Taxable income (Line 15) omitted — same value as this section header total
       ],
     },
@@ -790,22 +836,35 @@ export default function LeftPanel1040({
   return (
     <div className={styles.leftPanel}>
 
-      {/* ── View toggle ── */}
+      {/* ── Output form navigator ── */}
       <div className={styles.viewToggle}>
-        <div className={styles.viewTogglePill} role="tablist">
-          <button
-            role="tab"
-            aria-selected={view === 'table'}
-            className={`${styles.viewToggleTab} ${view === 'table' ? styles.viewToggleTabActive : ''}`}
-            onClick={() => setView('table')}
-          >Summary</button>
-          <button
-            role="tab"
-            aria-selected={view === 'form'}
-            className={`${styles.viewToggleTab} ${view === 'form' ? styles.viewToggleTabActive : ''}`}
-            onClick={() => setView('form')}
-          >Form</button>
-        </div>
+        <CoachTip
+          open={outputFormsNudgeOpen}
+          title="Review output forms"
+          message="Import review is complete. Use this menu to open Form 1040, Schedule C, Form 8960, and other output forms."
+          onClose={() => onDismissOutputFormsNudge?.()}
+          position="bottom"
+          alignment="left"
+        >
+          <div className={styles.formNavWrap}>
+            <label className={styles.formNavLabel} htmlFor="output-form-select">
+              View
+            </label>
+            <select
+              id="output-form-select"
+              className={styles.formNavSelect}
+              value={outputFormId}
+              onChange={e => setOutputFormId(e.target.value as OutputFormId)}
+              aria-label="Select return form or schedule"
+            >
+              {OUTPUT_FORM_OPTIONS.map(opt => (
+                <option key={opt.id} value={opt.id}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </CoachTip>
       </div>
 
       {/* ── SUMMARY TABLE VIEW — Figma ProConnect style ── */}
@@ -869,7 +928,7 @@ export default function LeftPanel1040({
                               <span className={styles.summaryCurrValText}>${fmt(cat.totalCurr)}</span>
                               {totalHasBreakdown && (
                                 <Tooltip
-                                  text="View subtotals"
+                                  text={summaryInfoDiscoveryTooltip('calc')}
                                   placement="top"
                                   disabled={summaryFlyout?.field === cat.totalField}
                                 >
@@ -980,7 +1039,7 @@ export default function LeftPanel1040({
                               </span>
                               {hasPopover && (
                                 <Tooltip
-                                  text={row.kind === 'calc' ? 'View subtotals' : 'View sources'}
+                                  text={summaryInfoDiscoveryTooltip(row.kind === 'calc' ? 'calc' : 'source')}
                                   placement="top"
                                   disabled={summaryFlyout?.field === row.field}
                                 >
@@ -1111,7 +1170,7 @@ export default function LeftPanel1040({
                   <div className={styles.summaryCurrVal} style={{ width: 108 }}>
                     <span className={`${styles.summaryCurrValText} ${styles.summaryOweAmt}`}>${fmt(oweAmount)}</span>
                     <Tooltip
-                      text="View subtotals"
+                      text={summaryInfoDiscoveryTooltip('calc')}
                       placement="top"
                       disabled={summaryFlyout?.field === 'amountOwed'}
                     >
@@ -1182,6 +1241,13 @@ export default function LeftPanel1040({
       )}
 
       <div className={styles.documentViewer} style={{ display: view === 'table' ? 'none' : undefined }}>
+        {outputFormId !== 'summary' && outputFormId !== '1040' ? (
+          <OutputFormViews
+            formId={outputFormId}
+            live={originTotals}
+            amounts={liveAmounts}
+          />
+        ) : (
         <div className={styles.formDoc}>
 
           {/* ── IRS Header ── */}
@@ -1288,8 +1354,8 @@ export default function LeftPanel1040({
               <Row field="agi"             line="11" label="Adjusted gross income"                                         kind="calc"   value={totalIncome} bold shaded />
 
               <Section title="Deductions" />
-              <Row field="stdDeduction"    line="12" label="Standard deduction or itemized deductions (from Schedule A)"  kind="calc"   value={stdDeduction} />
-              <Row field="deductionSum"    line="14" label="Add lines 12 and 13"                                           kind="calc"   value={stdDeduction} />
+              <Row field="stdDeduction"    line="12" label="Standard deduction or itemized deductions (from Schedule A)"  kind="calc"   value={deductionTaken} />
+              <Row field="deductionSum"    line="14" label="Add lines 12 and 13"                                           kind="calc"   value={deductionTaken} />
 
               <Divider />
               <Row field="taxableIncome"   line="15" label="Taxable income"                                                kind="calc"   value={taxableIncome} bold shaded />
@@ -1312,6 +1378,7 @@ export default function LeftPanel1040({
           </table>
 
         </div>
+        )}
       </div>
 
       {/* ── Field popover — fixed-positioned so it escapes overflow:hidden ── */}

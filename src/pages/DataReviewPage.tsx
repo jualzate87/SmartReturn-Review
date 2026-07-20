@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { DotsSix, Panel, ChevronLeft, ChevronRight, Comment, PopOut, Close } from '@design-systems/icons'
+import { DotsSix, Panel, ChevronLeft, ChevronRight, Comment, Close } from '@design-systems/icons'
 import { useSyncedReviewState } from '../hooks/useSyncedReviewState'
 import { Button } from '@ids-ts/button'
 import '@ids-ts/button/dist/main.css'
@@ -32,6 +32,7 @@ import PriorYear1040Fields from './data-review/PriorYear1040Fields'
 import QuestionnaireResponsesPanel from './data-review/QuestionnaireResponsesPanel'
 import Phase1Banner from './data-review/Phase1Banner'
 import Phase1IssueBanner from './data-review/Phase1IssueBanner'
+import type { OutputFormId } from './data-review/outputForms'
 import CoachTip, { markCoachTipShown, readCoachTipShown, type CoachTipId } from './data-review/CoachTip'
 import {
   PHASE1_FLAG_KEYS,
@@ -78,11 +79,13 @@ const SUMMARY_TOGGLE_MS = 500
 const SHOW_SUMMARY_HANDLE_WIDTH = 44
 /** Soft floor for Summary when dragging the splitter — layout uses min-width:0
  *  so Summary + Sources always fit the viewport (no page horizontal scroll). */
-const LEFT_PANEL_MIN_WIDTH = 320
+const LEFT_PANEL_MIN_WIDTH = 720
 /** Absolute min Sources width when both panels are open */
 const RIGHT_PANEL_MIN_WIDTH = 360
 /** Matches DragHandle.module.css .handleVertical width */
 const PANEL_DRAG_HANDLE_WIDTH = 16
+
+const OUTPUT_FORMS_NUDGE_KEY = 'protoa-output-forms-nudge'
 
 export default function DataReviewPage() {
   // Source-doc review state — flags, reviewed fields, active tab, editable field
@@ -133,8 +136,6 @@ export default function DataReviewPage() {
   const [panelResizing, setPanelResizing] = useState(false)
   // Top/bottom section height ratio in right panel (0-100, where value = preview percentage)
   const [previewHeight, setPreviewHeight] = useState(40)
-  // Whether right panel is popped out
-  const [poppedOut, setPoppedOut] = useState(false)
   // Whether the right document panel is visible — hidden until "Start reviewing imports"
   const [rightPanelVisible, setRightPanelVisible] = useState(false)
   // Whether the right panel is animating out (slide-out before display:none)
@@ -150,8 +151,10 @@ export default function DataReviewPage() {
   const phase = 'import' as const
   // Summary visible by default; sources hidden until Start reviewing imports
   const [show1040, setShow1040] = useState(true)
+  const [outputFormId, setOutputFormId] = useState<OutputFormId>('summary')
   const [importsStarted, setImportsStarted] = useState(false)
-  /** First-run coach tips: hide summary → detach → (popout) dock back */
+  const [outputFormsNudgeOpen, setOutputFormsNudgeOpen] = useState(false)
+  /** First-run coach tip: hide summary */
   const [coachTip, setCoachTip] = useState<CoachTipId | null>(null)
   /** Explicit left-panel px width during Summary collapse/expand (null = natural flex). */
   const [leftAnimWidth, setLeftAnimWidth] = useState<number | null>(null)
@@ -240,8 +243,8 @@ export default function DataReviewPage() {
       ? (body.clientWidth || body.getBoundingClientRect().width)
       : window.innerWidth
     setBodyWidth(bodyW)
-    // ~65% of body → sourcesPanelWide (>0.6) → auto side-by-side on open;
-    // clamp so Summary still fits when both panels are open.
+    // ~65% of body for Sources; Details stays full-width of Sources while
+    // Summary is open (stacked). Clamp so Summary still fits beside Sources.
     const preferred = Math.round(bodyW * 0.65)
     const preferredMax = bodyW - LEFT_PANEL_MIN_WIDTH - PANEL_DRAG_HANDLE_WIDTH
     const hardMax = Math.max(RIGHT_PANEL_MIN_WIDTH, bodyW - PANEL_DRAG_HANDLE_WIDTH)
@@ -256,28 +259,28 @@ export default function DataReviewPage() {
 
   const dismissCoachTip = useCallback((id: CoachTipId) => {
     markCoachTipShown(id)
-    if (id === 'hideSummary' && !readCoachTipShown('detach')) {
-      setCoachTip('detach')
-      return
-    }
     setCoachTip(null)
   }, [])
 
-  // Sequence coach tips once sources are open
+  // Sequence hide-summary coach tip once sources are open
   useEffect(() => {
-    if (phase !== 'import' || !importsStarted || !rightPanelVisible || poppedOut) return
-    if (!readCoachTipShown('hideSummary')) {
-      if (show1040) {
-        setCoachTip('hideSummary')
-        return
-      }
-      // Summary already collapsed — skip that tip and move to Detach
-      markCoachTipShown('hideSummary')
+    if (phase !== 'import' || !importsStarted || !rightPanelVisible) return
+    if (!readCoachTipShown('hideSummary') && show1040) {
+      setCoachTip('hideSummary')
     }
-    if (!readCoachTipShown('detach')) {
-      setCoachTip('detach')
-    }
-  }, [phase, importsStarted, rightPanelVisible, show1040, poppedOut])
+  }, [phase, importsStarted, rightPanelVisible, show1040])
+
+  // One-shot nudge to review output forms after import review is fully complete
+  useEffect(() => {
+    if (!phase1FullyComplete) return
+    if (sessionStorage.getItem(OUTPUT_FORMS_NUDGE_KEY)) return
+    setOutputFormsNudgeOpen(true)
+  }, [phase1FullyComplete])
+
+  const dismissOutputFormsNudge = useCallback(() => {
+    sessionStorage.setItem(OUTPUT_FORMS_NUDGE_KEY, '1')
+    setOutputFormsNudgeOpen(false)
+  }, [])
 
   // If Hide Summary collapses while its tip is open, advance the sequence
   useEffect(() => {
@@ -501,19 +504,12 @@ export default function DataReviewPage() {
     setRightPanelWidth((w) => Math.min(w, maxRight))
   }, [bodyWidth, rightPanelVisible])
 
-  // Side-by-side (doc LEFT / Details RIGHT) when:
-  //   1. Hide Summary (!show1040), OR
-  //   2. Sources (right) panel is >60% of review body width
-  // Stacked (preview TOP / Details BOTTOM) when Summary is visible AND
-  // Sources panel is ≤60% of body. Uses measured body.clientWidth.
-  // Do NOT use previewHeight.
-  // Equivalent: sideBySide = !show1040 || (sourcesOpen && rightPanelWidth / bodyClientWidth > 0.6)
-  const sourcesPanelWide =
-    rightPanelVisible &&
-    !rightPanelExiting &&
-    bodyWidth > 0 &&
-    rightPanelWidth / bodyWidth > 0.6
-  const previewSideBySide = freezePreviewSideBySide || !show1040 || sourcesPanelWide
+  // Side-by-side (doc | Details) only when Summary is hidden — Sources then has
+  // the full body width. When both Summary + Sources are open, always stack
+  // (preview TOP / Details BOTTOM) so the Details form keeps the full Sources
+  // column width and never needs horizontal page scroll to stay readable.
+  // freezePreviewSideBySide holds orientation steady during Hide/Show Summary.
+  const previewSideBySide = freezePreviewSideBySide || !show1040
 
   // Resize drag between the document preview and detail fields. Axis is frozen
   // for the gesture (matches flexDirection at pointer-down). previewHeight
@@ -749,6 +745,10 @@ export default function DataReviewPage() {
             liveTotals={liveTotals}
             liveAmounts={amounts}
             editedFields={editedFields}
+            outputFormId={outputFormId}
+            onOutputFormChange={setOutputFormId}
+            outputFormsNudgeOpen={outputFormsNudgeOpen}
+            onDismissOutputFormsNudge={dismissOutputFormsNudge}
             onAddFieldNote={(text, context) => handleAddNote(text, context)}
             onNavigateToSourceDoc={handleNavigateToSourceDoc}
             onNavigateSource={handleNavigateSource}
@@ -789,8 +789,7 @@ export default function DataReviewPage() {
           />
         </div>
 
-        {!poppedOut && (
-          <>
+        <>
             {/* Left/right drag handle — stays mounted and collapses width with Summary
                 so the gutter doesn't pop out of the row mid-animation. */}
             {rightPanelVisible && !rightPanelExiting && (
@@ -825,49 +824,16 @@ export default function DataReviewPage() {
                 flex: (rightPanelFills && rightPanelVisible)
                   ? '1 1 0%'
                   : '0 0 auto',
+                minWidth: 0,
                 overflow: 'hidden',
                 opacity: (!rightPanelVisible && !rightPanelExiting) ? 0 : 1,
                 transition: panelResizing ? 'none' : undefined,
               }}
             >
-              {/* Source panel header — title left; Detach + Close on right */}
+              {/* Source panel header — title left; Close on right */}
               <div className={styles.sourcePanelHeader}>
                 <span className={styles.sourcePanelTitle}>Imported documents</span>
                 <div className={styles.sourcePanelActions}>
-                  <CoachTip
-                    open={coachTip === 'detach' && !poppedOut}
-                    title="Detach for a second screen"
-                    message="Open source documents in a separate window so you can put them on another monitor while you work the inputs here."
-                    onClose={() => dismissCoachTip('detach')}
-                    position="bottom"
-                    alignment="right"
-                  >
-                    <IconControl
-                      label="Detach"
-                      labelAlignment="right"
-                      size="small"
-                      aria-label="Detach — open source documents on another screen"
-                      onClick={() => {
-                        if (coachTip === 'detach') dismissCoachTip('detach')
-                        setPoppedOut(true)
-                        const popoutWindow = window.open(
-                          `${window.location.origin}${window.location.pathname}#/data-review-popout`,
-                          '_blank',
-                          'width=950,height=900'
-                        )
-                        if (popoutWindow) {
-                          const checkClosed = setInterval(() => {
-                            if (popoutWindow.closed) {
-                              clearInterval(checkClosed)
-                              setPoppedOut(false)
-                            }
-                          }, 500)
-                        }
-                      }}
-                    >
-                      <PopOut size="small" />
-                    </IconControl>
-                  </CoachTip>
                   <IconControl
                     size="small"
                     aria-label="Close"
@@ -1234,8 +1200,7 @@ export default function DataReviewPage() {
               </div>
             </div>
 
-          </>
-        )}
+        </>
       </div>
 
       {/* Notes / Comments pane — page-level overlay */}
