@@ -781,10 +781,14 @@
 /* ── Summary view ── */
 .summaryWrapper {
   flex: 1;
-  overflow-x: auto;
+  min-width: 0;
   overflow-y: auto;
+  /* No horizontal page/panel scroll — columns compress via @container rules */
+  overflow-x: hidden;
   padding: 40px 32px 32px;
   background: #f4f6f8;
+  container-type: inline-size;
+  container-name: summary;
 }
 
 .controlWrapper {
@@ -800,8 +804,9 @@
   border: 1px solid #eef0f3;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(28,32,42,0.06), 0 1px 2px rgba(28,32,42,0.03);
-  /* Keep value columns readable when Summary shares space with Sources */
-  min-width: 860px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
   /* visible so row-action tooltips aren’t clipped before the portal paints */
   overflow: visible;
 }
@@ -1588,3 +1593,29 @@
 /* Change indicators (kept for badge reuse) */
 .tvPos { color: #287f39; }
 .tvNeg { color: #955d2b; }
+
+/*
+ * When the Summary panel is narrower than 949px, keep ≥20px between the label
+ * column and CURRENT YEAR, and compress other value-column gaps to 20px so
+ * columns never overlap and the panel never needs horizontal scroll.
+ */
+@container summary (max-width: 948px) {
+  .summaryColHeaders,
+  .summarySectionRow,
+  .summarySubRow {
+    gap: 20px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .summarySubRow {
+    padding-left: 36px; /* keep indent, tighter side padding */
+  }
+  .summaryColValues,
+  .summaryRowRight {
+    gap: 20px;
+  }
+  .summaryCardHeader {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}

@@ -59,7 +59,8 @@ const PAYER_DATA: Record<IntPayer, { ein: string; name: string; street: string; 
 }
 
 const RECIPIENT_DATA = {
-  ssn: 'XXX-XX-4321',
+  // Full SSN visible during import accuracy review so preparers can verify against source
+  ssn: '987-65-4321',
   ...CLIENT_ADDRESS,
 }
 
@@ -135,6 +136,10 @@ interface DetailFields1099Props {
   reviewedFields?: Map<string, { by: string; at: string }>
   editedFields?: Set<string>
   editedFieldsMeta?: Map<string, { by: string; at: string }>
+  /** Persisted static field values (payer/recipient info, box amounts as text) */
+  fieldOverrides?: Record<string, string>
+  /** Persist a static field edit (also stamps Edited badge) */
+  onFieldOverride?: (fieldKey: string, value: string) => void
   verifiedDocs?: Set<string>
   verifiedDocsMeta?: Map<string, { by: string; at: string }>
   onVerifyDoc?: (docKey: string) => void
@@ -156,6 +161,8 @@ export default function DetailFields1099({
   reviewedFields,
   editedFields: syncedEditedFields,
   editedFieldsMeta,
+  fieldOverrides = {},
+  onFieldOverride,
   verifiedDocs,
   verifiedDocsMeta,
   onVerifyDoc,
@@ -165,11 +172,9 @@ export default function DetailFields1099({
   const highlightedRef = useRef<HTMLDivElement>(null)
   const [editingField, setEditingField] = useState<string | null>(null)
   const [draftValue, setDraftValue] = useState('')
+  const [originalValue, setOriginalValue] = useState('')
   const [savedField, setSavedField] = useState<string | null>(null)
   const [localEdited, setLocalEdited] = useState<Set<string>>(new Set())
-  // Local overrides for fields edited by the preparer (payer/recipient info, boxes 2-15) —
-  // per-payer Box 1 interest also updates live amounts for 1040 recalculation
-  const [staticValues, setStaticValues] = useState<Record<string, string>>({})
   const isEdited = (key: string) => syncedEditedFields?.has(key) || localEdited.has(key)
   const editMetaText = (key: string) => {
     const m = editedFieldsMeta?.get(key)
@@ -196,20 +201,24 @@ export default function DetailFields1099({
     const clean = currentValue.replace(/,/g, '')
     setEditingField(field)
     setDraftValue(clean)
+    setOriginalValue(clean)
   }
 
   const commitEdit = (field: 'taxableInterest') => {
-    const num = parseFloat(draftValue.replace(/,/g, '')) || 0
-    onFieldValueChange?.(field, num)
-    onAmountChange?.({ interestUnwavering: num }, 'taxableInterest')
+    if (editingField !== field) return
+    if (draftValue !== originalValue) {
+      const num = parseFloat(draftValue.replace(/,/g, '')) || 0
+      onFieldValueChange?.(field, num)
+      onAmountChange?.({ interestUnwavering: num }, 'taxableInterest')
+      setLocalEdited(prev => new Set(prev).add(field))
+      setSavedField(field)
+      setTimeout(() => setSavedField(null), 3500)
+      onMarkReviewed?.(field)
+    }
     setEditingField(null)
-    setLocalEdited(prev => new Set(prev).add(field))
-    setSavedField(field)
-    setTimeout(() => setSavedField(null), 3500)
-    onMarkReviewed?.(field)
   }
 
-  const cancelEdit = () => { setEditingField(null); setDraftValue('') }
+  const cancelEdit = () => { setEditingField(null); setDraftValue(''); setOriginalValue('') }
 
   // Close popover on outside click
   useEffect(() => {
@@ -313,7 +322,15 @@ export default function DetailFields1099({
 
   // Editable row with hover-revealed Edit + Mark as correct + Comment — same pattern as
   // the W-2 panel's renderStaticRow. Per-payer Box 1 interest also updates live amounts.
-  const renderReadOnlyRow = (fieldKey: string, label: string, defaultValue: string, inputClass = styles.fieldInputSmall, placeholder?: string) => {
+  const renderReadOnlyRow = (
+    fieldKey: string,
+    label: string,
+    defaultValue: string,
+    inputClass = styles.fieldInputSmall,
+    placeholder?: string,
+    /** Phase 1 flag key — when set, drives orange attention styling until resolved */
+    flagKey?: string,
+  ) => {
     const syncedInterest =
       amounts && fieldKey.startsWith('taxableInterest-')
         ? activePayer === 'harborlineCredit'
@@ -322,47 +339,61 @@ export default function DetailFields1099({
             ? amounts.interestCascade.toLocaleString()
             : null
         : null
-    const currentVal = syncedInterest ?? staticValues[fieldKey] ?? defaultValue
+    const currentVal = syncedInterest ?? fieldOverrides[fieldKey] ?? defaultValue
     const isEditing = editingField === fieldKey
     const isReviewed = reviewedFields?.has(fieldKey)
     const isCommentOpen = commentField === fieldKey
     const isSelected = selectedField === fieldKey
+    const flagUnresolved = !!(flagKey && flaggedFields[flagKey] && !reviewedFields?.has(flagKey))
     const flowsTo1040 = fieldKey.startsWith('taxableInterest-') || fieldKey.startsWith('taxExempt-')
     const commitStatic = () => {
-      setStaticValues(prev => ({ ...prev, [fieldKey]: draftValue }))
-      setEditingField(null)
-      setLocalEdited(prev => new Set(prev).add(fieldKey))
-      setSavedField(fieldKey)
-      setTimeout(() => setSavedField(null), 3500)
-      const num = parseAmountDraft(draftValue)
-      if (fieldKey.startsWith('taxableInterest-')) {
-        if (activePayer === 'harborlineCredit') onAmountChange?.({ interestHarborline: num }, fieldKey)
-        else if (activePayer === 'cascadeFederal') onAmountChange?.({ interestCascade: num }, fieldKey)
+      if (editingField !== fieldKey) return
+      if (draftValue !== originalValue) {
+        onFieldOverride?.(fieldKey, draftValue)
+        setLocalEdited(prev => new Set(prev).add(fieldKey))
+        setSavedField(fieldKey)
+        setTimeout(() => setSavedField(null), 3500)
+        const num = parseAmountDraft(draftValue)
+        if (fieldKey.startsWith('taxableInterest-')) {
+          if (activePayer === 'harborlineCredit') onAmountChange?.({ interestHarborline: num }, fieldKey)
+          else if (activePayer === 'cascadeFederal') onAmountChange?.({ interestCascade: num }, fieldKey)
+        }
+        if (draftValue.trim()) onMarkReviewed?.(fieldKey)
       }
-      if (draftValue.trim()) onMarkReviewed?.(fieldKey)
+      setEditingField(null)
     }
     return (
       <div
         ref={isSelected ? highlightedRef : undefined}
-        className={`${styles.fieldRow} ${isCommentOpen ? styles.fieldRowCommentOpen : ''} ${isSelected ? (highlightMode === 'orange' ? styles.fieldRowHighlightedOrange : styles.fieldRowHighlighted) : ''}`}
+        className={`${styles.fieldRow} ${flagUnresolved ? styles.fieldRowHasNote : ''} ${isCommentOpen ? styles.fieldRowCommentOpen : ''} ${isSelected ? (highlightMode === 'orange' ? styles.fieldRowHighlightedOrange : styles.fieldRowHighlighted) : ''}`}
         onClick={() => onFieldSelect?.(fieldKey)}
         style={{ cursor: 'pointer' }}
       >
-        <span className={styles.fieldLabel}>{label}</span>
+        <span className={`${styles.fieldLabel} ${flagUnresolved ? styles.fieldLabelFlagged : ''}`}>
+          {flagUnresolved && <span className={styles.issueIndicator} />}
+          {label}
+        </span>
         <input
-          className={`${styles.fieldInput} ${inputClass} ${isEditing ? styles.fieldInputEditing : isSelected ? (highlightMode === 'orange' ? styles.fieldInputHighlightedOrange : styles.fieldInputHighlighted) : ''}`}
+          className={`${styles.fieldInput} ${inputClass} ${isEditing ? styles.fieldInputEditing : flagUnresolved ? styles.fieldInputHighlightedOrange : isSelected ? (highlightMode === 'orange' ? styles.fieldInputHighlightedOrange : styles.fieldInputHighlighted) : ''}`}
           readOnly={!isEditing}
           value={isEditing ? draftValue : currentVal}
           onChange={e => setDraftValue(e.target.value)}
           placeholder={placeholder}
           autoFocus={isEditing}
           onClick={e => { e.stopPropagation(); if (!isEditing) startEdit(fieldKey, currentVal) }}
+          onBlur={commitStatic}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); commitStatic() } if (e.key === 'Escape') cancelEdit() }}
         />
         {isEditing ? (
           <div className={styles.editActions}>
-            <button className={styles.saveBtn} onClick={commitStatic}>Save</button>
-            <button className={styles.undoBtn} onClick={cancelEdit}>Undo</button>
+            <button
+              type="button"
+              className={styles.undoBtn}
+              onMouseDown={e => e.preventDefault()}
+              onClick={cancelEdit}
+            >
+              Undo
+            </button>
           </div>
         ) : isReviewed ? (
           <Tooltip text={reviewedTip(fieldKey, true)} placement="top">
@@ -465,12 +496,19 @@ export default function DetailFields1099({
                 onChange={e => setDraftValue(e.target.value)}
                 autoFocus={editingField === 'taxableInterest'}
                 onClick={e => { e.stopPropagation(); if (editingField !== 'taxableInterest') startEdit('taxableInterest', fieldValues?.taxableInterest?.toString() ?? form.box1_interest) }}
+                onBlur={() => commitEdit('taxableInterest')}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); commitEdit('taxableInterest') } if (e.key === 'Escape') cancelEdit() }}
               />
               {editingField === 'taxableInterest' ? (
                 <div className={styles.editActions}>
-                  <button className={styles.saveBtn} onClick={() => commitEdit('taxableInterest')}>Save</button>
-                  <button className={styles.undoBtn} onClick={cancelEdit}>Undo</button>
+                  <button
+                    type="button"
+                    className={styles.undoBtn}
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={cancelEdit}
+                  >
+                    Undo
+                  </button>
                 </div>
               ) : reviewedFields?.has('taxableInterest') ? (
                 <Tooltip text="Click to unmark" placement="top">
